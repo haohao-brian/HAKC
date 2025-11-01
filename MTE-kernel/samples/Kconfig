@@ -105,6 +105,13 @@ config SAMPLE_LIVEPATCH
 	help
 	  Build sample live patch demonstrations.
 
+config SAMPLE_HAKC_CLAQUE
+	tristate "Build HAKC clique transfer demo -- loadable module only"
+	depends on PAC_MTE_COMPART && m
+	help
+	  Build a minimal example showing how a RED clique can re-sign
+	  data for a SILVER clique consumer with HAKC helpers.
+
 config SAMPLE_CONFIGFS
 	tristate "Build configfs patching sample -- loadable modules only"
 	depends on CONFIGFS_FS && m
