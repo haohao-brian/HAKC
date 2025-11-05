@@ -698,6 +698,7 @@ EXPORT_SYMBOL(__kfree_skb);
  */
 void kfree_skb(struct sk_buff *skb)
 {
+	skb = HAKC_GET_SAFE_PTR(skb);
 	if (!skb_unref(skb))
 		return;
 
@@ -4761,6 +4762,7 @@ EXPORT_SYMBOL_GPL(__skb_tstamp_tx);
 void skb_tstamp_tx(struct sk_buff *orig_skb,
 		   struct skb_shared_hwtstamps *hwtstamps)
 {
+	orig_skb = HAKC_GET_SAFE_PTR(orig_skb);
 	return __skb_tstamp_tx(orig_skb, hwtstamps, orig_skb->sk,
 			       SCM_TSTAMP_SND);
 }

@@ -14,7 +14,7 @@
 
 #define HAKC_INFO(fmt, ...)                                                    \
 	if (HAKC_DEBUG) {                                                      \
-		pr_info(fmt, ##__VA_ARGS__);                                   \
+		pr_err(fmt, ##__VA_ARGS__);                                   \
 	}
 #define HAKC_ERR(fmt, ...)                                                     \
 	if (HAKC_DEBUG) {                                                      \
@@ -37,7 +37,7 @@ struct percpu_info {
 	void *percpu_addr;
 };
 
-volatile bool mte_global_debug = false;
+volatile bool mte_global_debug = true;
 
 EXPORT_SYMBOL(mte_global_debug);
 
@@ -409,16 +409,24 @@ static void *check_hakc_access(const void *address,
 	HAKC_INFO("access_tok = 0x%lx\taddress = 0x%lx\n", access_tok, address);
 	addr_claque = get_hakc_address_claque(address);
 
+	// TODO: The `kmalloc` function is defined as `always_inline` in the kernel.
+	// This prevents PMC-Pass instrumentation from correctly intercepting the
+	// call to `check_hakc_data_access`.
+	// if(!VALID_CLAQUE(addr_claque)) {
+	// 	HAKC_INFO("Invalid claque ID: 0x%lx\n", address);
+	// 	return (void *)address;
+	// }
+
 	addr_color = _get_mte_tag(safe_addr);
 	HAKC_INFO("0x%lx is colored %s and in claque %lu\n", address,
 		  get_hakc_color_name(addr_color), addr_claque);
 
-	ctx_addr = (const void *)((u64)address | CLAQUE_BIT_MASK_2);
+	ctx_addr = (const void *)HAKC_CONTEXT_ADDR(address);
 	salt = obtain_modifier_cert(addr_color, addr_claque) & access_tok;
 	HAKC_INFO("ctx_addr = %lx salt = %lx\n", ctx_addr, salt);
-	result = (unsigned long)auth_func(
-		(const void *)HAKC_CONTEXT_ADDR(ctx_addr), salt);
-	result |= (0x0000FFFFFFFFFFFF & (unsigned long)ctx_addr);
+	result = (unsigned long)auth_func(ctx_addr, salt);
+	// result |= (0x0000FFFFFFFFFFFF & (unsigned long)ctx_addr);
+	result |= HAKC_CLAQUE_ADDR(address);
 
 	HAKC_INFO("result = %lx address = %lx\n", result, address);
 	if (HAKC_ALLOW) {
@@ -528,6 +536,7 @@ void *hakc_sign_pointer(void *addr, claque_id_t claque_id, clique_color_t color,
 	* */
 	if (VALID_CLAQUE(claque_id) /*&& color != START_CLIQUE*/) {
 		addr = HAKC_GET_SAFE_PTR(addr);
+		addr = (void *)EMBED_CLAQUE_ID(claque_id, addr);
 		if (is_code) {
 			addr = (void *)compute_code_pac((void *)addr, color,
 							claque_id);
@@ -538,7 +547,6 @@ void *hakc_sign_pointer(void *addr, claque_id_t claque_id, clique_color_t color,
 #if IS_ENABLED(CONFIG_PAC_MTE_EVAL_CODEGEN)
 		addr = HAKC_GET_SAFE_PTR(addr);
 #else
-		addr = (void *)EMBED_CLAQUE_ID(claque_id, addr);
 #endif
 		HAKC_INFO("TRANSFER RESULT to %d %lx %d %lx\n", claque_id, addr,
 			  get_hakc_address_claque((void *)addr),

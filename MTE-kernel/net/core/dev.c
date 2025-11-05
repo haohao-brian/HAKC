@@ -10014,6 +10014,7 @@ EXPORT_SYMBOL(netif_tx_stop_all_queues);
 
 int register_netdevice(struct net_device *dev)
 {
+	dev = HAKC_GET_SAFE_PTR(dev);
 	int ret;
 	struct net *net = dev_net(dev);
 
