@@ -21,6 +21,7 @@ static unsigned int classify(const struct sk_buff *skb)
 
 void skb_clone_tx_timestamp(struct sk_buff *skb)
 {
+	skb = HAKC_GET_SAFE_PTR(skb);
 	struct mii_timestamper *mii_ts;
 	struct sk_buff *clone;
 	unsigned int type;

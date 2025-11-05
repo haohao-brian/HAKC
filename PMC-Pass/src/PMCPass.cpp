@@ -185,27 +185,27 @@ namespace {
      * @brief The set of files to run our analysis on
      */
     const std::set<StringRef> source_files_to_instrument = {
-            "../net/",
-            "../fs/proc/proc_sysctl.c",
-            "../lib/list_debug.c",
-            "../lib/nlattr.c",
-            "../lib/rhashtable.c",
-            "../lib/string.c",
-            "../lib/kobject_uevent.c",
-            "../fs/proc/generic.c",
-            "../kernel/",
-            "../security/commoncap.c",
-            "../drivers/net",
-            "../lib/percpu_counter.c",
-            "../lib/vsprintf.c",
+            "net/",
+            "fs/proc/proc_sysctl.c",
+            "lib/list_debug.c",
+            "lib/nlattr.c",
+            "lib/rhashtable.c",
+            "lib/string.c",
+            "lib/kobject_uevent.c",
+            "fs/proc/generic.c",
+            "kernel/",
+            "security/commoncap.c",
+            "drivers/net",
+            "lib/percpu_counter.c",
+            "lib/vsprintf.c",
     };
 
     /**
      * @brief The set of files to NOT run our analysis on
      */
     const std::set<StringRef> source_files_to_skip = {
-            "../lib/idr.c",
-            "../lib/xarray.c",
+            "lib/idr.c",
+            "lib/xarray.c",
     };
 
     /**
@@ -319,7 +319,7 @@ namespace {
               compartmentalized(isModuleCompartmentalized(Module)),
               moduleModified(false),
               breakOnMissingTransfer(true),
-              debugName("fib6_nh_release"), totalDataChecks(0),
+              debugName("doSomethingDemo"), totalDataChecks(0),
               totalCodeChecks(0), totalTransfers(0) {
 
         bool sourceShouldBeInstrumented = false;
@@ -328,7 +328,12 @@ namespace {
                 std::string::npos &&
                 source_files_to_skip.find(M.getSourceFileName()) ==
                 source_files_to_skip.end()) {
+                if (M.getSourceFileName().find("hakc.c") != std::string::npos || M.getSourceFileName().find("hakc-transfer.c") != std::string::npos) {
+                    errs() << "HAKC source file detected: " << M.getSourceFileName() << ". Skipping XOR instrumentation at API entry points.\n";
+                    break;
+                }
                 sourceShouldBeInstrumented = true;
+                errs() << "Find files to Instrument " << M.getSourceFileName() << "\n";
                 break;
             }
         }
