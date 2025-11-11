@@ -13,7 +13,7 @@ namespace {
      * these functions
      * are not recolored, and the authenticated pointer is passed when invoked.
      */
-    const std::set<StringRef> safe_transition_functions = {
+    const std::set<StringRef> safe_transition_functions = {            
             "mod_delayed_work",
             "kasan_check_write",
             "arch_static_branch_jump",
@@ -272,7 +272,7 @@ namespace {
             claque_transfer_name,
             get_safe_ptr_name,
             sign_ptr_with_color_name,
-            sign_ptr_name,
+            sign_ptr_name,            
     };
 
     /**
