@@ -406,7 +406,8 @@ static void *check_hakc_access(const void *address,
 	}
 	safe_addr = (void*)HAKC_GET_SAFE_PTR(address);
 
-	HAKC_INFO("access_tok = 0x%lx\taddress = 0x%lx\n", access_tok, address);
+	HAKC_INFO("hakc_access: caller=%pS addr=%px safe=%px tok=0x%lx\n",
+	  (void *)_RET_IP_, address, safe_addr, access_tok);
 	addr_claque = get_hakc_address_claque(address);
 
 	// TODO: The `kmalloc` function is defined as `always_inline` in the kernel.
@@ -418,25 +419,27 @@ static void *check_hakc_access(const void *address,
 	// }
 
 	addr_color = _get_mte_tag(safe_addr);
-	HAKC_INFO("0x%lx is colored %s and in claque %lu\n", address,
-		  get_hakc_color_name(addr_color), addr_claque);
+	HAKC_INFO("hakc_access: addr=%px color=%s claque=%lu\n",
+		  address, get_hakc_color_name(addr_color), addr_claque);
 
 	ctx_addr = (const void *)HAKC_CONTEXT_ADDR(address);
 	salt = obtain_modifier_cert(addr_color, addr_claque) & access_tok;
-	HAKC_INFO("ctx_addr = %lx salt = %lx\n", ctx_addr, salt);
+	HAKC_INFO("hakc_access: ctx_addr=%px salt=%lx\n", ctx_addr, salt);
+
 	result = (unsigned long)auth_func(ctx_addr, salt);
-	// result |= (0x0000FFFFFFFFFFFF & (unsigned long)ctx_addr);
 	result |= HAKC_CLAQUE_ADDR(address);
 
-	HAKC_INFO("result = %lx address = %lx\n", result, address);
 	if (HAKC_ALLOW) {
 		if (addr_is_signed((void *)result)) {
-			HAKC_INFO("Invalid PAC signature: 0x%lx 0x%lx\n",
-				  address, salt);
+			HAKC_INFO("hakc_access: invalid PAC? result=%px salt=%lx\n",
+				  (void *)result, (unsigned long)salt);
 		}
 		result |= 0xFFFF000000000000;
 	}
+	HAKC_INFO("hakc_access: done addr=%px -> result=%px\n",
+		  address, (void *)result);
 
+	pr_info("CHK: leaving check_hakc_data_access addr=%px\n", result);
 	return (void *)result;
 }
 
@@ -472,7 +475,10 @@ hakc_get_valid_target_index(const void *target,
 void *check_hakc_data_access(const void *address,
 			     const clique_access_tok_t access_tok)
 {
-	HAKC_INFO("check_hakc_data_access called from %lx\n", _RET_IP_);
+	pr_info("CHK: enter check_hakc_data_access addr=%px tok=0x%lx caller=%pS\n",
+            address, (unsigned long)access_tok, (void *)_RET_IP_);
+	pr_info("check_hakc_data_access: address=%px access_tok=%x\n", address, access_tok);
+    //return (void *)address;
 	return check_hakc_access(address, access_tok, hakc_auth_data_ptr);
 }
 
