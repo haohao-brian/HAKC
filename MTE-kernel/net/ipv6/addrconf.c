@@ -383,6 +383,8 @@ err_ip:
 	return -ENOMEM;
 }
 
+/* FIXED: add explicit transfer for neigh_parms_alloc() result to satisfy PMCPass
+ * and keep the rest of ipv6_add_dev confined to this function only. */
 static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 {
 	struct inet6_dev *ndev;
@@ -394,87 +396,116 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 	if (dev->mtu < IPV6_MIN_MTU)
 		return ERR_PTR(-EINVAL);
 
-	//ndev = kzalloc(sizeof(struct inet6_dev), GFP_KERNEL);
+	/* Allocate inet6_dev */
 	ndev = kzalloc(sizeof(*ndev), GFP_KERNEL);
 	if (!ndev)
 		return ERR_PTR(err);
+
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-    	//ndev = hakc_transfer_to_clique(ndev, sizeof(*ndev), __claque_id, __color, \
-                                  false);
+	/* Make the freshly allocated ndev belong to this clique. */
+	ndev = (struct inet6_dev *)hakc_transfer_to_clique(
+		(void *)ndev, sizeof(*ndev), __claque_id, __color, false);
 #endif
 
 	rwlock_init(&ndev->lock);
 	ndev->dev = dev;
 	INIT_LIST_HEAD(&ndev->addr_list);
 	timer_setup(&ndev->rs_timer, addrconf_rs_timer, 0);
-	//memcpy(&ndev->cnf, dev_net(dev)->ipv6.devconf_dflt, sizeof(ndev->cnf));
+
+	/* Copy default device configuration (protected by rtnl) */
 	dflt = rcu_dereference_protected(dev_net(dev)->ipv6.devconf_dflt,
-                                 lockdep_rtnl_is_held());
-	if (WARN_ON(!dflt))
-		return -EINVAL;
-	
-	//ndev->cnf = *dflt;
+					 lockdep_rtnl_is_held());
+	if (WARN_ON(!dflt)) {
+		kfree(ndev);
+		return ERR_PTR(-EINVAL);
+	}
 	memcpy(&ndev->cnf, dflt, sizeof(ndev->cnf));
 
 	if (ndev->cnf.stable_secret.initialized)
 		ndev->cnf.addr_gen_mode = IN6_ADDR_GEN_MODE_STABLE_PRIVACY;
 
 	ndev->cnf.mtu6 = dev->mtu;
-	pr_info("before neigh_parms_alloc:ndev->nd_parms=%p\n", ndev->nd_parms);
-	ndev->nd_parms = neigh_parms_alloc(dev, &nd_tbl);
-	pr_info("after neigh_parms_alloc:ndev->nd_parms=%p\n", ndev->nd_parms);
 
-	if (ndev->nd_parms) {
-		struct neigh_parms *p = ndev->nd_parms;
+	/* --- neigh_parms_alloc() + REQUIRED TRANSFER (fix for PMCPass) --- */
+	pr_info("ipv6_add_dev: before neigh_parms_alloc ndev->nd_parms=%p\n",
+		ndev->nd_parms);
 
-		pr_info("IPv6 nd_parms@%px: "
-				"base_reachable_time=%u delay_probe_time=%u retrans_time=%u "
-				"gc_staletime=%u gc_interval=%u "
-				"ucast_probes=%u mcast_probes=%u app_probes=%u "
-				"proxy_delay=%u anycast_delay=%u proxy_qlen=%u locktime=%u\n",
-				NEIGH_VAR(p, BASE_REACHABLE_TIME),
-				NEIGH_VAR(p, DELAY_PROBE_TIME),
-				NEIGH_VAR(p, RETRANS_TIME),
-				NEIGH_VAR(p, GC_STALETIME),
-				NEIGH_VAR(p, GC_INTERVAL),
-				NEIGH_VAR(p, UCAST_PROBES),
-				NEIGH_VAR(p, MCAST_PROBES),
-				NEIGH_VAR(p, APP_PROBES),
-				NEIGH_VAR(p, PROXY_DELAY),
-				NEIGH_VAR(p, ANYCAST_DELAY),
-				NEIGH_VAR(p, PROXY_QLEN),
-				NEIGH_VAR(p, LOCKTIME));
+	/* raw allocation from core neighbor table */
+	{
+		struct neigh_parms *np_raw, *np;
+
+		np_raw = neigh_parms_alloc(dev, &nd_tbl);
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+		/* Transfer the returned struct neigh_parms into our clique.
+		 * This is the critical piece PMCPass requires at this callsite. */
+		if (likely(np_raw)) {
+			np = (struct neigh_parms *)hakc_transfer_to_clique(
+				(void *)np_raw, sizeof(*np_raw),
+				__claque_id, __color, false);
+		} else {
+			np = NULL;
+		}
+#else
+		np = np_raw;
+#endif
+		ndev->nd_parms = np;
 	}
+
+	pr_info("ipv6_add_dev: after neigh_parms_alloc ndev->nd_parms=%p\n",
+		ndev->nd_parms);
 
 	if (!ndev->nd_parms) {
 		kfree(ndev);
 		return ERR_PTR(err);
 	}
-	unsigned long v = (unsigned long)ndev;
-	v &= ~(0xFFUL << 56);
-	v = (unsigned long)(((long)v << 16) >> 16);
 
-	//pr_info("ndev raw=%px tagged=%px\n", untag_ptr2(ndev), ndev);
-	//pr_info("nd_parms raw=%px tagged=%px\n", untag_ptr2(ndev->nd_parms), ndev->nd_parms);
-#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-	ndev->nd_parms = hakc_transfer_to_clique(ndev->nd_parms, sizeof
-	(*ndev->nd_parms), __claque_id, __color, false);
-#endif
+	/* Optional: log configured NEIGH variables for visibility */
+	{
+		struct neigh_parms *p = ndev->nd_parms;
+		pr_info("IPv6 nd_parms@%px: "
+			"base_reachable_time=%u delay_probe_time=%u retrans_time=%u "
+			"gc_staletime=%u gc_interval=%u "
+			"ucast_probes=%u mcast_probes=%u app_probes=%u "
+			"proxy_delay=%u anycast_delay=%u proxy_qlen=%u locktime=%u\n",
+			p,
+			NEIGH_VAR(p, BASE_REACHABLE_TIME),
+			NEIGH_VAR(p, DELAY_PROBE_TIME),
+			NEIGH_VAR(p, RETRANS_TIME),
+			NEIGH_VAR(p, GC_STALETIME),
+			NEIGH_VAR(p, GC_INTERVAL),
+			NEIGH_VAR(p, UCAST_PROBES),
+			NEIGH_VAR(p, MCAST_PROBES),
+			NEIGH_VAR(p, APP_PROBES),
+			NEIGH_VAR(p, PROXY_DELAY),
+			NEIGH_VAR(p, ANYCAST_DELAY),
+			NEIGH_VAR(p, PROXY_QLEN),
+			NEIGH_VAR(p, LOCKTIME));
+	}
+
 	if (ndev->cnf.forwarding)
 		dev_disable_lro(dev);
-	/* We refer to the device */
+
+	/* Hold a ref on the net_device for this inet6_dev */
 	dev_hold(dev);
-	
-	if (snmp6_alloc_dev(ndev) < 0) {
+
+	err = snmp6_alloc_dev(ndev);
+	if (err < 0) {
 		netdev_dbg(dev, "%s: cannot allocate memory for statistics\n",
 			   __func__);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+		neigh_parms_release(&nd_tbl, (struct neigh_parms *)
+			check_hakc_data_access((void *)ndev->nd_parms, 0x20007));
+#else
 		neigh_parms_release(&nd_tbl, ndev->nd_parms);
+#endif
 		dev_put(dev);
 		kfree(ndev);
 		return ERR_PTR(err);
 	}
 
-	if (snmp6_register_dev(ndev) < 0) {
+	err = snmp6_register_dev(ndev);
+	if (err < 0) {
 		netdev_dbg(dev, "%s: cannot create /proc/net/dev_snmp6/%s\n",
 			   __func__, dev->name);
 		goto err_release;
@@ -495,13 +526,13 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 
 	INIT_LIST_HEAD(&ndev->tempaddr_list);
 	ndev->desync_factor = U32_MAX;
-	if ((dev->flags&IFF_LOOPBACK) ||
+
+	if ((dev->flags & IFF_LOOPBACK) ||
 	    dev->type == ARPHRD_TUNNEL ||
 	    dev->type == ARPHRD_TUNNEL6 ||
 	    dev->type == ARPHRD_SIT ||
-	    dev->type == ARPHRD_NONE) {
+	    dev->type == ARPHRD_NONE)
 		ndev->cnf.use_tempaddr = -1;
-	}
 
 	ndev->token = in6addr_any;
 
@@ -510,28 +541,37 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 
 	ipv6_mc_init_dev(ndev);
 	ndev->tstamp = jiffies;
+
 	err = addrconf_sysctl_register(ndev);
 	if (err) {
 		ipv6_mc_destroy_dev(ndev);
 		snmp6_unregister_dev(ndev);
 		goto err_release;
 	}
-	/* protected by rtnl_lock */
+
+	/* Publish ip6_ptr. Keep encoded when configured. */
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	rcu_assign_pointer(dev->ip6_ptr, (struct inet6_dev *)
+		hakc_sign_pointer_with_color((void *)ndev, __claque_id, false));
+#else
 	rcu_assign_pointer(dev->ip6_ptr, ndev);
+#endif
 
-	/* Join interface-local all-node multicast group */
+	/* Join multicast groups */
 	ipv6_dev_mc_inc(dev, &in6addr_interfacelocal_allnodes);
-
-	/* Join all-node multicast group */
 	ipv6_dev_mc_inc(dev, &in6addr_linklocal_allnodes);
-
-	/* Join all-router multicast group if forwarding is set */
 	if (ndev->cnf.forwarding && (dev->flags & IFF_MULTICAST))
 		ipv6_dev_mc_inc(dev, &in6addr_linklocal_allrouters);
+
 	return ndev;
 
 err_release:
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	neigh_parms_release(&nd_tbl, (struct neigh_parms *)
+		check_hakc_data_access((void *)ndev->nd_parms, 0x20007));
+#else
 	neigh_parms_release(&nd_tbl, ndev->nd_parms);
+#endif
 	ndev->dead = 1;
 	in6_dev_finish_destroy(ndev);
 	return ERR_PTR(err);
