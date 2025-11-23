@@ -387,17 +387,19 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 {
 	struct inet6_dev *ndev;
 	int err = -ENOMEM;
+	const struct ipv6_devconf *dflt;
 
 	ASSERT_RTNL();
 
 	if (dev->mtu < IPV6_MIN_MTU)
 		return ERR_PTR(-EINVAL);
 
-	ndev = kzalloc(sizeof(struct inet6_dev), GFP_KERNEL);
+	//ndev = kzalloc(sizeof(struct inet6_dev), GFP_KERNEL);
+	ndev = kzalloc(sizeof(*ndev), GFP_KERNEL);
 	if (!ndev)
 		return ERR_PTR(err);
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-    	ndev = hakc_transfer_to_clique(ndev, sizeof(*ndev), __claque_id, __color,
+    	//ndev = hakc_transfer_to_clique(ndev, sizeof(*ndev), __claque_id, __color, \
                                   false);
 #endif
 
@@ -405,17 +407,55 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 	ndev->dev = dev;
 	INIT_LIST_HEAD(&ndev->addr_list);
 	timer_setup(&ndev->rs_timer, addrconf_rs_timer, 0);
-	memcpy(&ndev->cnf, dev_net(dev)->ipv6.devconf_dflt, sizeof(ndev->cnf));
+	//memcpy(&ndev->cnf, dev_net(dev)->ipv6.devconf_dflt, sizeof(ndev->cnf));
+	dflt = rcu_dereference_protected(dev_net(dev)->ipv6.devconf_dflt,
+                                 lockdep_rtnl_is_held());
+	if (WARN_ON(!dflt))
+		return -EINVAL;
+	
+	//ndev->cnf = *dflt;
+	memcpy(&ndev->cnf, dflt, sizeof(ndev->cnf));
 
 	if (ndev->cnf.stable_secret.initialized)
 		ndev->cnf.addr_gen_mode = IN6_ADDR_GEN_MODE_STABLE_PRIVACY;
 
 	ndev->cnf.mtu6 = dev->mtu;
+	pr_info("before neigh_parms_alloc:ndev->nd_parms=%p\n", ndev->nd_parms);
 	ndev->nd_parms = neigh_parms_alloc(dev, &nd_tbl);
+	pr_info("after neigh_parms_alloc:ndev->nd_parms=%p\n", ndev->nd_parms);
+
+	if (ndev->nd_parms) {
+		struct neigh_parms *p = ndev->nd_parms;
+
+		pr_info("IPv6 nd_parms@%px: "
+				"base_reachable_time=%u delay_probe_time=%u retrans_time=%u "
+				"gc_staletime=%u gc_interval=%u "
+				"ucast_probes=%u mcast_probes=%u app_probes=%u "
+				"proxy_delay=%u anycast_delay=%u proxy_qlen=%u locktime=%u\n",
+				NEIGH_VAR(p, BASE_REACHABLE_TIME),
+				NEIGH_VAR(p, DELAY_PROBE_TIME),
+				NEIGH_VAR(p, RETRANS_TIME),
+				NEIGH_VAR(p, GC_STALETIME),
+				NEIGH_VAR(p, GC_INTERVAL),
+				NEIGH_VAR(p, UCAST_PROBES),
+				NEIGH_VAR(p, MCAST_PROBES),
+				NEIGH_VAR(p, APP_PROBES),
+				NEIGH_VAR(p, PROXY_DELAY),
+				NEIGH_VAR(p, ANYCAST_DELAY),
+				NEIGH_VAR(p, PROXY_QLEN),
+				NEIGH_VAR(p, LOCKTIME));
+	}
+
 	if (!ndev->nd_parms) {
 		kfree(ndev);
 		return ERR_PTR(err);
 	}
+	unsigned long v = (unsigned long)ndev;
+	v &= ~(0xFFUL << 56);
+	v = (unsigned long)(((long)v << 16) >> 16);
+
+	//pr_info("ndev raw=%px tagged=%px\n", untag_ptr2(ndev), ndev);
+	//pr_info("nd_parms raw=%px tagged=%px\n", untag_ptr2(ndev->nd_parms), ndev->nd_parms);
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
 	ndev->nd_parms = hakc_transfer_to_clique(ndev->nd_parms, sizeof
 	(*ndev->nd_parms), __claque_id, __color, false);
@@ -424,7 +464,7 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 		dev_disable_lro(dev);
 	/* We refer to the device */
 	dev_hold(dev);
-
+	
 	if (snmp6_alloc_dev(ndev) < 0) {
 		netdev_dbg(dev, "%s: cannot allocate memory for statistics\n",
 			   __func__);
@@ -2613,7 +2653,7 @@ static void manage_tempaddrs(struct inet6_dev *idev,
 			ipv6_ifa_notify(0, ift);
 	}
 
-	if ((create || list_empty(&idev->tempaddr_list)) &&
+	if ((create || list_empty_new(&idev->tempaddr_list)) &&
 	    idev->cnf.use_tempaddr > 0) {
 		/* When a new public address is created as described
 		 * in [ADDRCONF], also create a new temporary address.
@@ -3888,7 +3928,7 @@ restart:
 		idev->if_flags &= ~(IF_RS_SENT|IF_RA_RCVD|IF_READY);
 
 	/* Step 3: clear tempaddr list */
-	while (!list_empty(&idev->tempaddr_list)) {
+	while (!list_empty_new(&idev->tempaddr_list)) {
 		ifa = list_first_entry(&idev->tempaddr_list,
 				       struct inet6_ifaddr, tmp_list);
 		list_del(&ifa->tmp_list);
@@ -6044,13 +6084,30 @@ nla_put_failure:
 	return -EMSGSIZE;
 }
 
+// static noinline size_t inet6_get_link_af_size(const struct net_device *dev,
+// 				     u32 ext_filter_mask)
+// {
+// 	if (!__in6_dev_get(dev))
+// 		return 0;
+
+// 	return inet6_ifla6_size();
+// }
 static noinline size_t inet6_get_link_af_size(const struct net_device *dev,
-				     u32 ext_filter_mask)
+					      u32 ext_filter_mask)
 {
+	size_t sz;
+
 	if (!__in6_dev_get(dev))
 		return 0;
 
-	return inet6_ifla6_size();
+	sz = inet6_ifla6_size();  // base: FLAGS, CACHEINFO, CONF, TOKEN, ADDR_GEN_MODE
+
+	if (!(ext_filter_mask & RTEXT_FILTER_SKIP_STATS)) {
+		sz += nla_total_size(IPSTATS_MIB_MAX * sizeof(u64));     // IFLA_INET6_STATS
+		sz += nla_total_size(ICMP6_MIB_MAX * sizeof(u64));       // IFLA_INET6_ICMP6STATS
+	}
+
+	return sz;
 }
 
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
