@@ -1,0 +1,1 @@
+cmd_drivers/hwmon/sl28cpld-hwmon.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/hwmon/sl28cpld-hwmon.ko drivers/hwmon/sl28cpld-hwmon.o drivers/hwmon/sl28cpld-hwmon.mod.o;  true

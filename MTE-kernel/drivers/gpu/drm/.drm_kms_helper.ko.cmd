@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/drm_kms_helper.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/drm_kms_helper.ko drivers/gpu/drm/drm_kms_helper.o drivers/gpu/drm/drm_kms_helper.mod.o;  true

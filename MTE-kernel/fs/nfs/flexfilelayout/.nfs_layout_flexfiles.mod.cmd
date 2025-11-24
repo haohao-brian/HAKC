@@ -1,0 +1,1 @@
+cmd_fs/nfs/flexfilelayout/nfs_layout_flexfiles.mod := { echo  fs/nfs/flexfilelayout/flexfilelayout.o fs/nfs/flexfilelayout/flexfilelayoutdev.o;  echo; } > fs/nfs/flexfilelayout/nfs_layout_flexfiles.mod

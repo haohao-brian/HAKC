@@ -1,0 +1,3 @@
+lib/crypto/libchacha.ko
+lib/crypto/libarc4.ko
+lib/crypto/libdes.ko

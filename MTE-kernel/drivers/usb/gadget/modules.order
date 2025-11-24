@@ -1,0 +1,15 @@
+drivers/usb/gadget/udc/tegra-xudc.ko
+drivers/usb/gadget/udc/renesas_usb3.ko
+drivers/usb/gadget/function/usb_f_acm.ko
+drivers/usb/gadget/function/u_serial.ko
+drivers/usb/gadget/function/usb_f_serial.ko
+drivers/usb/gadget/function/usb_f_obex.ko
+drivers/usb/gadget/function/u_ether.ko
+drivers/usb/gadget/function/usb_f_ncm.ko
+drivers/usb/gadget/function/usb_f_ecm.ko
+drivers/usb/gadget/function/usb_f_eem.ko
+drivers/usb/gadget/function/usb_f_ecm_subset.ko
+drivers/usb/gadget/function/usb_f_rndis.ko
+drivers/usb/gadget/function/usb_f_mass_storage.ko
+drivers/usb/gadget/function/usb_f_fs.ko
+drivers/usb/gadget/libcomposite.ko

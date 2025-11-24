@@ -1,0 +1,1 @@
+cmd_drivers/media/rc/keymaps/rc-pctv-sedna.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/keymaps/rc-pctv-sedna.ko drivers/media/rc/keymaps/rc-pctv-sedna.o drivers/media/rc/keymaps/rc-pctv-sedna.mod.o;  true

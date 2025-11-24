@@ -1,0 +1,1 @@
+cmd_drivers/spi/spi-bcm2835aux.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/spi/spi-bcm2835aux.ko drivers/spi/spi-bcm2835aux.o drivers/spi/spi-bcm2835aux.mod.o;  true

@@ -385,11 +385,24 @@ err_ip:
 
 /* FIXED: add explicit transfer for neigh_parms_alloc() result to satisfy PMCPass
  * and keep the rest of ipv6_add_dev confined to this function only. */
+/* HAKC token & helpers (adjust if your tree already declares these) */
+#define HAKC_TOK 0x20007UL
+
+/* HAKC tokens / access check */
+#include <linux/hakc.h>   /* adjust to your actual header, e.g. <linux/hakc/tokens.h> */
+/* Fallbacks in case the header doesn’t export the READ/WRITE split yet */
+#define HAKC_TOK_FAMILY  0x20004ULL
+#define HAKC_TOK_READ   (HAKC_TOK_FAMILY | 0x1ULL)
+#define HAKC_TOK_WRITE  (HAKC_TOK_FAMILY | 0x2ULL)
+#define HAKC_TOK        (HAKC_TOK_FAMILY | 0x3ULL)
+
 static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 {
+	dev = (struct net_device *)check_hakc_data_access((void *)dev, HAKC_TOK);
 	struct inet6_dev *ndev;
-	int err = -ENOMEM;
 	const struct ipv6_devconf *dflt;
+	struct neigh_parms *np_raw = NULL, *np = NULL;
+	int err = -ENOMEM;
 
 	ASSERT_RTNL();
 
@@ -402,8 +415,8 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 		return ERR_PTR(err);
 
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-	/* Make the freshly allocated ndev belong to this clique. */
-	ndev = (struct inet6_dev *)hakc_transfer_to_clique(
+	/* Transfer freshly allocated ndev into our clique. */
+	ndev = (struct inet6_dev *)hakc_transfer_to_clique( \
 		(void *)ndev, sizeof(*ndev), __claque_id, __color, false);
 #endif
 
@@ -413,8 +426,12 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 	timer_setup(&ndev->rs_timer, addrconf_rs_timer, 0);
 
 	/* Copy default device configuration (protected by rtnl) */
-	dflt = rcu_dereference_protected(dev_net(dev)->ipv6.devconf_dflt,
+	//dflt = rcu_dereference_protected(dev_net(dev)->ipv6.devconf_dflt, \
 					 lockdep_rtnl_is_held());
+	struct net *net = (struct net *)check_hakc_data_access((void *)dev_net(dev), HAKC_TOK_READ);
+	dflt = rcu_dereference_protected(net->ipv6.devconf_dflt, lockdep_rtnl_is_held());
+	dflt = (const struct ipv6_devconf *) \
+    	check_hakc_data_access((void *)dflt, HAKC_TOK_READ);
 	if (WARN_ON(!dflt)) {
 		kfree(ndev);
 		return ERR_PTR(-EINVAL);
@@ -426,68 +443,71 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 
 	ndev->cnf.mtu6 = dev->mtu;
 
-	/* --- neigh_parms_alloc() + REQUIRED TRANSFER (fix for PMCPass) --- */
-	pr_info("ipv6_add_dev: before neigh_parms_alloc ndev->nd_parms=%p\n",
-		ndev->nd_parms);
-
-	/* raw allocation from core neighbor table */
-	{
-		struct neigh_parms *np_raw, *np;
-
-		np_raw = neigh_parms_alloc(dev, &nd_tbl);
+	/* --- neigh_parms_alloc() + REQUIRED TRANSFER (PMCPass requirement) --- */
+	np_raw = neigh_parms_alloc(dev, &nd_tbl);
 
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-		/* Transfer the returned struct neigh_parms into our clique.
-		 * This is the critical piece PMCPass requires at this callsite. */
-		if (likely(np_raw)) {
-			np = (struct neigh_parms *)hakc_transfer_to_clique(
-				(void *)np_raw, sizeof(*np_raw),
-				__claque_id, __color, false);
-		} else {
-			np = NULL;
-		}
-#else
-		np = np_raw;
-#endif
-		ndev->nd_parms = np;
+	if (likely(np_raw)) {
+		np = (struct neigh_parms *)hakc_transfer_to_clique(
+			(void *)np_raw, sizeof(*np_raw), __claque_id, __color, false);
 	}
-
-	pr_info("ipv6_add_dev: after neigh_parms_alloc ndev->nd_parms=%p\n",
-		ndev->nd_parms);
+#else
+	np = np_raw;
+#endif
+	ndev->nd_parms = np;
 
 	if (!ndev->nd_parms) {
 		kfree(ndev);
 		return ERR_PTR(err);
 	}
 
-	/* Optional: log configured NEIGH variables for visibility */
-	{
-		struct neigh_parms *p = ndev->nd_parms;
-		pr_info("IPv6 nd_parms@%px: "
-			"base_reachable_time=%u delay_probe_time=%u retrans_time=%u "
-			"gc_staletime=%u gc_interval=%u "
-			"ucast_probes=%u mcast_probes=%u app_probes=%u "
-			"proxy_delay=%u anycast_delay=%u proxy_qlen=%u locktime=%u\n",
-			p,
-			NEIGH_VAR(p, BASE_REACHABLE_TIME),
-			NEIGH_VAR(p, DELAY_PROBE_TIME),
-			NEIGH_VAR(p, RETRANS_TIME),
-			NEIGH_VAR(p, GC_STALETIME),
-			NEIGH_VAR(p, GC_INTERVAL),
-			NEIGH_VAR(p, UCAST_PROBES),
-			NEIGH_VAR(p, MCAST_PROBES),
-			NEIGH_VAR(p, APP_PROBES),
-			NEIGH_VAR(p, PROXY_DELAY),
-			NEIGH_VAR(p, ANYCAST_DELAY),
-			NEIGH_VAR(p, PROXY_QLEN),
-			NEIGH_VAR(p, LOCKTIME));
-	}
-
 	if (ndev->cnf.forwarding)
 		dev_disable_lro(dev);
 
 	/* Hold a ref on the net_device for this inet6_dev */
-	dev_hold(dev);
+	pr_info("dev_hold before dev=%px name=%s ifindex=%d mtu=%u\n",
+        dev, dev->name, dev->ifindex, dev->mtu);
+
+	/* If it still dies here, the fault is the store in dev_hold(). */
+	//dev_hold(dev);
+	/* Hold a ref on the net_device for this inet6_dev */
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/*
+* HAKC-safe refcnt bump:
+*   - read percpu base safely (read token),
+*   - re-sign that percpu object for SILVER (write path),
+*   - bump this-CPU cell using the SILVER-signed token.
+*/
+{
+	int __percpu *refp_raw, *refp_silver;
+
+	int __percpu *raw = READ_ONCE(dev->pcpu_refcnt);
+	pr_info("pcpu_refcnt raw=%px\n", raw);
+
+	/* 1) Safely fetch the __percpu base pointer */
+	refp_raw = READ_ONCE(dev->pcpu_refcnt);              // don't check the base
+
+	if (likely(refp_raw)) {
+		refp_silver = (int __percpu *)hakc_transfer_percpu_to_clique(
+			(void *)refp_raw, sizeof(int), __claque_id, SILVER_CLIQUE);
+
+		/* compute the concrete this-CPU cell, then check that */
+		int *cell = this_cpu_ptr(refp_silver);
+		pr_info("%p\n",cell);
+		//(void)check_hakc_data_access(cell, HAKC_TOK_WRITE);
+
+		this_cpu_inc(*refp_silver);   // ok; pass will guard the LDXR/STXR
+	} else {
+		dev_hold(dev);
+	}
+}
+#else
+dev_hold(dev);
+#endif
+
+pr_info("dev_hold after\n");
+
 
 	err = snmp6_alloc_dev(ndev);
 	if (err < 0) {
@@ -495,7 +515,7 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 			   __func__);
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
 		neigh_parms_release(&nd_tbl, (struct neigh_parms *)
-			check_hakc_data_access((void *)ndev->nd_parms, 0x20007));
+			check_hakc_data_access((void *)ndev->nd_parms, HAKC_TOK));
 #else
 		neigh_parms_release(&nd_tbl, ndev->nd_parms);
 #endif
@@ -518,10 +538,8 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 		ndev->cnf.accept_dad = -1;
 
 #if IS_ENABLED(CONFIG_IPV6_SIT)
-	if (dev->type == ARPHRD_SIT && (dev->priv_flags & IFF_ISATAP)) {
-		pr_info("%s: Disabled Multicast RS\n", dev->name);
+	if (dev->type == ARPHRD_SIT && (dev->priv_flags & IFF_ISATAP))
 		ndev->cnf.rtr_solicits = 0;
-	}
 #endif
 
 	INIT_LIST_HEAD(&ndev->tempaddr_list);
@@ -549,7 +567,7 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 		goto err_release;
 	}
 
-	/* Publish ip6_ptr. Keep encoded when configured. */
+	/* Publish ip6_ptr (signed when HAKC is enabled). */
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
 	rcu_assign_pointer(dev->ip6_ptr, (struct inet6_dev *)
 		hakc_sign_pointer_with_color((void *)ndev, __claque_id, false));
@@ -568,7 +586,7 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 err_release:
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
 	neigh_parms_release(&nd_tbl, (struct neigh_parms *)
-		check_hakc_data_access((void *)ndev->nd_parms, 0x20007));
+		check_hakc_data_access((void *)ndev->nd_parms, HAKC_TOK));
 #else
 	neigh_parms_release(&nd_tbl, ndev->nd_parms);
 #endif
@@ -853,7 +871,7 @@ static int inet6_netconf_dump_devconf(struct sk_buff *skb,
 		struct netconfmsg *ncm;
 
 		if (nlh->nlmsg_len < nlmsg_msg_size(sizeof(*ncm))) {
-			NL_SET_ERR_MSG_MOD(extack, "Invalid header for netconf dump request");
+			NL_SET_ERR_MSG_MOD(extack, "Invalid header for netconf dump request"); // line 838 is here
 			return -EINVAL;
 		}
 

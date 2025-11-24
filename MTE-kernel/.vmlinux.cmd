@@ -1,0 +1,1 @@
+cmd_vmlinux := sh scripts/link-vmlinux.sh "ld.lld" "-EL  -maarch64elf -z norelro" "--no-undefined -X -shared -Bsymbolic -z notext  --no-apply-dynamic-relocs --fix-cortex-a53-843419 --build-id=sha1 --pack-dyn-relocs=relr --orphan-handling=warn";  true

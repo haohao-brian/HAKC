@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/scheduler/gpu-sched.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/gpu/drm/scheduler/gpu-sched.o drivers/gpu/drm/scheduler/sched_main.o drivers/gpu/drm/scheduler/sched_fence.o drivers/gpu/drm/scheduler/sched_entity.o

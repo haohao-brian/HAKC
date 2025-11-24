@@ -1,0 +1,1 @@
+cmd_drivers/crypto/amlogic/amlogic-gxl-crypto.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/crypto/amlogic/amlogic-gxl-crypto.ko drivers/crypto/amlogic/amlogic-gxl-crypto.o drivers/crypto/amlogic/amlogic-gxl-crypto.mod.o;  true

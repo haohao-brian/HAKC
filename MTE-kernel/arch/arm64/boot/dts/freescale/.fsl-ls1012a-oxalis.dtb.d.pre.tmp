@@ -1,0 +1,6 @@
+arch/arm64/boot/dts/freescale/.fsl-ls1012a-oxalis.dtb.dts.tmp: \
+  arch/arm64/boot/dts/freescale/fsl-ls1012a-oxalis.dts \
+  arch/arm64/boot/dts/freescale/fsl-ls1012a.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/thermal/thermal.h

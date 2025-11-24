@@ -1,0 +1,6 @@
+arch/arm64/boot/dts/lg/.lg1313-ref.dtb.dts.tmp: \
+  arch/arm64/boot/dts/lg/lg1313-ref.dts \
+  arch/arm64/boot/dts/lg/lg1313.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h

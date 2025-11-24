@@ -1,0 +1,5 @@
+arch/arm64/boot/dts/amazon/.alpine-v3-evp.dtb.dts.tmp: \
+  arch/arm64/boot/dts/amazon/alpine-v3-evp.dts \
+  arch/arm64/boot/dts/amazon/alpine-v3.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h

@@ -1,0 +1,1 @@
+cmd_drivers/soc/bcm/brcmstb/built-in.a := rm -f drivers/soc/bcm/brcmstb/built-in.a; llvm-ar cDPrST drivers/soc/bcm/brcmstb/built-in.a drivers/soc/bcm/brcmstb/common.o drivers/soc/bcm/brcmstb/biuctrl.o drivers/soc/bcm/brcmstb/pm/built-in.a

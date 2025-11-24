@@ -1,0 +1,1 @@
+cmd_drivers/perf/fsl_imx8_ddr_perf.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/perf/fsl_imx8_ddr_perf.ko drivers/perf/fsl_imx8_ddr_perf.o drivers/perf/fsl_imx8_ddr_perf.mod.o;  true

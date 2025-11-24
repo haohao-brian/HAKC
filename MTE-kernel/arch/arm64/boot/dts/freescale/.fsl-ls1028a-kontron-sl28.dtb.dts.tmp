@@ -1,0 +1,1374 @@
+# 1 "arch/arm64/boot/dts/freescale/fsl-ls1028a-kontron-sl28.dts"
+# 1 "<built-in>" 1
+# 1 "arch/arm64/boot/dts/freescale/fsl-ls1028a-kontron-sl28.dts" 2
+
+
+
+
+
+
+
+
+/dts-v1/;
+
+# 1 "arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi" 1
+# 11 "arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi"
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 1
+
+
+
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h" 1
+# 10 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 2
+# 12 "arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi" 2
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/thermal/thermal.h" 1
+# 13 "arch/arm64/boot/dts/freescale/fsl-ls1028a.dtsi" 2
+
+/ {
+ compatible = "fsl,ls1028a";
+ interrupt-parent = <&gic>;
+ #address-cells = <2>;
+ #size-cells = <2>;
+
+ aliases {
+  rtc1 = &ftm_alarm0;
+ };
+
+ cpus {
+  #address-cells = <1>;
+  #size-cells = <0>;
+
+  cpu0: cpu@0 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a72";
+   reg = <0x0>;
+   enable-method = "psci";
+   clocks = <&clockgen 1 0>;
+   next-level-cache = <&l2>;
+   cpu-idle-states = <&CPU_PW20>;
+   #cooling-cells = <2>;
+  };
+
+  cpu1: cpu@1 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a72";
+   reg = <0x1>;
+   enable-method = "psci";
+   clocks = <&clockgen 1 0>;
+   next-level-cache = <&l2>;
+   cpu-idle-states = <&CPU_PW20>;
+   #cooling-cells = <2>;
+  };
+
+  l2: l2-cache {
+   compatible = "cache";
+  };
+ };
+
+ idle-states {
+
+
+
+
+  entry-method = "psci";
+
+  CPU_PW20: cpu-pw20 {
+     compatible = "arm,idle-state";
+     idle-state-name = "PW20";
+     arm,psci-suspend-param = <0x0>;
+     entry-latency-us = <2000>;
+     exit-latency-us = <2000>;
+     min-residency-us = <6000>;
+  };
+ };
+
+ sysclk: clock-sysclk {
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-frequency = <100000000>;
+  clock-output-names = "sysclk";
+ };
+
+ osc_27m: clock-osc-27m {
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-frequency = <27000000>;
+  clock-output-names = "phy_27m";
+ };
+
+ dpclk: clock-controller@f1f0000 {
+  compatible = "fsl,ls1028a-plldig";
+  reg = <0x0 0xf1f0000 0x0 0xffff>;
+  #clock-cells = <0>;
+  clocks = <&osc_27m>;
+ };
+
+ reboot {
+  compatible ="syscon-reboot";
+  regmap = <&rst>;
+  offset = <0>;
+  mask = <0x02>;
+ };
+
+ timer {
+  compatible = "arm,armv8-timer";
+  interrupts = <1 13 ((((1 << (2)) - 1) << 8) |
+       8)>,
+        <1 14 ((((1 << (2)) - 1) << 8) |
+       8)>,
+        <1 11 ((((1 << (2)) - 1) << 8) |
+       8)>,
+        <1 10 ((((1 << (2)) - 1) << 8) |
+       8)>;
+ };
+
+ pmu {
+  compatible = "arm,cortex-a72-pmu";
+  interrupts = <1 7 4>;
+ };
+
+ gic: interrupt-controller@6000000 {
+  compatible= "arm,gic-v3";
+  #address-cells = <2>;
+  #size-cells = <2>;
+  ranges;
+  reg= <0x0 0x06000000 0 0x10000>,
+   <0x0 0x06040000 0 0x40000>;
+  #interrupt-cells= <3>;
+  interrupt-controller;
+  interrupts = <1 9 (((0xf) << 8) |
+      8)>;
+  its: gic-its@6020000 {
+   compatible = "arm,gic-v3-its";
+   msi-controller;
+   reg = <0x0 0x06020000 0 0x20000>;
+  };
+ };
+
+ thermal-zones {
+  ddr-controller {
+   polling-delay-passive = <1000>;
+   polling-delay = <5000>;
+   thermal-sensors = <&tmu 0>;
+
+   trips {
+    ddr-ctrler-alert {
+     temperature = <85000>;
+     hysteresis = <2000>;
+     type = "passive";
+    };
+
+    ddr-ctrler-crit {
+     temperature = <95000>;
+     hysteresis = <2000>;
+     type = "critical";
+    };
+   };
+  };
+
+  core-cluster {
+   polling-delay-passive = <1000>;
+   polling-delay = <5000>;
+   thermal-sensors = <&tmu 1>;
+
+   trips {
+    core_cluster_alert: core-cluster-alert {
+     temperature = <85000>;
+     hysteresis = <2000>;
+     type = "passive";
+    };
+
+    core_cluster_crit: core-cluster-crit {
+     temperature = <95000>;
+     hysteresis = <2000>;
+     type = "critical";
+    };
+   };
+
+   cooling-maps {
+    map0 {
+     trip = <&core_cluster_alert>;
+     cooling-device =
+      <&cpu0 (~0) (~0)>,
+      <&cpu1 (~0) (~0)>;
+    };
+   };
+  };
+ };
+
+ soc: soc {
+  compatible = "simple-bus";
+  #address-cells = <2>;
+  #size-cells = <2>;
+  ranges;
+
+  ddr: memory-controller@1080000 {
+   compatible = "fsl,qoriq-memory-controller";
+   reg = <0x0 0x1080000 0x0 0x1000>;
+   interrupts = <0 144 4>;
+   big-endian;
+  };
+
+  dcfg: syscon@1e00000 {
+   compatible = "fsl,ls1028a-dcfg", "syscon";
+   reg = <0x0 0x1e00000 0x0 0x10000>;
+   little-endian;
+  };
+
+  rst: syscon@1e60000 {
+   compatible = "syscon";
+   reg = <0x0 0x1e60000 0x0 0x10000>;
+   little-endian;
+  };
+
+  scfg: syscon@1fc0000 {
+   compatible = "fsl,ls1028a-scfg", "syscon";
+   reg = <0x0 0x1fc0000 0x0 0x10000>;
+   big-endian;
+  };
+
+  clockgen: clock-controller@1300000 {
+   compatible = "fsl,ls1028a-clockgen";
+   reg = <0x0 0x1300000 0x0 0xa0000>;
+   #clock-cells = <2>;
+   clocks = <&sysclk>;
+  };
+
+  i2c0: i2c@2000000 {
+   compatible = "fsl,vf610-i2c";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x2000000 0x0 0x10000>;
+   interrupts = <0 34 4>;
+   clocks = <&clockgen 4 3>;
+   status = "disabled";
+  };
+
+  i2c1: i2c@2010000 {
+   compatible = "fsl,vf610-i2c";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x2010000 0x0 0x10000>;
+   interrupts = <0 34 4>;
+   clocks = <&clockgen 4 3>;
+   status = "disabled";
+  };
+
+  i2c2: i2c@2020000 {
+   compatible = "fsl,vf610-i2c";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x2020000 0x0 0x10000>;
+   interrupts = <0 35 4>;
+   clocks = <&clockgen 4 3>;
+   status = "disabled";
+  };
+
+  i2c3: i2c@2030000 {
+   compatible = "fsl,vf610-i2c";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x2030000 0x0 0x10000>;
+   interrupts = <0 35 4>;
+   clocks = <&clockgen 4 3>;
+   status = "disabled";
+  };
+
+  i2c4: i2c@2040000 {
+   compatible = "fsl,vf610-i2c";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x2040000 0x0 0x10000>;
+   interrupts = <0 74 4>;
+   clocks = <&clockgen 4 3>;
+   status = "disabled";
+  };
+
+  i2c5: i2c@2050000 {
+   compatible = "fsl,vf610-i2c";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x2050000 0x0 0x10000>;
+   interrupts = <0 74 4>;
+   clocks = <&clockgen 4 3>;
+   status = "disabled";
+  };
+
+  i2c6: i2c@2060000 {
+   compatible = "fsl,vf610-i2c";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x2060000 0x0 0x10000>;
+   interrupts = <0 75 4>;
+   clocks = <&clockgen 4 3>;
+   status = "disabled";
+  };
+
+  i2c7: i2c@2070000 {
+   compatible = "fsl,vf610-i2c";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x2070000 0x0 0x10000>;
+   interrupts = <0 75 4>;
+   clocks = <&clockgen 4 3>;
+   status = "disabled";
+  };
+
+  fspi: spi@20c0000 {
+   compatible = "nxp,lx2160a-fspi";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x20c0000 0x0 0x10000>,
+         <0x0 0x20000000 0x0 0x10000000>;
+   reg-names = "fspi_base", "fspi_mmap";
+   interrupts = <0 25 4>;
+   clocks = <&clockgen 2 0>, <&clockgen 2 0>;
+   clock-names = "fspi_en", "fspi";
+   status = "disabled";
+  };
+
+  dspi0: spi@2100000 {
+   compatible = "fsl,ls1028a-dspi", "fsl,ls1021a-v1.0-dspi";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x2100000 0x0 0x10000>;
+   interrupts = <0 26 4>;
+   clock-names = "dspi";
+   clocks = <&clockgen 4 1>;
+   dmas = <&edma0 0 62>, <&edma0 0 60>;
+   dma-names = "tx", "rx";
+   spi-num-chipselects = <4>;
+   little-endian;
+   status = "disabled";
+  };
+
+  dspi1: spi@2110000 {
+   compatible = "fsl,ls1028a-dspi", "fsl,ls1021a-v1.0-dspi";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x2110000 0x0 0x10000>;
+   interrupts = <0 26 4>;
+   clock-names = "dspi";
+   clocks = <&clockgen 4 1>;
+   dmas = <&edma0 0 58>, <&edma0 0 56>;
+   dma-names = "tx", "rx";
+   spi-num-chipselects = <4>;
+   little-endian;
+   status = "disabled";
+  };
+
+  dspi2: spi@2120000 {
+   compatible = "fsl,ls1028a-dspi", "fsl,ls1021a-v1.0-dspi";
+   #address-cells = <1>;
+   #size-cells = <0>;
+   reg = <0x0 0x2120000 0x0 0x10000>;
+   interrupts = <0 26 4>;
+   clock-names = "dspi";
+   clocks = <&clockgen 4 1>;
+   dmas = <&edma0 0 54>, <&edma0 0 2>;
+   dma-names = "tx", "rx";
+   spi-num-chipselects = <3>;
+   little-endian;
+   status = "disabled";
+  };
+
+  esdhc: mmc@2140000 {
+   compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
+   reg = <0x0 0x2140000 0x0 0x10000>;
+   interrupts = <0 28 4>;
+   clock-frequency = <0>;
+   clocks = <&clockgen 2 1>;
+   voltage-ranges = <1800 1800 3300 3300>;
+   sdhci,auto-cmd12;
+   little-endian;
+   bus-width = <4>;
+   status = "disabled";
+  };
+
+  esdhc1: mmc@2150000 {
+   compatible = "fsl,ls1028a-esdhc", "fsl,esdhc";
+   reg = <0x0 0x2150000 0x0 0x10000>;
+   interrupts = <0 63 4>;
+   clock-frequency = <0>;
+   clocks = <&clockgen 2 1>;
+   voltage-ranges = <1800 1800 3300 3300>;
+   sdhci,auto-cmd12;
+   broken-cd;
+   little-endian;
+   bus-width = <4>;
+   status = "disabled";
+  };
+
+  duart0: serial@21c0500 {
+   compatible = "fsl,ns16550", "ns16550a";
+   reg = <0x00 0x21c0500 0x0 0x100>;
+   interrupts = <0 32 4>;
+   clocks = <&clockgen 4 1>;
+   status = "disabled";
+  };
+
+  duart1: serial@21c0600 {
+   compatible = "fsl,ns16550", "ns16550a";
+   reg = <0x00 0x21c0600 0x0 0x100>;
+   interrupts = <0 32 4>;
+   clocks = <&clockgen 4 1>;
+   status = "disabled";
+  };
+
+
+  lpuart0: serial@2260000 {
+   compatible = "fsl,ls1028a-lpuart";
+   reg = <0x0 0x2260000 0x0 0x1000>;
+   interrupts = <0 232 4>;
+   clocks = <&clockgen 4 1>;
+   clock-names = "ipg";
+   dma-names = "rx","tx";
+   dmas = <&edma0 1 32>,
+          <&edma0 1 33>;
+   status = "disabled";
+  };
+
+  lpuart1: serial@2270000 {
+   compatible = "fsl,ls1028a-lpuart";
+   reg = <0x0 0x2270000 0x0 0x1000>;
+   interrupts = <0 233 4>;
+   clocks = <&clockgen 4 1>;
+   clock-names = "ipg";
+   dma-names = "rx","tx";
+   dmas = <&edma0 1 30>,
+          <&edma0 1 31>;
+   status = "disabled";
+  };
+
+  lpuart2: serial@2280000 {
+   compatible = "fsl,ls1028a-lpuart";
+   reg = <0x0 0x2280000 0x0 0x1000>;
+   interrupts = <0 234 4>;
+   clocks = <&clockgen 4 1>;
+   clock-names = "ipg";
+   dma-names = "rx","tx";
+   dmas = <&edma0 1 28>,
+          <&edma0 1 29>;
+   status = "disabled";
+  };
+
+  lpuart3: serial@2290000 {
+   compatible = "fsl,ls1028a-lpuart";
+   reg = <0x0 0x2290000 0x0 0x1000>;
+   interrupts = <0 235 4>;
+   clocks = <&clockgen 4 1>;
+   clock-names = "ipg";
+   dma-names = "rx","tx";
+   dmas = <&edma0 1 26>,
+          <&edma0 1 27>;
+   status = "disabled";
+  };
+
+  lpuart4: serial@22a0000 {
+   compatible = "fsl,ls1028a-lpuart";
+   reg = <0x0 0x22a0000 0x0 0x1000>;
+   interrupts = <0 236 4>;
+   clocks = <&clockgen 4 1>;
+   clock-names = "ipg";
+   dma-names = "rx","tx";
+   dmas = <&edma0 1 24>,
+          <&edma0 1 25>;
+   status = "disabled";
+  };
+
+  lpuart5: serial@22b0000 {
+   compatible = "fsl,ls1028a-lpuart";
+   reg = <0x0 0x22b0000 0x0 0x1000>;
+   interrupts = <0 237 4>;
+   clocks = <&clockgen 4 1>;
+   clock-names = "ipg";
+   dma-names = "rx","tx";
+   dmas = <&edma0 1 22>,
+          <&edma0 1 23>;
+   status = "disabled";
+  };
+
+  edma0: dma-controller@22c0000 {
+   #dma-cells = <2>;
+   compatible = "fsl,ls1028a-edma", "fsl,vf610-edma";
+   reg = <0x0 0x22c0000 0x0 0x10000>,
+         <0x0 0x22d0000 0x0 0x10000>,
+         <0x0 0x22e0000 0x0 0x10000>;
+   interrupts = <0 56 4>,
+         <0 56 4>;
+   interrupt-names = "edma-tx", "edma-err";
+   dma-channels = <32>;
+   clock-names = "dmamux0", "dmamux1";
+   clocks = <&clockgen 4 1>,
+     <&clockgen 4 1>;
+  };
+
+  gpio1: gpio@2300000 {
+   compatible = "fsl,ls1028a-gpio","fsl,qoriq-gpio";
+   reg = <0x0 0x2300000 0x0 0x10000>;
+   interrupts = <0 36 4>;
+   gpio-controller;
+   #gpio-cells = <2>;
+   interrupt-controller;
+   #interrupt-cells = <2>;
+   little-endian;
+  };
+
+  gpio2: gpio@2310000 {
+   compatible = "fsl,ls1028a-gpio","fsl,qoriq-gpio";
+   reg = <0x0 0x2310000 0x0 0x10000>;
+   interrupts = <0 36 4>;
+   gpio-controller;
+   #gpio-cells = <2>;
+   interrupt-controller;
+   #interrupt-cells = <2>;
+   little-endian;
+  };
+
+  gpio3: gpio@2320000 {
+   compatible = "fsl,ls1028a-gpio","fsl,qoriq-gpio";
+   reg = <0x0 0x2320000 0x0 0x10000>;
+   interrupts = <0 37 4>;
+   gpio-controller;
+   #gpio-cells = <2>;
+   interrupt-controller;
+   #interrupt-cells = <2>;
+   little-endian;
+  };
+
+  usb0: usb@3100000 {
+   compatible = "fsl,ls1028a-dwc3", "snps,dwc3";
+   reg = <0x0 0x3100000 0x0 0x10000>;
+   interrupts = <0 80 4>;
+   dr_mode = "host";
+   snps,dis_rxdet_inp3_quirk;
+   snps,quirk-frame-length-adjustment = <0x20>;
+   snps,incr-burst-type-adjustment = <1>, <4>, <8>, <16>;
+  };
+
+  usb1: usb@3110000 {
+   compatible = "fsl,ls1028a-dwc3", "snps,dwc3";
+   reg = <0x0 0x3110000 0x0 0x10000>;
+   interrupts = <0 81 4>;
+   dr_mode = "host";
+   snps,dis_rxdet_inp3_quirk;
+   snps,quirk-frame-length-adjustment = <0x20>;
+   snps,incr-burst-type-adjustment = <1>, <4>, <8>, <16>;
+  };
+
+  sata: sata@3200000 {
+   compatible = "fsl,ls1028a-ahci";
+   reg = <0x0 0x3200000 0x0 0x10000>,
+    <0x7 0x100520 0x0 0x4>;
+   reg-names = "ahci", "sata-ecc";
+   interrupts = <0 133 4>;
+   clocks = <&clockgen 4 1>;
+   status = "disabled";
+  };
+
+  pcie1: pcie@3400000 {
+   compatible = "fsl,ls1028a-pcie";
+   reg = <0x00 0x03400000 0x0 0x00100000
+          0x80 0x00000000 0x0 0x00002000>;
+   reg-names = "regs", "config";
+   interrupts = <0 108 4>,
+         <0 109 4>;
+   interrupt-names = "pme", "aer";
+   #address-cells = <3>;
+   #size-cells = <2>;
+   device_type = "pci";
+   dma-coherent;
+   num-viewport = <8>;
+   bus-range = <0x0 0xff>;
+   ranges = <0x81000000 0x0 0x00000000 0x80 0x00010000 0x0 0x00010000
+      0x82000000 0x0 0x40000000 0x80 0x40000000 0x0 0x40000000>;
+   msi-parent = <&its>;
+   #interrupt-cells = <1>;
+   interrupt-map-mask = <0 0 0 7>;
+   interrupt-map = <0000 0 0 1 &gic 0 0 0 109 4>,
+     <0000 0 0 2 &gic 0 0 0 110 4>,
+     <0000 0 0 3 &gic 0 0 0 111 4>,
+     <0000 0 0 4 &gic 0 0 0 112 4>;
+   iommu-map = <0 &smmu 0 1>;
+   status = "disabled";
+  };
+
+  pcie2: pcie@3500000 {
+   compatible = "fsl,ls1028a-pcie";
+   reg = <0x00 0x03500000 0x0 0x00100000
+          0x88 0x00000000 0x0 0x00002000>;
+   reg-names = "regs", "config";
+   interrupts = <0 113 4>,
+         <0 114 4>;
+   interrupt-names = "pme", "aer";
+   #address-cells = <3>;
+   #size-cells = <2>;
+   device_type = "pci";
+   dma-coherent;
+   num-viewport = <8>;
+   bus-range = <0x0 0xff>;
+   ranges = <0x81000000 0x0 0x00000000 0x88 0x00010000 0x0 0x00010000
+      0x82000000 0x0 0x40000000 0x88 0x40000000 0x0 0x40000000>;
+   msi-parent = <&its>;
+   #interrupt-cells = <1>;
+   interrupt-map-mask = <0 0 0 7>;
+   interrupt-map = <0000 0 0 1 &gic 0 0 0 114 4>,
+     <0000 0 0 2 &gic 0 0 0 115 4>,
+     <0000 0 0 3 &gic 0 0 0 116 4>,
+     <0000 0 0 4 &gic 0 0 0 117 4>;
+   iommu-map = <0 &smmu 0 1>;
+   status = "disabled";
+  };
+
+  smmu: iommu@5000000 {
+   compatible = "arm,mmu-500";
+   reg = <0 0x5000000 0 0x800000>;
+   #global-interrupts = <8>;
+   #iommu-cells = <1>;
+   stream-match-mask = <0x7c00>;
+
+   interrupts = <0 13 4>,
+
+         <0 14 4>,
+
+         <0 15 4>,
+
+         <0 16 4>,
+
+         <0 211 4>, <0 212 4>,
+         <0 213 4>, <0 214 4>,
+
+         <0 146 4>, <0 147 4>,
+         <0 148 4>, <0 149 4>,
+         <0 150 4>, <0 151 4>,
+         <0 152 4>, <0 153 4>,
+         <0 154 4>, <0 155 4>,
+         <0 156 4>, <0 157 4>,
+         <0 158 4>, <0 159 4>,
+         <0 160 4>, <0 161 4>,
+         <0 162 4>, <0 163 4>,
+         <0 164 4>, <0 165 4>,
+         <0 166 4>, <0 167 4>,
+         <0 168 4>, <0 169 4>,
+         <0 170 4>, <0 171 4>,
+         <0 172 4>, <0 173 4>,
+         <0 174 4>, <0 175 4>,
+         <0 176 4>, <0 177 4>,
+         <0 178 4>, <0 179 4>,
+         <0 180 4>, <0 181 4>,
+         <0 182 4>, <0 183 4>,
+         <0 184 4>, <0 185 4>,
+         <0 186 4>, <0 187 4>,
+         <0 188 4>, <0 189 4>,
+         <0 190 4>, <0 191 4>,
+         <0 192 4>, <0 193 4>,
+         <0 194 4>, <0 195 4>,
+         <0 196 4>, <0 197 4>,
+         <0 198 4>, <0 199 4>,
+         <0 200 4>, <0 201 4>,
+         <0 202 4>, <0 203 4>,
+         <0 204 4>, <0 205 4>,
+         <0 206 4>, <0 207 4>,
+         <0 208 4>, <0 209 4>;
+  };
+
+  crypto: crypto@8000000 {
+   compatible = "fsl,sec-v5.0", "fsl,sec-v4.0";
+   fsl,sec-era = <10>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0x0 0x00 0x8000000 0x100000>;
+   reg = <0x00 0x8000000 0x0 0x100000>;
+   interrupts = <0 139 4>;
+   dma-coherent;
+
+   sec_jr0: jr@10000 {
+    compatible = "fsl,sec-v5.0-job-ring",
+          "fsl,sec-v4.0-job-ring";
+    reg = <0x10000 0x10000>;
+    interrupts = <0 140 4>;
+   };
+
+   sec_jr1: jr@20000 {
+    compatible = "fsl,sec-v5.0-job-ring",
+          "fsl,sec-v4.0-job-ring";
+    reg = <0x20000 0x10000>;
+    interrupts = <0 141 4>;
+   };
+
+   sec_jr2: jr@30000 {
+    compatible = "fsl,sec-v5.0-job-ring",
+          "fsl,sec-v4.0-job-ring";
+    reg = <0x30000 0x10000>;
+    interrupts = <0 142 4>;
+   };
+
+   sec_jr3: jr@40000 {
+    compatible = "fsl,sec-v5.0-job-ring",
+          "fsl,sec-v4.0-job-ring";
+    reg = <0x40000 0x10000>;
+    interrupts = <0 143 4>;
+   };
+  };
+
+  qdma: dma-controller@8380000 {
+   compatible = "fsl,ls1028a-qdma", "fsl,ls1021a-qdma";
+   reg = <0x0 0x8380000 0x0 0x1000>,
+         <0x0 0x8390000 0x0 0x10000>,
+         <0x0 0x83a0000 0x0 0x40000>;
+   interrupts = <0 43 4>,
+         <0 251 4>,
+         <0 252 4>,
+         <0 253 4>,
+         <0 254 4>;
+   interrupt-names = "qdma-error", "qdma-queue0",
+    "qdma-queue1", "qdma-queue2", "qdma-queue3";
+   dma-channels = <8>;
+   block-number = <1>;
+   block-offset = <0x10000>;
+   fsl,dma-queues = <2>;
+   status-sizes = <64>;
+   queue-sizes = <64 64>;
+  };
+
+  cluster1_core0_watchdog: watchdog@c000000 {
+   compatible = "arm,sp805", "arm,primecell";
+   reg = <0x0 0xc000000 0x0 0x1000>;
+   clocks = <&clockgen 4 15>, <&clockgen 4 15>;
+   clock-names = "wdog_clk", "apb_pclk";
+  };
+
+  cluster1_core1_watchdog: watchdog@c010000 {
+   compatible = "arm,sp805", "arm,primecell";
+   reg = <0x0 0xc010000 0x0 0x1000>;
+   clocks = <&clockgen 4 15>, <&clockgen 4 15>;
+   clock-names = "wdog_clk", "apb_pclk";
+  };
+
+  sai1: audio-controller@f100000 {
+   #sound-dai-cells = <0>;
+   compatible = "fsl,vf610-sai";
+   reg = <0x0 0xf100000 0x0 0x10000>;
+   interrupts = <0 82 4>;
+   clocks = <&clockgen 4 1>, <&clockgen 4 1>,
+     <&clockgen 4 1>, <&clockgen 4 1>;
+   clock-names = "bus", "mclk1", "mclk2", "mclk3";
+   dma-names = "tx", "rx";
+   dmas = <&edma0 1 4>,
+          <&edma0 1 3>;
+   fsl,sai-asynchronous;
+   status = "disabled";
+  };
+
+  sai2: audio-controller@f110000 {
+   #sound-dai-cells = <0>;
+   compatible = "fsl,vf610-sai";
+   reg = <0x0 0xf110000 0x0 0x10000>;
+   interrupts = <0 82 4>;
+   clocks = <&clockgen 4 1>, <&clockgen 4 1>,
+     <&clockgen 4 1>, <&clockgen 4 1>;
+   clock-names = "bus", "mclk1", "mclk2", "mclk3";
+   dma-names = "tx", "rx";
+   dmas = <&edma0 1 6>,
+          <&edma0 1 5>;
+   fsl,sai-asynchronous;
+   status = "disabled";
+  };
+
+  sai3: audio-controller@f120000 {
+   #sound-dai-cells = <0>;
+   compatible = "fsl,vf610-sai";
+   reg = <0x0 0xf120000 0x0 0x10000>;
+   interrupts = <0 83 4>;
+   clocks = <&clockgen 4 1>, <&clockgen 4 1>,
+     <&clockgen 4 1>, <&clockgen 4 1>;
+   clock-names = "bus", "mclk1", "mclk2", "mclk3";
+   dma-names = "tx", "rx";
+   dmas = <&edma0 1 8>,
+          <&edma0 1 7>;
+   fsl,sai-asynchronous;
+   status = "disabled";
+  };
+
+  sai4: audio-controller@f130000 {
+   #sound-dai-cells = <0>;
+   compatible = "fsl,vf610-sai";
+   reg = <0x0 0xf130000 0x0 0x10000>;
+   interrupts = <0 83 4>;
+   clocks = <&clockgen 4 1>, <&clockgen 4 1>,
+     <&clockgen 4 1>, <&clockgen 4 1>;
+   clock-names = "bus", "mclk1", "mclk2", "mclk3";
+   dma-names = "tx", "rx";
+   dmas = <&edma0 1 10>,
+          <&edma0 1 9>;
+   fsl,sai-asynchronous;
+   status = "disabled";
+  };
+
+  sai5: audio-controller@f140000 {
+   #sound-dai-cells = <0>;
+   compatible = "fsl,vf610-sai";
+   reg = <0x0 0xf140000 0x0 0x10000>;
+   interrupts = <0 84 4>;
+   clocks = <&clockgen 4 1>, <&clockgen 4 1>,
+     <&clockgen 4 1>, <&clockgen 4 1>;
+   clock-names = "bus", "mclk1", "mclk2", "mclk3";
+   dma-names = "tx", "rx";
+   dmas = <&edma0 1 12>,
+          <&edma0 1 11>;
+   fsl,sai-asynchronous;
+   status = "disabled";
+  };
+
+  sai6: audio-controller@f150000 {
+   #sound-dai-cells = <0>;
+   compatible = "fsl,vf610-sai";
+   reg = <0x0 0xf150000 0x0 0x10000>;
+   interrupts = <0 84 4>;
+   clocks = <&clockgen 4 1>, <&clockgen 4 1>,
+     <&clockgen 4 1>, <&clockgen 4 1>;
+   clock-names = "bus", "mclk1", "mclk2", "mclk3";
+   dma-names = "tx", "rx";
+   dmas = <&edma0 1 14>,
+          <&edma0 1 13>;
+   fsl,sai-asynchronous;
+   status = "disabled";
+  };
+
+  tmu: tmu@1f80000 {
+   compatible = "fsl,qoriq-tmu";
+   reg = <0x0 0x1f80000 0x0 0x10000>;
+   interrupts = <0 23 0x4>;
+   fsl,tmu-range = <0xb0000 0xa0026 0x80048 0x70061>;
+   fsl,tmu-calibration = <0x00000000 0x00000024
+            0x00000001 0x0000002b
+            0x00000002 0x00000031
+            0x00000003 0x00000038
+            0x00000004 0x0000003f
+            0x00000005 0x00000045
+            0x00000006 0x0000004c
+            0x00000007 0x00000053
+            0x00000008 0x00000059
+            0x00000009 0x00000060
+            0x0000000a 0x00000066
+            0x0000000b 0x0000006d
+
+            0x00010000 0x0000001c
+            0x00010001 0x00000024
+            0x00010002 0x0000002c
+            0x00010003 0x00000035
+            0x00010004 0x0000003d
+            0x00010005 0x00000045
+            0x00010006 0x0000004d
+            0x00010007 0x00000055
+            0x00010008 0x0000005e
+            0x00010009 0x00000066
+            0x0001000a 0x0000006e
+
+            0x00020000 0x00000018
+            0x00020001 0x00000022
+            0x00020002 0x0000002d
+            0x00020003 0x00000038
+            0x00020004 0x00000043
+            0x00020005 0x0000004d
+            0x00020006 0x00000058
+            0x00020007 0x00000063
+            0x00020008 0x0000006e
+
+            0x00030000 0x00000010
+            0x00030001 0x0000001c
+            0x00030002 0x00000029
+            0x00030003 0x00000036
+            0x00030004 0x00000042
+            0x00030005 0x0000004f
+            0x00030006 0x0000005b
+            0x00030007 0x00000068>;
+   little-endian;
+   #thermal-sensor-cells = <1>;
+  };
+
+  pcie@1f0000000 {
+   compatible = "pci-host-ecam-generic";
+   reg = <0x01 0xf0000000 0x0 0x100000>;
+   #address-cells = <3>;
+   #size-cells = <2>;
+   msi-parent = <&its>;
+   device_type = "pci";
+   bus-range = <0x0 0x0>;
+   dma-coherent;
+   msi-map = <0 &its 0x17 0xe>;
+   iommu-map = <0 &smmu 0x17 0xe>;
+
+   ranges = <0x82000000 0x0 0x00000000 0x1 0xf8000000 0x0 0x160000
+
+      0xc2000000 0x0 0x00000000 0x1 0xf8160000 0x0 0x070000
+
+      0x82000000 0x0 0x00000000 0x1 0xf81d0000 0x0 0x020000
+
+      0xc2000000 0x0 0x00000000 0x1 0xf81f0000 0x0 0x020000
+
+      0x82000000 0x0 0x00000000 0x1 0xf8210000 0x0 0x020000
+
+      0xc2000000 0x0 0x00000000 0x1 0xf8230000 0x0 0x020000
+
+      0x82000000 0x0 0x00000000 0x1 0xfc000000 0x0 0x400000>;
+
+   enetc_port0: ethernet@0,0 {
+    compatible = "fsl,enetc";
+    reg = <0x000000 0 0 0 0>;
+    status = "disabled";
+   };
+
+   enetc_port1: ethernet@0,1 {
+    compatible = "fsl,enetc";
+    reg = <0x000100 0 0 0 0>;
+    status = "disabled";
+   };
+
+   enetc_port2: ethernet@0,2 {
+    compatible = "fsl,enetc";
+    reg = <0x000200 0 0 0 0>;
+    phy-mode = "internal";
+    status = "disabled";
+
+    fixed-link {
+     speed = <1000>;
+     full-duplex;
+    };
+   };
+
+   enetc_mdio_pf3: mdio@0,3 {
+    compatible = "fsl,enetc-mdio";
+    reg = <0x000300 0 0 0 0>;
+    #address-cells = <1>;
+    #size-cells = <0>;
+   };
+
+   ethernet@0,4 {
+    compatible = "fsl,enetc-ptp";
+    reg = <0x000400 0 0 0 0>;
+    clocks = <&clockgen 2 3>;
+    little-endian;
+    fsl,extts-fifo;
+   };
+
+   mscc_felix: ethernet-switch@0,5 {
+    reg = <0x000500 0 0 0 0>;
+
+    interrupts = <0 95 4>;
+    status = "disabled";
+
+    ports {
+     #address-cells = <1>;
+     #size-cells = <0>;
+
+
+     mscc_felix_port0: port@0 {
+      reg = <0>;
+      status = "disabled";
+     };
+
+     mscc_felix_port1: port@1 {
+      reg = <1>;
+      status = "disabled";
+     };
+
+     mscc_felix_port2: port@2 {
+      reg = <2>;
+      status = "disabled";
+     };
+
+     mscc_felix_port3: port@3 {
+      reg = <3>;
+      status = "disabled";
+     };
+
+
+     mscc_felix_port4: port@4 {
+      reg = <4>;
+      phy-mode = "internal";
+      status = "disabled";
+
+      fixed-link {
+       speed = <2500>;
+       full-duplex;
+      };
+     };
+
+     mscc_felix_port5: port@5 {
+      reg = <5>;
+      phy-mode = "internal";
+      status = "disabled";
+
+      fixed-link {
+       speed = <1000>;
+       full-duplex;
+      };
+     };
+    };
+   };
+
+   enetc_port3: ethernet@0,6 {
+    compatible = "fsl,enetc";
+    reg = <0x000600 0 0 0 0>;
+    phy-mode = "internal";
+    status = "disabled";
+
+    fixed-link {
+     speed = <1000>;
+     full-duplex;
+    };
+   };
+  };
+
+  rcpm: power-controller@1e34040 {
+   compatible = "fsl,ls1028a-rcpm", "fsl,qoriq-rcpm-2.1+";
+   reg = <0x0 0x1e34040 0x0 0x1c>;
+   #fsl,rcpm-wakeup-cells = <7>;
+   little-endian;
+  };
+
+  ftm_alarm0: timer@2800000 {
+   compatible = "fsl,ls1028a-ftm-alarm";
+   reg = <0x0 0x2800000 0x0 0x10000>;
+   fsl,rcpm-wakeup = <&rcpm 0x0 0x0 0x0 0x0 0x4000 0x0 0x0>;
+   interrupts = <0 44 4>;
+  };
+ };
+
+ malidp0: display@f080000 {
+  compatible = "arm,mali-dp500";
+  reg = <0x0 0xf080000 0x0 0x10000>;
+  interrupts = <0 222 4>,
+        <0 223 4>;
+  interrupt-names = "DE", "SE";
+  clocks = <&dpclk>, <&clockgen 2 2>, <&clockgen 2 2>,
+    <&clockgen 2 2>;
+  clock-names = "pxlclk", "mclk", "aclk", "pclk";
+  arm,malidp-output-port-lines = /bits/ 8 <8 8 8>;
+  arm,malidp-arqos-value = <0xd000d000>;
+
+  port {
+   dp0_out: endpoint {
+
+   };
+  };
+ };
+};
+# 11 "arch/arm64/boot/dts/freescale/fsl-ls1028a-kontron-sl28.dts" 2
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h" 1
+# 13 "arch/arm64/boot/dts/freescale/fsl-ls1028a-kontron-sl28.dts" 2
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/input/input.h" 1
+# 13 "./scripts/dtc/include-prefixes/dt-bindings/input/input.h"
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/input/linux-event-codes.h" 1
+# 14 "./scripts/dtc/include-prefixes/dt-bindings/input/input.h" 2
+# 14 "arch/arm64/boot/dts/freescale/fsl-ls1028a-kontron-sl28.dts" 2
+
+/ {
+ model = "Kontron SMARC-sAL28";
+ compatible = "kontron,sl28", "fsl,ls1028a";
+
+ aliases {
+  crypto = &crypto;
+  serial0 = &duart0;
+  serial1 = &duart1;
+  serial2 = &lpuart1;
+  spi0 = &fspi;
+  spi1 = &dspi2;
+ };
+
+ buttons0 {
+  compatible = "gpio-keys";
+
+  power-button {
+   interrupts-extended = <&sl28cpld_intc
+            4 (2 | 1)>;
+   linux,code = <116>;
+   label = "Power";
+  };
+
+  sleep-button {
+   interrupts-extended = <&sl28cpld_intc
+            5 (2 | 1)>;
+   linux,code = <142>;
+   label = "Sleep";
+  };
+ };
+
+ buttons1 {
+  compatible = "gpio-keys-polled";
+  poll-interval = <200>;
+
+  lid-switch {
+   linux,input-type = <0x05>;
+   linux,code = <0x00>;
+   gpios = <&sl28cpld_gpio3 4 1>;
+   label = "Lid";
+  };
+ };
+
+ chosen {
+  stdout-path = "serial0:115200n8";
+ };
+};
+
+&dspi2 {
+ status = "okay";
+};
+
+&duart0 {
+ status = "okay";
+};
+
+&duart1 {
+ status = "okay";
+};
+
+&enetc_port0 {
+ phy-handle = <&phy0>;
+ phy-connection-type = "sgmii";
+ managed = "in-band-status";
+ status = "okay";
+
+ mdio {
+  #address-cells = <1>;
+  #size-cells = <0>;
+
+  phy0: ethernet-phy@5 {
+   reg = <0x5>;
+   eee-broken-1000t;
+   eee-broken-100tx;
+  };
+ };
+};
+
+&esdhc {
+ sd-uhs-sdr104;
+ sd-uhs-sdr50;
+ sd-uhs-sdr25;
+ sd-uhs-sdr12;
+ status = "okay";
+};
+
+&esdhc1 {
+ mmc-hs200-1_8v;
+ mmc-hs400-1_8v;
+ bus-width = <8>;
+ status = "okay";
+};
+
+&fspi {
+ status = "okay";
+
+ flash@0 {
+  #address-cells = <1>;
+  #size-cells = <1>;
+  compatible = "jedec,spi-nor";
+  m25p,fast-read;
+  spi-max-frequency = <133000000>;
+  reg = <0>;
+
+  spi-rx-bus-width = <2>;
+  spi-tx-bus-width = <1>;
+
+  partition@0 {
+   reg = <0x000000 0x010000>;
+   label = "rcw";
+   read-only;
+  };
+
+  partition@10000 {
+   reg = <0x010000 0x0f0000>;
+   label = "failsafe bootloader";
+   read-only;
+  };
+
+  partition@100000 {
+   reg = <0x100000 0x040000>;
+   label = "failsafe DP firmware";
+   read-only;
+  };
+
+  partition@140000 {
+   reg = <0x140000 0x0a0000>;
+   label = "failsafe trusted firmware";
+   read-only;
+  };
+
+  partition@1e0000 {
+   reg = <0x1e0000 0x020000>;
+   label = "reserved";
+   read-only;
+  };
+
+  partition@200000 {
+   reg = <0x200000 0x010000>;
+   label = "configuration store";
+  };
+
+  partition@210000 {
+   reg = <0x210000 0x1d0000>;
+   label = "bootloader";
+  };
+
+  partition@3e0000 {
+   reg = <0x3e0000 0x020000>;
+   label = "bootloader environment";
+  };
+ };
+};
+
+&gpio1 {
+ gpio-line-names =
+  "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "TDO", "TCK",
+  "", "", "", "", "", "", "", "";
+};
+
+&gpio2 {
+ gpio-line-names =
+  "", "", "", "", "", "", "TMS", "TDI",
+  "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "",
+  "", "", "", "", "", "", "", "";
+};
+
+&i2c0 {
+ status = "okay";
+
+ rtc@32 {
+  compatible = "microcrystal,rv8803";
+  reg = <0x32>;
+ };
+
+ sl28cpld@4a {
+  compatible = "kontron,sl28cpld";
+  reg = <0x4a>;
+  #address-cells = <1>;
+  #size-cells = <0>;
+
+  watchdog@4 {
+   compatible = "kontron,sl28cpld-wdt";
+   reg = <0x4>;
+   kontron,assert-wdt-timeout-pin;
+  };
+
+  hwmon@b {
+   compatible = "kontron,sl28cpld-fan";
+   reg = <0xb>;
+  };
+
+  sl28cpld_pwm0: pwm@c {
+   compatible = "kontron,sl28cpld-pwm";
+   reg = <0xc>;
+   #pwm-cells = <2>;
+  };
+
+  sl28cpld_pwm1: pwm@e {
+   compatible = "kontron,sl28cpld-pwm";
+   reg = <0xe>;
+   #pwm-cells = <2>;
+  };
+
+  sl28cpld_gpio0: gpio@10 {
+   compatible = "kontron,sl28cpld-gpio";
+   reg = <0x10>;
+   interrupts-extended = <&gpio2 6
+            2>;
+
+   gpio-controller;
+   #gpio-cells = <2>;
+   gpio-line-names =
+    "GPIO0_CAM0_PWR_N", "GPIO1_CAM1_PWR_N",
+    "GPIO2_CAM0_RST_N", "GPIO3_CAM1_RST_N",
+    "GPIO4_HDA_RST_N", "GPIO5_PWM_OUT",
+    "GPIO6_TACHIN", "GPIO7";
+
+   interrupt-controller;
+   #interrupt-cells = <2>;
+  };
+
+  sl28cpld_gpio1: gpio@15 {
+   compatible = "kontron,sl28cpld-gpio";
+   reg = <0x15>;
+   interrupts-extended = <&gpio2 6
+            2>;
+
+   gpio-controller;
+   #gpio-cells = <2>;
+   gpio-line-names =
+    "GPIO8", "GPIO9", "GPIO10", "GPIO11",
+    "", "", "", "";
+
+   interrupt-controller;
+   #interrupt-cells = <2>;
+  };
+
+  sl28cpld_gpio2: gpio@1a {
+   compatible = "kontron,sl28cpld-gpo";
+   reg = <0x1a>;
+
+   gpio-controller;
+   #gpio-cells = <2>;
+   gpio-line-names =
+    "LCD0 voltage enable",
+    "LCD0 backlight enable",
+    "eMMC reset", "LVDS bridge reset",
+    "LVDS bridge power-down",
+    "SDIO power enable",
+    "", "";
+  };
+
+  sl28cpld_gpio3: gpio@1b {
+   compatible = "kontron,sl28cpld-gpi";
+   reg = <0x1b>;
+
+   gpio-controller;
+   #gpio-cells = <2>;
+   gpio-line-names =
+    "Power button", "Force recovery", "Sleep",
+    "Battery low", "Lid state", "Charging",
+    "Charger present", "";
+  };
+
+  sl28cpld_intc: interrupt-controller@1c {
+   compatible = "kontron,sl28cpld-intc";
+   reg = <0x1c>;
+   interrupts-extended = <&gpio2 6
+            2>;
+
+   interrupt-controller;
+   #interrupt-cells = <2>;
+  };
+ };
+
+ eeprom@50 {
+  compatible = "atmel,24c32";
+  reg = <0x50>;
+  pagesize = <32>;
+ };
+};
+
+&i2c3 {
+ status = "okay";
+};
+
+&i2c4 {
+ status = "okay";
+
+ eeprom@50 {
+  compatible = "atmel,24c32";
+  reg = <0x50>;
+  pagesize = <32>;
+ };
+};
+
+&lpuart1 {
+ status = "okay";
+};

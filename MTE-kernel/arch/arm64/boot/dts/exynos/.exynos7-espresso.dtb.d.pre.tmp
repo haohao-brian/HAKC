@@ -1,0 +1,12 @@
+arch/arm64/boot/dts/exynos/.exynos7-espresso.dtb.dts.tmp: \
+  arch/arm64/boot/dts/exynos/exynos7-espresso.dts \
+  arch/arm64/boot/dts/exynos/exynos7.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/exynos7-clk.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  arch/arm64/boot/dts/exynos/exynos7-trip-points.dtsi \
+  arch/arm64/boot/dts/exynos/exynos7-pinctrl.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/pinctrl/samsung.h \
+  scripts/dtc/include-prefixes/arm/exynos-syscon-restart.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/samsung,s2mps11.h \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h

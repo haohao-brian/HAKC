@@ -1,0 +1,1 @@
+cmd_drivers/input/misc/built-in.a := rm -f drivers/input/misc/built-in.a; llvm-ar cDPrST drivers/input/misc/built-in.a drivers/input/misc/hisi_powerkey.o drivers/input/misc/pm8941-pwrkey.o drivers/input/misc/xen-kbdfront.o

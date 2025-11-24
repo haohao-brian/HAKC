@@ -1,0 +1,1 @@
+cmd_drivers/clk/meson/clk-phase.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/clk/meson/clk-phase.ko drivers/clk/meson/clk-phase.o drivers/clk/meson/clk-phase.mod.o;  true

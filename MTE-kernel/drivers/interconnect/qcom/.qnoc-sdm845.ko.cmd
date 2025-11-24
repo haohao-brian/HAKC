@@ -1,0 +1,1 @@
+cmd_drivers/interconnect/qcom/qnoc-sdm845.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/interconnect/qcom/qnoc-sdm845.ko drivers/interconnect/qcom/qnoc-sdm845.o drivers/interconnect/qcom/qnoc-sdm845.mod.o;  true

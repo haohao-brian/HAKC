@@ -1,0 +1,1382 @@
+# 1 "arch/arm64/boot/dts/sprd/sp9860g-1h10.dts"
+# 1 "<built-in>" 1
+# 1 "arch/arm64/boot/dts/sprd/sp9860g-1h10.dts" 2
+
+
+
+
+
+
+
+
+/dts-v1/;
+
+
+# 1 "arch/arm64/boot/dts/sprd/sc9860.dtsi" 1
+
+
+
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 1
+
+
+
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h" 1
+# 10 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 2
+# 10 "arch/arm64/boot/dts/sprd/sc9860.dtsi" 2
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/input/input.h" 1
+# 13 "./scripts/dtc/include-prefixes/dt-bindings/input/input.h"
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/input/linux-event-codes.h" 1
+# 14 "./scripts/dtc/include-prefixes/dt-bindings/input/input.h" 2
+# 11 "arch/arm64/boot/dts/sprd/sc9860.dtsi" 2
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h" 1
+# 12 "arch/arm64/boot/dts/sprd/sc9860.dtsi" 2
+# 1 "arch/arm64/boot/dts/sprd/whale2.dtsi" 1
+
+
+
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/clock/sprd,sc9860-clk.h" 1
+# 10 "arch/arm64/boot/dts/sprd/whale2.dtsi" 2
+
+/ {
+ interrupt-parent = <&gic>;
+ #address-cells = <2>;
+ #size-cells = <2>;
+
+ soc: soc {
+  compatible = "simple-bus";
+  #address-cells = <2>;
+  #size-cells = <2>;
+  ranges;
+
+  ap_ahb_regs: syscon@20210000 {
+   compatible = "syscon";
+   reg = <0 0x20210000 0 0x10000>;
+  };
+
+  pmu_regs: syscon@402b0000 {
+   compatible = "syscon";
+   reg = <0 0x402b0000 0 0x10000>;
+  };
+
+  aon_regs: syscon@402e0000 {
+   compatible = "syscon";
+   reg = <0 0x402e0000 0 0x10000>;
+  };
+
+  ana_regs: syscon@40400000 {
+   compatible = "syscon";
+   reg = <0 0x40400000 0 0x10000>;
+  };
+
+  agcp_regs: syscon@415e0000 {
+   compatible = "syscon";
+   reg = <0 0x415e0000 0 0x1000000>;
+  };
+
+  vsp_regs: syscon@61100000 {
+   compatible = "syscon";
+   reg = <0 0x61100000 0 0x10000>;
+  };
+
+  cam_regs: syscon@62100000 {
+   compatible = "syscon";
+   reg = <0 0x62100000 0 0x10000>;
+  };
+
+  disp_regs: syscon@63100000 {
+   compatible = "syscon";
+   reg = <0 0x63100000 0 0x10000>;
+  };
+
+  ap_apb_regs: syscon@70b00000 {
+   compatible = "syscon";
+   reg = <0 0x70b00000 0 0x40000>;
+  };
+
+  ap-apb {
+   compatible = "simple-bus";
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0 0x0 0x70000000 0x10000000>;
+
+   uart0: serial@0 {
+    compatible = "sprd,sc9860-uart",
+          "sprd,sc9836-uart";
+    reg = <0x0 0x100>;
+    interrupts = <0 2 4>;
+    clock-names = "enable", "uart", "source";
+    clocks = <&apapb_gate 14>,
+           <&ap_clk 2>, <&ext_26m>;
+    status = "disabled";
+   };
+
+   uart1: serial@100000 {
+    compatible = "sprd,sc9860-uart",
+          "sprd,sc9836-uart";
+    reg = <0x100000 0x100>;
+    interrupts = <0 3 4>;
+    clock-names = "enable", "uart", "source";
+    clocks = <&apapb_gate 15>,
+           <&ap_clk 3>, <&ext_26m>;
+    status = "disabled";
+   };
+
+   uart2: serial@200000 {
+    compatible = "sprd,sc9860-uart",
+          "sprd,sc9836-uart";
+    reg = <0x200000 0x100>;
+    interrupts = <0 4 4>;
+    clock-names = "enable", "uart", "source";
+    clocks = <&apapb_gate 16>,
+           <&ap_clk 4>, <&ext_26m>;
+    status = "disabled";
+   };
+
+   uart3: serial@300000 {
+    compatible = "sprd,sc9860-uart",
+          "sprd,sc9836-uart";
+    reg = <0x300000 0x100>;
+    interrupts = <0 5 4>;
+    clock-names = "enable", "uart", "source";
+    clocks = <&apapb_gate 17>,
+           <&ap_clk 5>, <&ext_26m>;
+    status = "disabled";
+   };
+  };
+
+  ap-ahb {
+   compatible = "simple-bus";
+   #address-cells = <2>;
+   #size-cells = <2>;
+   ranges;
+
+   ap_dma: dma-controller@20100000 {
+    compatible = "sprd,sc9860-dma";
+    reg = <0 0x20100000 0 0x4000>;
+    interrupts = <0 42 4>;
+    #dma-cells = <1>;
+    #dma-channels = <32>;
+    clock-names = "enable";
+    clocks = <&apahb_gate 3>;
+   };
+
+   sdio3: sdio@50430000 {
+    compatible = "sprd,sdhci-r11";
+    reg = <0 0x50430000 0 0x1000>;
+    interrupts = <0 41 4>;
+
+    clock-names = "sdio", "enable", "2x_enable";
+    clocks = <&aon_prediv 12>,
+           <&apahb_gate 7>,
+           <&aon_gate 67>;
+    assigned-clocks = <&aon_prediv 12>;
+    assigned-clock-parents = <&clk_l0_409m6>;
+
+    sprd,phy-delay-mmc-hs400 = <0x44 0x7f 0x2e 0x2e>;
+    sprd,phy-delay-mmc-hs200 = <0x0 0x8c 0x8c 0x8c>;
+    sprd,phy-delay-mmc-ddr52 = <0x3f 0x75 0x14 0x14>;
+    sprd,phy-delay-mmc-hs400es = <0x3f 0x3f 0x2e 0x2e>;
+    vmmc-supply = <&vddemmccore>;
+    bus-width = <8>;
+    non-removable;
+    no-sdio;
+    no-sd;
+    cap-mmc-hw-reset;
+    mmc-hs400-enhanced-strobe;
+    mmc-hs400-1_8v;
+    mmc-hs200-1_8v;
+    mmc-ddr-1_8v;
+   };
+  };
+
+  aon {
+   compatible = "simple-bus";
+   #address-cells = <2>;
+   #size-cells = <2>;
+   ranges;
+
+   adi_bus: spi@40030000 {
+    compatible = "sprd,sc9860-adi";
+    reg = <0 0x40030000 0 0x10000>;
+    hwlocks = <&hwlock 0>;
+    hwlock-names = "adi";
+    #address-cells = <1>;
+    #size-cells = <0>;
+   };
+
+   timer@40050000 {
+    compatible = "sprd,sc9860-timer";
+    reg = <0 0x40050000 0 0x20>;
+    interrupts = <0 26 4>;
+    clocks = <&ext_32k>;
+   };
+
+   timer@40050020 {
+    compatible = "sprd,sc9860-suspend-timer";
+    reg = <0 0x40050020 0 0x20>;
+    clocks = <&ext_32k>;
+   };
+
+   hwlock: hwspinlock@40500000 {
+    compatible = "sprd,hwspinlock-r3p0";
+    reg = <0 0x40500000 0 0x1000>;
+    #hwlock-cells = <1>;
+    clock-names = "enable";
+    clocks = <&aon_gate 22>;
+   };
+
+   eic_debounce: gpio@40210000 {
+    compatible = "sprd,sc9860-eic-debounce";
+    reg = <0 0x40210000 0 0x80>;
+    gpio-controller;
+    #gpio-cells = <2>;
+    interrupt-controller;
+    #interrupt-cells = <2>;
+    interrupts = <0 52 4>;
+   };
+
+   eic_latch: gpio@40210080 {
+    compatible = "sprd,sc9860-eic-latch";
+    reg = <0 0x40210080 0 0x20>;
+    gpio-controller;
+    #gpio-cells = <2>;
+    interrupt-controller;
+    #interrupt-cells = <2>;
+    interrupts = <0 52 4>;
+   };
+
+   eic_async: gpio@402100a0 {
+    compatible = "sprd,sc9860-eic-async";
+    reg = <0 0x402100a0 0 0x20>;
+    gpio-controller;
+    #gpio-cells = <2>;
+    interrupt-controller;
+    #interrupt-cells = <2>;
+    interrupts = <0 52 4>;
+   };
+
+   eic_sync: gpio@402100c0 {
+    compatible = "sprd,sc9860-eic-sync";
+    reg = <0 0x402100c0 0 0x20>;
+    gpio-controller;
+    #gpio-cells = <2>;
+    interrupt-controller;
+    #interrupt-cells = <2>;
+    interrupts = <0 52 4>;
+   };
+
+   ap_gpio: gpio@40280000 {
+    compatible = "sprd,sc9860-gpio";
+    reg = <0 0x40280000 0 0x1000>;
+    gpio-controller;
+    #gpio-cells = <2>;
+    interrupt-controller;
+    #interrupt-cells = <2>;
+    interrupts = <0 50 4>;
+   };
+
+   pin_controller: pinctrl@402a0000 {
+    compatible = "sprd,sc9860-pinctrl";
+    reg = <0 0x402a0000 0 0x10000>;
+   };
+
+   watchdog@40310000 {
+    compatible = "sprd,sp9860-wdt";
+    reg = <0 0x40310000 0 0x1000>;
+    interrupts = <0 61 4>;
+    timeout-sec = <12>;
+    clock-names = "enable", "rtc_enable";
+    clocks = <&aon_gate 40>,
+           <&aon_gate 76>;
+   };
+  };
+
+  agcp {
+   compatible = "simple-bus";
+   #address-cells = <2>;
+   #size-cells = <2>;
+   ranges;
+
+   agcp_dma: dma-controller@41580000 {
+    compatible = "sprd,sc9860-dma";
+    reg = <0 0x41580000 0 0x4000>;
+    #dma-cells = <1>;
+    #dma-channels = <32>;
+    clock-names = "enable", "ashb_eb";
+    clocks = <&agcp_gate 6>,
+           <&agcp_gate 14>;
+   };
+  };
+ };
+
+ ext_32k: ext_32k {
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-frequency = <32768>;
+  clock-output-names = "ext-32k";
+ };
+
+ ext_26m: ext_26m {
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-frequency = <26000000>;
+  clock-output-names = "ext-26m";
+ };
+
+ ext_rco_100m: ext_rco_100m {
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-frequency = <100000000>;
+  clock-output-names = "ext-rco-100m";
+ };
+
+ clk_l0_409m6: clk_l0_409m6 {
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-frequency = <409600000>;
+  clock-output-names = "ext-409m6";
+ };
+};
+# 13 "arch/arm64/boot/dts/sprd/sc9860.dtsi" 2
+
+/ {
+ cpus {
+  #address-cells = <2>;
+  #size-cells = <0>;
+
+  cpu-map {
+   cluster0 {
+    core0 {
+     cpu = <&CPU0>;
+    };
+    core1 {
+     cpu = <&CPU1>;
+    };
+    core2 {
+     cpu = <&CPU2>;
+    };
+    core3 {
+     cpu = <&CPU3>;
+    };
+   };
+
+   cluster1 {
+    core0 {
+     cpu = <&CPU4>;
+    };
+    core1 {
+     cpu = <&CPU5>;
+    };
+    core2 {
+     cpu = <&CPU6>;
+    };
+    core3 {
+     cpu = <&CPU7>;
+    };
+   };
+  };
+
+  CPU0: cpu@530000 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x530000>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD &CLUSTER_PD>;
+  };
+
+  CPU1: cpu@530001 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x530001>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD &CLUSTER_PD>;
+  };
+
+  CPU2: cpu@530002 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x530002>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD &CLUSTER_PD>;
+  };
+
+  CPU3: cpu@530003 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x530003>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD &CLUSTER_PD>;
+  };
+
+  CPU4: cpu@530100 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x530100>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD &CLUSTER_PD>;
+  };
+
+  CPU5: cpu@530101 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x530101>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD &CLUSTER_PD>;
+  };
+
+  CPU6: cpu@530102 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x530102>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD &CLUSTER_PD>;
+  };
+
+  CPU7: cpu@530103 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x530103>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD &CLUSTER_PD>;
+  };
+ };
+
+ idle-states{
+  entry-method = "psci";
+
+  CORE_PD: core_pd {
+   compatible = "arm,idle-state";
+   entry-latency-us = <1000>;
+   exit-latency-us = <700>;
+   min-residency-us = <2500>;
+   local-timer-stop;
+   arm,psci-suspend-param = <0x00010002>;
+  };
+
+  CLUSTER_PD: cluster_pd {
+   compatible = "arm,idle-state";
+   entry-latency-us = <1000>;
+   exit-latency-us = <1000>;
+   min-residency-us = <3000>;
+   local-timer-stop;
+   arm,psci-suspend-param = <0x01010003>;
+  };
+ };
+
+ gic: interrupt-controller@12001000 {
+  compatible = "arm,gic-400";
+  reg = <0 0x12001000 0 0x1000>,
+        <0 0x12002000 0 0x2000>,
+        <0 0x12004000 0 0x2000>,
+        <0 0x12006000 0 0x2000>;
+  #interrupt-cells = <3>;
+  interrupt-controller;
+  interrupts = <1 9 ((((1 << (8)) - 1) << 8)
+     | 4)>;
+ };
+
+ psci {
+  compatible = "arm,psci-0.2";
+  method = "smc";
+ };
+
+ timer {
+  compatible = "arm,armv8-timer";
+  interrupts = <1 13 ((((1 << (8)) - 1) << 8)
+      | 8)>,
+        <1 14 ((((1 << (8)) - 1) << 8)
+      | 8)>,
+        <1 11 ((((1 << (8)) - 1) << 8)
+      | 8)>,
+        <1 10 ((((1 << (8)) - 1) << 8)
+      | 8)>;
+ };
+
+ pmu {
+  compatible = "arm,cortex-a53-pmu", "arm,armv8-pmuv3";
+  interrupts = <0 122 4>,
+        <0 123 4>,
+        <0 124 4>,
+        <0 125 4>,
+        <0 154 4>,
+        <0 155 4>,
+        <0 156 4>,
+        <0 157 4>;
+  interrupt-affinity = <&CPU0>,
+         <&CPU1>,
+         <&CPU2>,
+         <&CPU3>,
+         <&CPU4>,
+         <&CPU5>,
+         <&CPU6>,
+         <&CPU7>;
+ };
+
+ soc {
+  pmu_gate: pmu-gate {
+   compatible = "sprd,sc9860-pmu-gate";
+   sprd,syscon = <&pmu_regs>;
+   clocks = <&ext_26m>;
+   #clock-cells = <1>;
+  };
+
+  pll: pll {
+   compatible = "sprd,sc9860-pll";
+   sprd,syscon = <&ana_regs>;
+   clocks = <&pmu_gate 0>;
+   #clock-cells = <1>;
+  };
+
+  ap_clk: clock-controller@20000000 {
+   compatible = "sprd,sc9860-ap-clk";
+   reg = <0 0x20000000 0 0x400>;
+   clocks = <&ext_26m>, <&pll 0>,
+     <&pmu_gate 0>;
+   #clock-cells = <1>;
+  };
+
+  aon_prediv: aon-prediv {
+   compatible = "sprd,sc9860-aon-prediv";
+   reg = <0 0x402d0000 0 0x400>;
+   clocks = <&ext_26m>, <&pll 0>,
+     <&pmu_gate 0>;
+   #clock-cells = <1>;
+  };
+
+  apahb_gate: apahb-gate {
+   compatible = "sprd,sc9860-apahb-gate";
+   sprd,syscon = <&ap_ahb_regs>;
+   clocks = <&aon_prediv 0>;
+   #clock-cells = <1>;
+  };
+
+  aon_gate: aon-gate {
+   compatible = "sprd,sc9860-aon-gate";
+   sprd,syscon = <&aon_regs>;
+   clocks = <&aon_prediv 0>;
+   #clock-cells = <1>;
+  };
+
+  aonsecure_clk: clock-controller@40880000 {
+   compatible = "sprd,sc9860-aonsecure-clk";
+   reg = <0 0x40880000 0 0x400>;
+   clocks = <&ext_26m>, <&pll 0>;
+   #clock-cells = <1>;
+  };
+
+  agcp_gate: agcp-gate {
+   compatible = "sprd,sc9860-agcp-gate";
+   sprd,syscon = <&agcp_regs>;
+   clocks = <&aon_prediv 0>;
+   #clock-cells = <1>;
+  };
+
+  gpu_clk: clock-controller@60200000 {
+   compatible = "sprd,sc9860-gpu-clk";
+   reg = <0 0x60200000 0 0x400>;
+   clocks = <&pll 0>;
+   #clock-cells = <1>;
+  };
+
+  vsp_clk: clock-controller@61000000 {
+   compatible = "sprd,sc9860-vsp-clk";
+   reg = <0 0x61000000 0 0x400>;
+   clocks = <&ext_26m>, <&pll 0>;
+   #clock-cells = <1>;
+  };
+
+  vsp_gate: vsp-gate {
+   compatible = "sprd,sc9860-vsp-gate";
+   sprd,syscon = <&vsp_regs>;
+   clocks = <&vsp_clk 0>;
+   #clock-cells = <1>;
+  };
+
+  cam_clk: clock-controller@62000000 {
+   compatible = "sprd,sc9860-cam-clk";
+   reg = <0 0x62000000 0 0x4000>;
+   clocks = <&ext_26m>, <&pll 0>;
+   #clock-cells = <1>;
+  };
+
+  cam_gate: cam-gate {
+   compatible = "sprd,sc9860-cam-gate";
+   sprd,syscon = <&cam_regs>;
+   clocks = <&cam_clk 0>;
+   #clock-cells = <1>;
+  };
+
+  disp_clk: clock-controller@63000000 {
+   compatible = "sprd,sc9860-disp-clk";
+   reg = <0 0x63000000 0 0x400>;
+   clocks = <&ext_26m>, <&pll 0>;
+   #clock-cells = <1>;
+  };
+
+  disp_gate: disp-gate {
+   compatible = "sprd,sc9860-disp-gate";
+   sprd,syscon = <&disp_regs>;
+   clocks = <&disp_clk 0>;
+   #clock-cells = <1>;
+  };
+
+  apapb_gate: apapb-gate {
+   compatible = "sprd,sc9860-apapb-gate";
+   sprd,syscon = <&ap_apb_regs>;
+   clocks = <&ap_clk 0>;
+   #clock-cells = <1>;
+  };
+
+  funnel@10001000 {
+   compatible = "arm,coresight-dynamic-funnel", "arm,primecell";
+   reg = <0 0x10001000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+   out-ports {
+    port {
+     soc_funnel_out_port: endpoint {
+      remote-endpoint = <&etb_in>;
+     };
+    };
+   };
+
+   in-ports {
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    port@0 {
+     reg = <0>;
+     soc_funnel_in_port0: endpoint {
+      remote-endpoint =
+      <&main_funnel_out_port>;
+     };
+    };
+
+    port@4 {
+     reg = <4>;
+     soc_funnel_in_port1: endpoint {
+      remote-endpoint =
+       <&stm_out_port>;
+     };
+    };
+   };
+  };
+
+  etb@10003000 {
+   compatible = "arm,coresight-tmc", "arm,primecell";
+   reg = <0 0x10003000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+   out-ports {
+    port {
+     etb_in: endpoint {
+      remote-endpoint =
+       <&soc_funnel_out_port>;
+     };
+    };
+   };
+  };
+
+  stm@10006000 {
+   compatible = "arm,coresight-stm", "arm,primecell";
+   reg = <0 0x10006000 0 0x1000>,
+         <0 0x01000000 0 0x180000>;
+   reg-names = "stm-base", "stm-stimulus-base";
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+   out-ports {
+    port {
+     stm_out_port: endpoint {
+      remote-endpoint =
+       <&soc_funnel_in_port1>;
+     };
+    };
+   };
+  };
+
+  funnel@11001000 {
+   compatible = "arm,coresight-dynamic-funnel", "arm,primecell";
+   reg = <0 0x11001000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+   out-ports {
+    port {
+     cluster0_funnel_out_port: endpoint {
+      remote-endpoint =
+       <&cluster0_etf_in>;
+     };
+    };
+   };
+
+   in-ports {
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    port@0 {
+     reg = <0>;
+     cluster0_funnel_in_port0: endpoint {
+      remote-endpoint = <&etm0_out>;
+     };
+    };
+
+    port@1 {
+     reg = <1>;
+     cluster0_funnel_in_port1: endpoint {
+      remote-endpoint = <&etm1_out>;
+     };
+    };
+
+    port@2 {
+     reg = <2>;
+     cluster0_funnel_in_port2: endpoint {
+      remote-endpoint = <&etm2_out>;
+     };
+    };
+
+    port@4 {
+     reg = <4>;
+     cluster0_funnel_in_port3: endpoint {
+      remote-endpoint = <&etm3_out>;
+     };
+    };
+   };
+  };
+
+  funnel@11002000 {
+   compatible = "arm,coresight-dynamic-funnel", "arm,primecell";
+   reg = <0 0x11002000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+   out-ports {
+    port {
+     cluster1_funnel_out_port: endpoint {
+      remote-endpoint =
+       <&cluster1_etf_in>;
+     };
+    };
+   };
+
+   in-ports {
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    port@0 {
+     reg = <0>;
+     cluster1_funnel_in_port0: endpoint {
+      remote-endpoint = <&etm4_out>;
+     };
+    };
+
+    port@1 {
+     reg = <1>;
+     cluster1_funnel_in_port1: endpoint {
+      remote-endpoint = <&etm5_out>;
+     };
+    };
+
+    port@2 {
+     reg = <2>;
+     cluster1_funnel_in_port2: endpoint {
+      remote-endpoint = <&etm6_out>;
+     };
+    };
+
+    port@3 {
+     reg = <3>;
+     cluster1_funnel_in_port3: endpoint {
+      remote-endpoint = <&etm7_out>;
+     };
+    };
+   };
+  };
+
+  etf@11003000 {
+   compatible = "arm,coresight-tmc", "arm,primecell";
+   reg = <0 0x11003000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     cluster0_etf_out: endpoint {
+      remote-endpoint =
+      <&main_funnel_in_port0>;
+     };
+    };
+   };
+
+   in-ports {
+    port {
+     cluster0_etf_in: endpoint {
+      remote-endpoint =
+      <&cluster0_funnel_out_port>;
+     };
+    };
+   };
+  };
+
+  etf@11004000 {
+   compatible = "arm,coresight-tmc", "arm,primecell";
+   reg = <0 0x11004000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     cluster1_etf_out: endpoint {
+      remote-endpoint =
+      <&main_funnel_in_port1>;
+     };
+    };
+   };
+
+   in-ports {
+    port {
+     cluster1_etf_in: endpoint {
+      remote-endpoint =
+      <&cluster1_funnel_out_port>;
+     };
+    };
+   };
+  };
+
+  funnel@11005000 {
+   compatible = "arm,coresight-dynamic-funnel", "arm,primecell";
+   reg = <0 0x11005000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     main_funnel_out_port: endpoint {
+      remote-endpoint =
+       <&soc_funnel_in_port0>;
+     };
+    };
+   };
+
+   in-ports {
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    port@0 {
+     reg = <0>;
+     main_funnel_in_port0: endpoint {
+      remote-endpoint =
+       <&cluster0_etf_out>;
+     };
+    };
+
+    port@1 {
+     reg = <1>;
+     main_funnel_in_port1: endpoint {
+      remote-endpoint =
+       <&cluster1_etf_out>;
+     };
+    };
+   };
+  };
+
+  etm@11440000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x11440000 0 0x1000>;
+   cpu = <&CPU0>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm0_out: endpoint {
+      remote-endpoint =
+       <&cluster0_funnel_in_port0>;
+     };
+    };
+   };
+  };
+
+  etm@11540000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x11540000 0 0x1000>;
+   cpu = <&CPU1>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm1_out: endpoint {
+      remote-endpoint =
+       <&cluster0_funnel_in_port1>;
+     };
+    };
+   };
+  };
+
+  etm@11640000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x11640000 0 0x1000>;
+   cpu = <&CPU2>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm2_out: endpoint {
+      remote-endpoint =
+       <&cluster0_funnel_in_port2>;
+     };
+    };
+   };
+  };
+
+  etm@11740000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x11740000 0 0x1000>;
+   cpu = <&CPU3>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm3_out: endpoint {
+      remote-endpoint =
+       <&cluster0_funnel_in_port3>;
+     };
+    };
+   };
+  };
+
+  etm@11840000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x11840000 0 0x1000>;
+   cpu = <&CPU4>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm4_out: endpoint {
+      remote-endpoint =
+       <&cluster1_funnel_in_port0>;
+     };
+    };
+   };
+  };
+
+  etm@11940000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x11940000 0 0x1000>;
+   cpu = <&CPU5>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm5_out: endpoint {
+      remote-endpoint =
+       <&cluster1_funnel_in_port1>;
+     };
+    };
+   };
+  };
+
+  etm@11a40000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x11a40000 0 0x1000>;
+   cpu = <&CPU6>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm6_out: endpoint {
+      remote-endpoint =
+       <&cluster1_funnel_in_port2>;
+     };
+    };
+   };
+  };
+
+  etm@11b40000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x11b40000 0 0x1000>;
+   cpu = <&CPU7>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm7_out: endpoint {
+      remote-endpoint =
+       <&cluster1_funnel_in_port3>;
+     };
+    };
+   };
+  };
+
+  gpio-keys {
+   compatible = "gpio-keys";
+
+   key-volumedown {
+    label = "Volume Down Key";
+    linux,code = <114>;
+    gpios = <&eic_debounce 2 1>;
+    debounce-interval = <2>;
+    wakeup-source;
+   };
+
+   key-volumeup {
+    label = "Volume Up Key";
+    linux,code = <115>;
+    gpios = <&pmic_eic 10 0>;
+    debounce-interval = <2>;
+    wakeup-source;
+   };
+
+   key-power {
+    label = "Power Key";
+    linux,code = <116>;
+    gpios = <&pmic_eic 1 0>;
+    debounce-interval = <2>;
+    wakeup-source;
+   };
+  };
+ };
+};
+# 12 "arch/arm64/boot/dts/sprd/sp9860g-1h10.dts" 2
+# 1 "arch/arm64/boot/dts/sprd/sc2731.dtsi" 1
+
+
+
+
+
+
+
+
+&adi_bus {
+ sc2731_pmic: pmic@0 {
+  compatible = "sprd,sc2731";
+  reg = <0>;
+  spi-max-frequency = <26000000>;
+  interrupts = <0 31 4>;
+  interrupt-controller;
+  #interrupt-cells = <1>;
+  #address-cells = <1>;
+  #size-cells = <0>;
+
+  charger@0 {
+   compatible = "sprd,sc2731-charger";
+   reg = <0x0>;
+   monitored-battery = <&bat>;
+  };
+
+  led-controller@200 {
+   compatible = "sprd,sc2731-bltc";
+   reg = <0x200>;
+   #address-cells = <1>;
+   #size-cells = <0>;
+
+   led@0 {
+    label = "red";
+    reg = <0x0>;
+   };
+
+   led@1 {
+    label = "green";
+    reg = <0x1>;
+   };
+
+   led@2 {
+    label = "blue";
+    reg = <0x2>;
+   };
+  };
+
+  rtc@280 {
+   compatible = "sprd,sc2731-rtc";
+   reg = <0x280>;
+   interrupt-parent = <&sc2731_pmic>;
+   interrupts = <2>;
+  };
+
+  pmic_eic: gpio@300 {
+   compatible = "sprd,sc2731-eic";
+   reg = <0x300>;
+   interrupt-parent = <&sc2731_pmic>;
+   interrupts = <5>;
+   gpio-controller;
+   #gpio-cells = <2>;
+   interrupt-controller;
+   #interrupt-cells = <2>;
+  };
+
+  efuse@380 {
+   compatible = "sprd,sc2731-efuse";
+   reg = <0x380>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   hwlocks = <&hwlock 12>;
+
+   fgu_calib: calib@6 {
+    reg = <0x6 0x2>;
+    bits = <0 9>;
+   };
+
+   adc_big_scale: calib@24 {
+    reg = <0x24 0x2>;
+   };
+
+   adc_small_scale: calib@26 {
+    reg = <0x26 0x2>;
+   };
+  };
+
+  pmic_adc: adc@480 {
+   compatible = "sprd,sc2731-adc";
+   reg = <0x480>;
+   interrupt-parent = <&sc2731_pmic>;
+   interrupts = <0>;
+   #io-channel-cells = <1>;
+   hwlocks = <&hwlock 4>;
+   nvmem-cell-names = "big_scale_calib", "small_scale_calib";
+   nvmem-cells = <&adc_big_scale>, <&adc_small_scale>;
+  };
+
+  fgu@a00 {
+   compatible = "sprd,sc2731-fgu";
+   reg = <0xa00>;
+   bat-detect-gpio = <&pmic_eic 9 0>;
+   io-channels = <&pmic_adc 3>, <&pmic_adc 6>;
+   io-channel-names = "bat-temp", "charge-vol";
+   monitored-battery = <&bat>;
+   nvmem-cell-names = "fgu_calib";
+   nvmem-cells = <&fgu_calib>;
+   interrupt-parent = <&sc2731_pmic>;
+   interrupts = <4>;
+  };
+
+  vibrator@ec8 {
+   compatible = "sprd,sc2731-vibrator";
+   reg = <0xec8>;
+  };
+
+  regulators {
+   compatible = "sprd,sc2731-regulator";
+
+   vddarm0: BUCK_CPU0 {
+    regulator-name = "vddarm0";
+    regulator-min-microvolt = <400000>;
+    regulator-max-microvolt = <1996875>;
+    regulator-ramp-delay = <25000>;
+    regulator-always-on;
+   };
+
+   vddarm1: BUCK_CPU1 {
+    regulator-name = "vddarm1";
+    regulator-min-microvolt = <400000>;
+    regulator-max-microvolt = <1996875>;
+    regulator-ramp-delay = <25000>;
+    regulator-always-on;
+   };
+
+   dcdcrf: BUCK_RF {
+    regulator-name = "dcdcrf";
+    regulator-min-microvolt = <600000>;
+    regulator-max-microvolt = <2196875>;
+    regulator-ramp-delay = <25000>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-always-on;
+   };
+
+   vddcama0: LDO_CAMA0 {
+    regulator-name = "vddcama0";
+    regulator-min-microvolt = <1200000>;
+    regulator-max-microvolt = <3750000>;
+    regulator-enable-ramp-delay = <100>;
+   };
+
+   vddcama1: LDO_CAMA1 {
+    regulator-name = "vddcama1";
+    regulator-min-microvolt = <1200000>;
+    regulator-max-microvolt = <3750000>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+   };
+
+   vddcammot: LDO_CAMMOT {
+    regulator-name = "vddcammot";
+    regulator-min-microvolt = <1200000>;
+    regulator-max-microvolt = <3750000>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+   };
+
+   vddvldo: LDO_VLDO {
+    regulator-name = "vddvldo";
+    regulator-min-microvolt = <1200000>;
+    regulator-max-microvolt = <3750000>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+   };
+
+   vddemmccore: LDO_EMMCCORE {
+    regulator-name = "vddemmccore";
+    regulator-min-microvolt = <1200000>;
+    regulator-max-microvolt = <3750000>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+    regulator-boot-on;
+   };
+
+   vddsdcore: LDO_SDCORE {
+    regulator-name = "vddsdcore";
+    regulator-min-microvolt = <1200000>;
+    regulator-max-microvolt = <3750000>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+   };
+
+   vddsdio: LDO_SDIO {
+    regulator-name = "vddsdio";
+    regulator-min-microvolt = <1200000>;
+    regulator-max-microvolt = <3750000>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+   };
+
+   vddwifipa: LDO_WIFIPA {
+    regulator-name = "vddwifipa";
+    regulator-min-microvolt = <1200000>;
+    regulator-max-microvolt = <3750000>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+   };
+
+   vddusb33: LDO_USB33 {
+    regulator-name = "vddusb33";
+    regulator-min-microvolt = <1200000>;
+    regulator-max-microvolt = <3750000>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+   };
+
+   vddcamd0: LDO_CAMD0 {
+    regulator-name = "vddcamd0";
+    regulator-min-microvolt = <1000000>;
+    regulator-max-microvolt = <1793750>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+   };
+
+   vddcamd1: LDO_CAMD1 {
+    regulator-name = "vddcamd1";
+    regulator-min-microvolt = <1000000>;
+    regulator-max-microvolt = <1793750>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+   };
+
+   vddcon: LDO_CON {
+    regulator-name = "vddcon";
+    regulator-min-microvolt = <1000000>;
+    regulator-max-microvolt = <1793750>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+   };
+
+   vddcamio: LDO_CAMIO {
+    regulator-name = "vddcamio";
+    regulator-min-microvolt = <1000000>;
+    regulator-max-microvolt = <1793750>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+   };
+
+   vddsram: LDO_SRAM {
+    regulator-name = "vddsram";
+    regulator-min-microvolt = <1000000>;
+    regulator-max-microvolt = <1793750>;
+    regulator-enable-ramp-delay = <100>;
+    regulator-ramp-delay = <25000>;
+    regulator-always-on;
+   };
+  };
+ };
+};
+# 13 "arch/arm64/boot/dts/sprd/sp9860g-1h10.dts" 2
+
+/ {
+ model = "Spreadtrum SP9860G 3GFHD Board";
+
+ compatible = "sprd,sp9860g-1h10", "sprd,sc9860";
+
+ aliases {
+  serial0 = &uart0;
+  serial1 = &uart1;
+  serial2 = &uart2;
+  serial3 = &uart3;
+  spi0 = &adi_bus;
+ };
+
+ memory{
+  device_type = "memory";
+  reg = <0x0 0x80000000 0 0x60000000>,
+        <0x1 0x80000000 0 0x60000000>;
+ };
+
+ chosen {
+  stdout-path = "serial1:115200n8";
+ };
+
+ reserved-memory {
+  #address-cells = <2>;
+  #size-cells = <2>;
+  ranges;
+ };
+
+ bat: battery {
+  compatible = "simple-battery";
+  charge-full-design-microamp-hours = <1900000>;
+  charge-term-current-microamp = <120000>;
+  constant_charge_voltage_max_microvolt = <4350000>;
+  internal-resistance-micro-ohms = <250000>;
+  ocv-capacity-celsius = <20>;
+  ocv-capacity-table-0 = <4185000 100>, <4113000 95>, <4066000 90>,
+   <4022000 85>, <3983000 80>, <3949000 75>,
+   <3917000 70>, <3889000 65>, <3864000 60>,
+   <3835000 55>, <3805000 50>, <3787000 45>,
+   <3777000 40>, <3773000 35>, <3770000 30>,
+   <3765000 25>, <3752000 20>, <3724000 15>,
+   <3680000 10>, <3605000 5>, <3400000 0>;
+ };
+};
+
+&uart0 {
+ status = "okay";
+};
+
+&uart1 {
+ status = "okay";
+};
+
+&uart2 {
+ status = "okay";
+};
+
+&uart3 {
+ status = "okay";
+};

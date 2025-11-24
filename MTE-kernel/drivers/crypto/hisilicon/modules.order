@@ -1,0 +1,4 @@
+drivers/crypto/hisilicon/hpre/hisi_hpre.ko
+drivers/crypto/hisilicon/sec2/hisi_sec2.ko
+drivers/crypto/hisilicon/hisi_qm.ko
+drivers/crypto/hisilicon/zip/hisi_zip.ko

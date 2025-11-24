@@ -1,0 +1,1 @@
+cmd_lib/zstd/zstd_compress.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o lib/zstd/zstd_compress.ko lib/zstd/zstd_compress.o lib/zstd/zstd_compress.mod.o;  true

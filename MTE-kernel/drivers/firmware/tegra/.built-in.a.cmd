@@ -1,0 +1,1 @@
+cmd_drivers/firmware/tegra/built-in.a := rm -f drivers/firmware/tegra/built-in.a; llvm-ar cDPrST drivers/firmware/tegra/built-in.a drivers/firmware/tegra/bpmp.o drivers/firmware/tegra/bpmp-tegra210.o drivers/firmware/tegra/bpmp-tegra186.o drivers/firmware/tegra/bpmp-debugfs.o drivers/firmware/tegra/ivc.o

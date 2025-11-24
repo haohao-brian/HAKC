@@ -1,0 +1,12 @@
+arch/arm64/boot/dts/mediatek/.mt2712-evb.dtb.dts.tmp: \
+  arch/arm64/boot/dts/mediatek/mt2712-evb.dts \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  arch/arm64/boot/dts/mediatek/mt2712e.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/mt2712-clk.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/memory/mt2712-larb-port.h \
+  scripts/dtc/include-prefixes/dt-bindings/phy/phy.h \
+  scripts/dtc/include-prefixes/dt-bindings/power/mt2712-power.h \
+  arch/arm64/boot/dts/mediatek/mt2712-pinfunc.h \
+  scripts/dtc/include-prefixes/dt-bindings/pinctrl/mt65xx.h

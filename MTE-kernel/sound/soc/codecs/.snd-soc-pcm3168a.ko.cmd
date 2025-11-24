@@ -1,0 +1,1 @@
+cmd_sound/soc/codecs/snd-soc-pcm3168a.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/codecs/snd-soc-pcm3168a.ko sound/soc/codecs/snd-soc-pcm3168a.o sound/soc/codecs/snd-soc-pcm3168a.mod.o;  true

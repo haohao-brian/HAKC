@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/bridge/synopsys/dw-hdmi.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/bridge/synopsys/dw-hdmi.ko drivers/gpu/drm/bridge/synopsys/dw-hdmi.o drivers/gpu/drm/bridge/synopsys/dw-hdmi.mod.o;  true

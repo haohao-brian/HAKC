@@ -1,0 +1,1 @@
+cmd_drivers/crypto/caam/caamhash_desc.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/crypto/caam/caamhash_desc.ko drivers/crypto/caam/caamhash_desc.o drivers/crypto/caam/caamhash_desc.mod.o;  true

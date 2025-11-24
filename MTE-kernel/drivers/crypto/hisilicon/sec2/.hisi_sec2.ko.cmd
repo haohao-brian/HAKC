@@ -1,0 +1,1 @@
+cmd_drivers/crypto/hisilicon/sec2/hisi_sec2.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/crypto/hisilicon/sec2/hisi_sec2.ko drivers/crypto/hisilicon/sec2/hisi_sec2.o drivers/crypto/hisilicon/sec2/hisi_sec2.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/hwmon/modules.order := {   echo drivers/hwmon/ina2xx.ko;   echo drivers/hwmon/ina3221.ko;   echo drivers/hwmon/lm90.ko;   echo drivers/hwmon/pwm-fan.ko;   echo drivers/hwmon/raspberrypi-hwmon.ko;   echo drivers/hwmon/sl28cpld-hwmon.ko; :; } | awk '!x[$$0]++' - > drivers/hwmon/modules.order

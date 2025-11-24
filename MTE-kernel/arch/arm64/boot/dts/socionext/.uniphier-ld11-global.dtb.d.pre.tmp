@@ -1,0 +1,7 @@
+arch/arm64/boot/dts/socionext/.uniphier-ld11-global.dtb.dts.tmp: \
+  arch/arm64/boot/dts/socionext/uniphier-ld11-global.dts \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/uniphier-gpio.h \
+  arch/arm64/boot/dts/socionext/uniphier-ld11.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  arch/arm64/boot/dts/socionext/uniphier-pinctrl.dtsi \
+  scripts/dtc/include-prefixes/arm/uniphier-pinctrl.dtsi

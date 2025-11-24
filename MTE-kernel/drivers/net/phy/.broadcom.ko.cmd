@@ -1,0 +1,1 @@
+cmd_drivers/net/phy/broadcom.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/net/phy/broadcom.ko drivers/net/phy/broadcom.o drivers/net/phy/broadcom.mod.o;  true

@@ -1,0 +1,6 @@
+arch/arm64/boot/dts/qcom/.sdm660-xiaomi-lavender.dtb.dts.tmp: \
+  arch/arm64/boot/dts/qcom/sdm660-xiaomi-lavender.dts \
+  arch/arm64/boot/dts/qcom/sdm660.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/qcom,gcc-sdm660.h

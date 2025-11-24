@@ -1,0 +1,1 @@
+cmd_arch/arm64/crypto/sha512-arm64.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o arch/arm64/crypto/sha512-arm64.ko arch/arm64/crypto/sha512-arm64.o arch/arm64/crypto/sha512-arm64.mod.o;  true

@@ -1,0 +1,4 @@
+drivers/iio/adc/max9611.ko
+drivers/iio/adc/qcom-spmi-adc5.ko
+drivers/iio/adc/qcom-vadc-common.ko
+drivers/iio/adc/rockchip_saradc.ko

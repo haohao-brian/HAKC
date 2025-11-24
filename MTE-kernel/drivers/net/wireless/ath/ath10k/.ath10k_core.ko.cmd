@@ -1,0 +1,1 @@
+cmd_drivers/net/wireless/ath/ath10k/ath10k_core.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/net/wireless/ath/ath10k/ath10k_core.ko drivers/net/wireless/ath/ath10k/ath10k_core.o drivers/net/wireless/ath/ath10k/ath10k_core.mod.o;  true

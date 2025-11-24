@@ -1,0 +1,1 @@
+cmd_drivers/net/phy/meson-gxl.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/net/phy/meson-gxl.ko drivers/net/phy/meson-gxl.o drivers/net/phy/meson-gxl.mod.o;  true

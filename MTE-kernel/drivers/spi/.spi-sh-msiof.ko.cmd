@@ -1,0 +1,1 @@
+cmd_drivers/spi/spi-sh-msiof.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/spi/spi-sh-msiof.ko drivers/spi/spi-sh-msiof.o drivers/spi/spi-sh-msiof.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/clk/bcm/built-in.a := rm -f drivers/clk/bcm/built-in.a; llvm-ar cDPrST drivers/clk/bcm/built-in.a drivers/clk/bcm/clk-iproc-armpll.o drivers/clk/bcm/clk-iproc-pll.o drivers/clk/bcm/clk-iproc-asiu.o drivers/clk/bcm/clk-bcm2711-dvp.o drivers/clk/bcm/clk-bcm2835.o drivers/clk/bcm/clk-bcm2835-aux.o drivers/clk/bcm/clk-ns2.o drivers/clk/bcm/clk-sr.o

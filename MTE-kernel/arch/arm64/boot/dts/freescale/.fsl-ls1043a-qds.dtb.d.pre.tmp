@@ -1,0 +1,17 @@
+arch/arm64/boot/dts/freescale/.fsl-ls1043a-qds.dtb.dts.tmp: \
+  arch/arm64/boot/dts/freescale/fsl-ls1043a-qds.dts \
+  arch/arm64/boot/dts/freescale/fsl-ls1043a.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/thermal/thermal.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  arch/arm64/boot/dts/freescale/qoriq-qman-portals.dtsi \
+  arch/arm64/boot/dts/freescale/qoriq-bman-portals.dtsi \
+  arch/arm64/boot/dts/freescale/fsl-ls1043-post.dtsi \
+  arch/arm64/boot/dts/freescale/qoriq-fman3-0.dtsi \
+  arch/arm64/boot/dts/freescale/qoriq-fman3-0-1g-0.dtsi \
+  arch/arm64/boot/dts/freescale/qoriq-fman3-0-1g-1.dtsi \
+  arch/arm64/boot/dts/freescale/qoriq-fman3-0-1g-2.dtsi \
+  arch/arm64/boot/dts/freescale/qoriq-fman3-0-1g-3.dtsi \
+  arch/arm64/boot/dts/freescale/qoriq-fman3-0-1g-4.dtsi \
+  arch/arm64/boot/dts/freescale/qoriq-fman3-0-1g-5.dtsi \
+  arch/arm64/boot/dts/freescale/qoriq-fman3-0-10g-0.dtsi

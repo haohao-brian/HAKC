@@ -1,0 +1,1 @@
+cmd_drivers/interconnect/qcom/icc-smd-rpm.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/interconnect/qcom/icc-smd-rpm.ko drivers/interconnect/qcom/icc-smd-rpm.o drivers/interconnect/qcom/icc-smd-rpm.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/cpufreq/raspberrypi-cpufreq.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/cpufreq/raspberrypi-cpufreq.ko drivers/cpufreq/raspberrypi-cpufreq.o drivers/cpufreq/raspberrypi-cpufreq.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/crypto/allwinner/sun8i-ce/sun8i-ce.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/crypto/allwinner/sun8i-ce/sun8i-ce.o drivers/crypto/allwinner/sun8i-ce/sun8i-ce-core.o drivers/crypto/allwinner/sun8i-ce/sun8i-ce-cipher.o

@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/mxsfb/mxsfb.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/mxsfb/mxsfb.ko drivers/gpu/drm/mxsfb/mxsfb.o drivers/gpu/drm/mxsfb/mxsfb.mod.o;  true

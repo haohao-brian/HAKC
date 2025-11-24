@@ -1,0 +1,1 @@
+cmd_drivers/clk/sprd/built-in.a := rm -f drivers/clk/sprd/built-in.a; llvm-ar cDPrST drivers/clk/sprd/built-in.a drivers/clk/sprd/common.o drivers/clk/sprd/gate.o drivers/clk/sprd/mux.o drivers/clk/sprd/div.o drivers/clk/sprd/composite.o drivers/clk/sprd/pll.o drivers/clk/sprd/sc9860-clk.o drivers/clk/sprd/sc9863a-clk.o

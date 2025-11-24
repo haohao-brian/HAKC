@@ -1,0 +1,1 @@
+cmd_drivers/media/rc/keymaps/rc-kworld-315u.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/keymaps/rc-kworld-315u.ko drivers/media/rc/keymaps/rc-kworld-315u.o drivers/media/rc/keymaps/rc-kworld-315u.mod.o;  true

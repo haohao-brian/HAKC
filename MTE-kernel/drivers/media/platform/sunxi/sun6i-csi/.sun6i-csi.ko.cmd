@@ -1,0 +1,1 @@
+cmd_drivers/media/platform/sunxi/sun6i-csi/sun6i-csi.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/platform/sunxi/sun6i-csi/sun6i-csi.ko drivers/media/platform/sunxi/sun6i-csi/sun6i-csi.o drivers/media/platform/sunxi/sun6i-csi/sun6i-csi.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/slimbus/slim-qcom-ctrl.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/slimbus/slim-qcom-ctrl.ko drivers/slimbus/slim-qcom-ctrl.o drivers/slimbus/slim-qcom-ctrl.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/omapdrm/modules.order := {   cat drivers/gpu/drm/omapdrm/dss/modules.order;   cat drivers/gpu/drm/omapdrm/displays/modules.order; :; } | awk '!x[$$0]++' - > drivers/gpu/drm/omapdrm/modules.order

@@ -1,0 +1,1 @@
+cmd_drivers/crypto/hisilicon/zip/hisi_zip.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/crypto/hisilicon/zip/hisi_zip.o drivers/crypto/hisilicon/zip/zip_main.o drivers/crypto/hisilicon/zip/zip_crypto.o

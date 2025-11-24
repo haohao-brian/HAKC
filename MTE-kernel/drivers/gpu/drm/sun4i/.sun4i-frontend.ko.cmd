@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/sun4i/sun4i-frontend.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/sun4i/sun4i-frontend.ko drivers/gpu/drm/sun4i/sun4i-frontend.o drivers/gpu/drm/sun4i/sun4i-frontend.mod.o;  true

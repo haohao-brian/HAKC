@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/sun4i/sun4i-drm-hdmi.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/gpu/drm/sun4i/sun4i-drm-hdmi.o drivers/gpu/drm/sun4i/sun4i_hdmi_ddc_clk.o drivers/gpu/drm/sun4i/sun4i_hdmi_enc.o drivers/gpu/drm/sun4i/sun4i_hdmi_i2c.o drivers/gpu/drm/sun4i/sun4i_hdmi_tmds_clk.o

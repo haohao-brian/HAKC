@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/sun4i/sun4i-backend.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/gpu/drm/sun4i/sun4i-backend.o drivers/gpu/drm/sun4i/sun4i_backend.o drivers/gpu/drm/sun4i/sun4i_layer.o

@@ -1,0 +1,1 @@
+cmd_drivers/media/i2c/modules.order := {   echo drivers/media/i2c/ov5645.ko;   echo drivers/media/i2c/ir-kbd-i2c.ko;   echo drivers/media/i2c/imx219.ko; :; } | awk '!x[$$0]++' - > drivers/media/i2c/modules.order

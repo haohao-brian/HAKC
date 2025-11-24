@@ -1,0 +1,18 @@
+arch/arm64/boot/dts/broadcom/.bcm2837-rpi-cm3-io3.dtb.dts.tmp: \
+  arch/arm64/boot/dts/broadcom/bcm2837-rpi-cm3-io3.dts \
+  scripts/dtc/include-prefixes/arm/bcm2837-rpi-cm3-io3.dts \
+  scripts/dtc/include-prefixes/arm/bcm2837-rpi-cm3.dtsi \
+  scripts/dtc/include-prefixes/arm/bcm2837.dtsi \
+  scripts/dtc/include-prefixes/arm/bcm283x.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/pinctrl/bcm2835.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/bcm2835.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/bcm2835-aux.h \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/soc/bcm2835-pm.h \
+  scripts/dtc/include-prefixes/arm/bcm2835-common.dtsi \
+  scripts/dtc/include-prefixes/arm/bcm2835-rpi-common.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/power/raspberrypi-power.h \
+  scripts/dtc/include-prefixes/arm/bcm2836-rpi.dtsi \
+  scripts/dtc/include-prefixes/arm/bcm2835-rpi.dtsi \
+  scripts/dtc/include-prefixes/arm/bcm283x-rpi-usb-host.dtsi

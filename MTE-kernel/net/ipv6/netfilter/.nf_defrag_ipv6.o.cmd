@@ -1,0 +1,1 @@
+cmd_net/ipv6/netfilter/nf_defrag_ipv6.o := ld.lld -EL  -maarch64elf -z norelro   -r -o net/ipv6/netfilter/nf_defrag_ipv6.o net/ipv6/netfilter/nf_defrag_ipv6_hooks.o net/ipv6/netfilter/nf_conntrack_reasm.o

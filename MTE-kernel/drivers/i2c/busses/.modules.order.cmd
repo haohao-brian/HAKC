@@ -1,0 +1,1 @@
+cmd_drivers/i2c/busses/modules.order := {   echo drivers/i2c/busses/i2c-bcm2835.ko;   echo drivers/i2c/busses/i2c-gpio.ko;   echo drivers/i2c/busses/i2c-qcom-cci.ko;   echo drivers/i2c/busses/i2c-qcom-geni.ko; :; } | awk '!x[$$0]++' - > drivers/i2c/busses/modules.order

@@ -1,0 +1,1 @@
+cmd_drivers/net/wireless/ti/wlcore/modules.order := {   echo drivers/net/wireless/ti/wlcore/wlcore.ko;   echo drivers/net/wireless/ti/wlcore/wlcore_sdio.ko; :; } | awk '!x[$$0]++' - > drivers/net/wireless/ti/wlcore/modules.order

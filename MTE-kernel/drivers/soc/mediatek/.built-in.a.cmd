@@ -1,0 +1,1 @@
+cmd_drivers/soc/mediatek/built-in.a := rm -f drivers/soc/mediatek/built-in.a; llvm-ar cDPrST drivers/soc/mediatek/built-in.a drivers/soc/mediatek/mtk-infracfg.o drivers/soc/mediatek/mtk-scpsys.o drivers/soc/mediatek/mtk-mmsys.o

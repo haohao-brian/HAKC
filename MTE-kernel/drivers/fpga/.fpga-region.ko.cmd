@@ -1,0 +1,1 @@
+cmd_drivers/fpga/fpga-region.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/fpga/fpga-region.ko drivers/fpga/fpga-region.o drivers/fpga/fpga-region.mod.o;  true

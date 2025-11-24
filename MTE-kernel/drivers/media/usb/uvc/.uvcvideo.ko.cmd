@@ -1,0 +1,1 @@
+cmd_drivers/media/usb/uvc/uvcvideo.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/usb/uvc/uvcvideo.ko drivers/media/usb/uvc/uvcvideo.o drivers/media/usb/uvc/uvcvideo.mod.o;  true

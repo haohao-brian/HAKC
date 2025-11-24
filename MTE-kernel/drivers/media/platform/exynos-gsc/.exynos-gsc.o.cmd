@@ -1,0 +1,1 @@
+cmd_drivers/media/platform/exynos-gsc/exynos-gsc.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/media/platform/exynos-gsc/exynos-gsc.o drivers/media/platform/exynos-gsc/gsc-core.o drivers/media/platform/exynos-gsc/gsc-m2m.o drivers/media/platform/exynos-gsc/gsc-regs.o

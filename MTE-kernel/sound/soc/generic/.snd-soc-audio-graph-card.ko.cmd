@@ -1,0 +1,1 @@
+cmd_sound/soc/generic/snd-soc-audio-graph-card.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/generic/snd-soc-audio-graph-card.ko sound/soc/generic/snd-soc-audio-graph-card.o sound/soc/generic/snd-soc-audio-graph-card.mod.o;  true

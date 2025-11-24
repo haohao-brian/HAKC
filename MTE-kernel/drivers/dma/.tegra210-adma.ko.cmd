@@ -1,0 +1,1 @@
+cmd_drivers/dma/tegra210-adma.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/dma/tegra210-adma.ko drivers/dma/tegra210-adma.o drivers/dma/tegra210-adma.mod.o;  true

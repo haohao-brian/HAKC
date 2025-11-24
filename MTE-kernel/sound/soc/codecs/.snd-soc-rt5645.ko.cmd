@@ -1,0 +1,1 @@
+cmd_sound/soc/codecs/snd-soc-rt5645.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/codecs/snd-soc-rt5645.ko sound/soc/codecs/snd-soc-rt5645.o sound/soc/codecs/snd-soc-rt5645.mod.o;  true

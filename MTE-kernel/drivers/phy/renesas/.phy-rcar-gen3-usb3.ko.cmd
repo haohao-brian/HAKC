@@ -1,0 +1,1 @@
+cmd_drivers/phy/renesas/phy-rcar-gen3-usb3.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/phy/renesas/phy-rcar-gen3-usb3.ko drivers/phy/renesas/phy-rcar-gen3-usb3.o drivers/phy/renesas/phy-rcar-gen3-usb3.mod.o;  true

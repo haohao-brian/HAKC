@@ -1,0 +1,1 @@
+cmd_drivers/phy/allwinner/phy-sun6i-mipi-dphy.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/phy/allwinner/phy-sun6i-mipi-dphy.ko drivers/phy/allwinner/phy-sun6i-mipi-dphy.o drivers/phy/allwinner/phy-sun6i-mipi-dphy.mod.o;  true

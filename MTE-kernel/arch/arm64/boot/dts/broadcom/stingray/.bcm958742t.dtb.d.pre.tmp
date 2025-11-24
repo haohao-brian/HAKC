@@ -1,0 +1,16 @@
+arch/arm64/boot/dts/broadcom/stingray/.bcm958742t.dtb.dts.tmp: \
+  arch/arm64/boot/dts/broadcom/stingray/bcm958742t.dts \
+  arch/arm64/boot/dts/broadcom/stingray/bcm958742-base.dtsi \
+  arch/arm64/boot/dts/broadcom/stingray/stingray-board-base.dtsi \
+  arch/arm64/boot/dts/broadcom/stingray/stingray.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  arch/arm64/boot/dts/broadcom/stingray/stingray-clock.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/bcm-sr.h \
+  arch/arm64/boot/dts/broadcom/stingray/stingray-fs4.dtsi \
+  arch/arm64/boot/dts/broadcom/stingray/stingray-sata.dtsi \
+  arch/arm64/boot/dts/broadcom/stingray/stingray-pcie.dtsi \
+  arch/arm64/boot/dts/broadcom/stingray/stingray-usb.dtsi \
+  arch/arm64/boot/dts/broadcom/stingray/stingray-pinctrl.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/pinctrl/brcm,pinctrl-stingray.h \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h

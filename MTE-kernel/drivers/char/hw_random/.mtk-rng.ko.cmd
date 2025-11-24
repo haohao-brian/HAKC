@@ -1,0 +1,1 @@
+cmd_drivers/char/hw_random/mtk-rng.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/char/hw_random/mtk-rng.ko drivers/char/hw_random/mtk-rng.o drivers/char/hw_random/mtk-rng.mod.o;  true

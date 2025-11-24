@@ -1,0 +1,1 @@
+cmd_drivers/media/v4l2-core/modules.order := {   echo drivers/media/v4l2-core/v4l2-fwnode.ko;   echo drivers/media/v4l2-core/videodev.ko;   echo drivers/media/v4l2-core/v4l2-dv-timings.ko;   echo drivers/media/v4l2-core/v4l2-mem2mem.ko; :; } | awk '!x[$$0]++' - > drivers/media/v4l2-core/modules.order

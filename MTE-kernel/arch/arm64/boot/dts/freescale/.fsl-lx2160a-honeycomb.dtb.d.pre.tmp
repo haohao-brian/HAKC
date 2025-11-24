@@ -1,0 +1,9 @@
+arch/arm64/boot/dts/freescale/.fsl-lx2160a-honeycomb.dtb.dts.tmp: \
+  arch/arm64/boot/dts/freescale/fsl-lx2160a-honeycomb.dts \
+  arch/arm64/boot/dts/freescale/fsl-lx2160a-clearfog-itx.dtsi \
+  arch/arm64/boot/dts/freescale/fsl-lx2160a-cex7.dtsi \
+  arch/arm64/boot/dts/freescale/fsl-lx2160a.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/thermal/thermal.h

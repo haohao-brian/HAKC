@@ -1,0 +1,1 @@
+cmd_drivers/crypto/caam/modules.order := {   echo drivers/crypto/caam/error.ko;   echo drivers/crypto/caam/caam.ko;   echo drivers/crypto/caam/caam_jr.ko;   echo drivers/crypto/caam/caamalg_desc.ko;   echo drivers/crypto/caam/caamhash_desc.ko;   echo drivers/crypto/caam/dpaa2_caam.ko; :; } | awk '!x[$$0]++' - > drivers/crypto/caam/modules.order

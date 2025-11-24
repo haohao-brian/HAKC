@@ -1,0 +1,1 @@
+cmd_drivers/mailbox/bcm-flexrm-mailbox.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/mailbox/bcm-flexrm-mailbox.ko drivers/mailbox/bcm-flexrm-mailbox.o drivers/mailbox/bcm-flexrm-mailbox.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/pinctrl/samsung/built-in.a := rm -f drivers/pinctrl/samsung/built-in.a; llvm-ar cDPrST drivers/pinctrl/samsung/built-in.a drivers/pinctrl/samsung/pinctrl-samsung.o drivers/pinctrl/samsung/pinctrl-exynos.o drivers/pinctrl/samsung/pinctrl-exynos-arm64.o

@@ -1,0 +1,1 @@
+cmd_drivers/dma/sh/usb-dmac.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/dma/sh/usb-dmac.ko drivers/dma/sh/usb-dmac.o drivers/dma/sh/usb-dmac.mod.o;  true

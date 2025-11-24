@@ -1,0 +1,1 @@
+cmd_drivers/dma/ti/built-in.a := rm -f drivers/dma/ti/built-in.a; llvm-ar cDPrST drivers/dma/ti/built-in.a drivers/dma/ti/k3-udma.o drivers/dma/ti/k3-udma-glue.o drivers/dma/ti/k3-psil.o drivers/dma/ti/k3-psil-am654.o drivers/dma/ti/k3-psil-j721e.o drivers/dma/ti/k3-psil-j7200.o

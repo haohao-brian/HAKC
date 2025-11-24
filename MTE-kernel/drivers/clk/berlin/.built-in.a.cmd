@@ -1,0 +1,1 @@
+cmd_drivers/clk/berlin/built-in.a := rm -f drivers/clk/berlin/built-in.a; llvm-ar cDPrST drivers/clk/berlin/built-in.a drivers/clk/berlin/berlin2-avpll.o drivers/clk/berlin/berlin2-pll.o drivers/clk/berlin/berlin2-div.o

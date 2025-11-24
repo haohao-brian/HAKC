@@ -1,0 +1,5 @@
+drivers/fpga/stratix10-soc.ko
+drivers/fpga/fpga-bridge.ko
+drivers/fpga/altera-freeze-bridge.ko
+drivers/fpga/fpga-region.ko
+drivers/fpga/of-fpga-region.ko

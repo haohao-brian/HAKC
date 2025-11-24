@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/bridge/thc63lvd1024.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/bridge/thc63lvd1024.ko drivers/gpu/drm/bridge/thc63lvd1024.o drivers/gpu/drm/bridge/thc63lvd1024.mod.o;  true

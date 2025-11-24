@@ -1,0 +1,1 @@
+cmd_drivers/firmware/imx/built-in.a := rm -f drivers/firmware/imx/built-in.a; llvm-ar cDPrST drivers/firmware/imx/built-in.a drivers/firmware/imx/imx-scu.o drivers/firmware/imx/misc.o drivers/firmware/imx/imx-scu-irq.o drivers/firmware/imx/rm.o drivers/firmware/imx/imx-scu-soc.o drivers/firmware/imx/scu-pd.o

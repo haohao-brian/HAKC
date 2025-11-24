@@ -1,0 +1,1 @@
+cmd_drivers/md/dm-region-hash.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/md/dm-region-hash.ko drivers/md/dm-region-hash.o drivers/md/dm-region-hash.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/cpuidle/built-in.a := rm -f drivers/cpuidle/built-in.a; llvm-ar cDPrST drivers/cpuidle/built-in.a drivers/cpuidle/cpuidle.o drivers/cpuidle/driver.o drivers/cpuidle/governor.o drivers/cpuidle/sysfs.o drivers/cpuidle/governors/built-in.a drivers/cpuidle/dt_idle_states.o drivers/cpuidle/cpuidle-arm.o drivers/cpuidle/cpuidle-psci.o drivers/cpuidle/cpuidle-psci-domain.o

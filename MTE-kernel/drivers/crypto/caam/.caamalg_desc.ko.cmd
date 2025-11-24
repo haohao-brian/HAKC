@@ -1,0 +1,1 @@
+cmd_drivers/crypto/caam/caamalg_desc.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/crypto/caam/caamalg_desc.ko drivers/crypto/caam/caamalg_desc.o drivers/crypto/caam/caamalg_desc.mod.o;  true

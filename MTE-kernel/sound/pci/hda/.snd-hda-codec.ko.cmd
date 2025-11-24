@@ -1,0 +1,1 @@
+cmd_sound/pci/hda/snd-hda-codec.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/pci/hda/snd-hda-codec.ko sound/pci/hda/snd-hda-codec.o sound/pci/hda/snd-hda-codec.mod.o;  true

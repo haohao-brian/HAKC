@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/bridge/analogix/analogix_dp.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/gpu/drm/bridge/analogix/analogix_dp.o drivers/gpu/drm/bridge/analogix/analogix_dp_core.o drivers/gpu/drm/bridge/analogix/analogix_dp_reg.o drivers/gpu/drm/bridge/analogix/analogix-i2c-dptx.o

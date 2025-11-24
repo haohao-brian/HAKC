@@ -1,0 +1,1 @@
+cmd_sound/soc/meson/snd-soc-meson-axg-pdm.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/meson/snd-soc-meson-axg-pdm.ko sound/soc/meson/snd-soc-meson-axg-pdm.o sound/soc/meson/snd-soc-meson-axg-pdm.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/clk/socfpga/built-in.a := rm -f drivers/clk/socfpga/built-in.a; llvm-ar cDPrST drivers/clk/socfpga/built-in.a drivers/clk/socfpga/clk-s10.o drivers/clk/socfpga/clk-pll-s10.o drivers/clk/socfpga/clk-periph-s10.o drivers/clk/socfpga/clk-gate-s10.o drivers/clk/socfpga/clk-agilex.o

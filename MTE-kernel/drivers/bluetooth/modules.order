@@ -1,0 +1,6 @@
+drivers/bluetooth/hci_uart.ko
+drivers/bluetooth/btusb.ko
+drivers/bluetooth/btintel.ko
+drivers/bluetooth/btbcm.ko
+drivers/bluetooth/btrtl.ko
+drivers/bluetooth/btqca.ko

@@ -1,0 +1,1 @@
+cmd_drivers/char/hw_random/hisi-trng-v2.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/char/hw_random/hisi-trng-v2.ko drivers/char/hw_random/hisi-trng-v2.o drivers/char/hw_random/hisi-trng-v2.mod.o;  true

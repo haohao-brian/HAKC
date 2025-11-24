@@ -1,0 +1,1 @@
+cmd_drivers/gpu/host1x/host1x.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/host1x/host1x.ko drivers/gpu/host1x/host1x.o drivers/gpu/host1x/host1x.mod.o;  true

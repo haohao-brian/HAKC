@@ -1,0 +1,5 @@
+drivers/gpu/drm/panel/panel-lvds.ko
+drivers/gpu/drm/panel/panel-simple.ko
+drivers/gpu/drm/panel/panel-raydium-rm67191.ko
+drivers/gpu/drm/panel/panel-sitronix-st7703.ko
+drivers/gpu/drm/panel/panel-truly-nt35597.ko

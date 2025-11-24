@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/etnaviv/etnaviv.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/etnaviv/etnaviv.ko drivers/gpu/drm/etnaviv/etnaviv.o drivers/gpu/drm/etnaviv/etnaviv.mod.o;  true

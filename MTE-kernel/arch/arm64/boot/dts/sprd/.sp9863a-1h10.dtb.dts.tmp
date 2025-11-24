@@ -1,0 +1,888 @@
+# 1 "arch/arm64/boot/dts/sprd/sp9863a-1h10.dts"
+# 1 "<built-in>" 1
+# 1 "arch/arm64/boot/dts/sprd/sp9863a-1h10.dts" 2
+
+
+
+
+
+
+
+/dts-v1/;
+
+
+# 1 "arch/arm64/boot/dts/sprd/sc9863a.dtsi" 1
+
+
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/clock/sprd,sc9863a-clk.h" 1
+# 9 "arch/arm64/boot/dts/sprd/sc9863a.dtsi" 2
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 1
+
+
+
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h" 1
+# 10 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 2
+# 10 "arch/arm64/boot/dts/sprd/sc9863a.dtsi" 2
+# 1 "arch/arm64/boot/dts/sprd/sharkl3.dtsi" 1
+
+
+
+
+
+
+
+/ {
+ interrupt-parent = <&gic>;
+ #address-cells = <2>;
+ #size-cells = <2>;
+
+ soc: soc {
+  compatible = "simple-bus";
+  #address-cells = <2>;
+  #size-cells = <2>;
+  ranges;
+
+  ap_ahb_regs: syscon@20e00000 {
+   compatible = "sprd,sc9863a-glbregs", "syscon",
+         "simple-mfd";
+   reg = <0 0x20e00000 0 0x4000>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0 0 0x20e00000 0x4000>;
+
+   apahb_gate: apahb-gate {
+    compatible = "sprd,sc9863a-apahb-gate";
+    reg = <0x0 0x1020>;
+    #clock-cells = <1>;
+   };
+  };
+
+  pmu_regs: syscon@402b0000 {
+   compatible = "sprd,sc9863a-glbregs", "syscon",
+         "simple-mfd";
+   reg = <0 0x402b0000 0 0x4000>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0 0 0x402b0000 0x4000>;
+
+   pmu_gate: pmu-gate {
+    compatible = "sprd,sc9863a-pmu-gate";
+    reg = <0 0x1200>;
+    clocks = <&ext_26m>;
+    clock-names = "ext-26m";
+    #clock-cells = <1>;
+   };
+  };
+
+  aon_apb_regs: syscon@402e0000 {
+   compatible = "sprd,sc9863a-glbregs", "syscon",
+         "simple-mfd";
+   reg = <0 0x402e0000 0 0x4000>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0 0 0x402e0000 0x4000>;
+
+   aonapb_gate: aonapb-gate {
+    compatible = "sprd,sc9863a-aonapb-gate";
+    reg = <0 0x1100>;
+    #clock-cells = <1>;
+   };
+  };
+
+  anlg_phy_g2_regs: syscon@40353000 {
+   compatible = "sprd,sc9863a-glbregs", "syscon",
+         "simple-mfd";
+   reg = <0 0x40353000 0 0x3000>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0 0 0x40353000 0x3000>;
+
+   pll: pll {
+    compatible = "sprd,sc9863a-pll";
+    reg = <0 0x100>;
+    clocks = <&ext_26m>;
+    clock-names = "ext-26m";
+    #clock-cells = <1>;
+   };
+  };
+
+  anlg_phy_g4_regs: syscon@40359000 {
+   compatible = "sprd,sc9863a-glbregs", "syscon",
+         "simple-mfd";
+   reg = <0 0x40359000 0 0x3000>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0 0 0x40359000 0x3000>;
+
+   mpll: mpll {
+    compatible = "sprd,sc9863a-mpll";
+    reg = <0 0x100>;
+    #clock-cells = <1>;
+   };
+  };
+
+  anlg_phy_g5_regs: syscon@4035c000 {
+   compatible = "sprd,sc9863a-glbregs", "syscon",
+         "simple-mfd";
+   reg = <0 0x4035c000 0 0x3000>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0 0 0x4035c000 0x3000>;
+
+   rpll: rpll {
+    compatible = "sprd,sc9863a-rpll";
+    reg = <0 0x100>;
+    clocks = <&ext_26m>;
+    clock-names = "ext-26m";
+    #clock-cells = <1>;
+   };
+  };
+
+  anlg_phy_g7_regs: syscon@40363000 {
+   compatible = "sprd,sc9863a-glbregs", "syscon",
+         "simple-mfd";
+   reg = <0 0x40363000 0 0x3000>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0 0 0x40363000 0x3000>;
+
+   dpll: dpll {
+    compatible = "sprd,sc9863a-dpll";
+    reg = <0 0x100>;
+    #clock-cells = <1>;
+   };
+  };
+
+  mm_ahb_regs: syscon@60800000 {
+   compatible = "sprd,sc9863a-glbregs", "syscon",
+         "simple-mfd";
+   reg = <0 0x60800000 0 0x1000>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0 0 0x60800000 0x3000>;
+
+   mm_gate: mm-gate {
+    compatible = "sprd,sc9863a-mm-gate";
+    reg = <0 0x1100>;
+    #clock-cells = <1>;
+   };
+  };
+
+  ap_apb_regs: syscon@71300000 {
+   compatible = "sprd,sc9863a-glbregs", "syscon",
+         "simple-mfd";
+   reg = <0 0x71300000 0 0x4000>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0 0 0x71300000 0x4000>;
+
+   apapb_gate: apapb-gate {
+    compatible = "sprd,sc9863a-apapb-gate";
+    reg = <0 0x1000>;
+    clocks = <&ext_26m>;
+    clock-names = "ext-26m";
+    #clock-cells = <1>;
+   };
+  };
+
+  apb@70000000 {
+   compatible = "simple-bus";
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges = <0 0x0 0x70000000 0x10000000>;
+
+   uart0: serial@0 {
+    compatible = "sprd,sc9863a-uart",
+          "sprd,sc9836-uart";
+    reg = <0x0 0x100>;
+    interrupts = <0 2 4>;
+    clocks = <&ext_26m>;
+    status = "disabled";
+   };
+
+   uart1: serial@100000 {
+    compatible = "sprd,sc9863a-uart",
+          "sprd,sc9836-uart";
+    reg = <0x100000 0x100>;
+    interrupts = <0 3 4>;
+    clocks = <&ext_26m>;
+    status = "disabled";
+   };
+
+   uart2: serial@200000 {
+    compatible = "sprd,sc9863a-uart",
+          "sprd,sc9836-uart";
+    reg = <0x200000 0x100>;
+    interrupts = <0 4 4>;
+    clocks = <&ext_26m>;
+    status = "disabled";
+   };
+
+   uart3: serial@300000 {
+    compatible = "sprd,sc9863a-uart",
+          "sprd,sc9836-uart";
+    reg = <0x300000 0x100>;
+    interrupts = <0 5 4>;
+    clocks = <&ext_26m>;
+    status = "disabled";
+   };
+
+   uart4: serial@400000 {
+    compatible = "sprd,sc9863a-uart",
+          "sprd,sc9836-uart";
+    reg = <0x400000 0x100>;
+    interrupts = <0 6 4>;
+    clocks = <&ext_26m>;
+    status = "disabled";
+   };
+  };
+ };
+
+ ext_26m: ext-26m {
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-frequency = <26000000>;
+  clock-output-names = "ext-26m";
+ };
+
+ ext_32k: ext-32k {
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-frequency = <32768>;
+  clock-output-names = "ext-32k";
+ };
+
+ ext_4m: ext-4m {
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-frequency = <4000000>;
+  clock-output-names = "ext-4m";
+ };
+
+ rco_100m: rco-100m {
+  compatible = "fixed-clock";
+  #clock-cells = <0>;
+  clock-frequency = <100000000>;
+  clock-output-names = "rco-100m";
+ };
+};
+# 11 "arch/arm64/boot/dts/sprd/sc9863a.dtsi" 2
+
+/ {
+ cpus {
+  #address-cells = <2>;
+  #size-cells = <0>;
+
+  cpu-map {
+   cluster0 {
+    core0 {
+     cpu = <&CPU0>;
+    };
+    core1 {
+     cpu = <&CPU1>;
+    };
+    core2 {
+     cpu = <&CPU2>;
+    };
+    core3 {
+     cpu = <&CPU3>;
+    };
+    core4 {
+     cpu = <&CPU4>;
+    };
+    core5 {
+     cpu = <&CPU5>;
+    };
+    core6 {
+     cpu = <&CPU6>;
+    };
+    core7 {
+     cpu = <&CPU7>;
+    };
+   };
+  };
+
+  CPU0: cpu@0 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a55";
+   reg = <0x0 0x0>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD>;
+  };
+
+  CPU1: cpu@100 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a55";
+   reg = <0x0 0x100>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD>;
+  };
+
+  CPU2: cpu@200 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a55";
+   reg = <0x0 0x200>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD>;
+  };
+
+  CPU3: cpu@300 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a55";
+   reg = <0x0 0x300>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD>;
+  };
+
+  CPU4: cpu@400 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a55";
+   reg = <0x0 0x400>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD>;
+  };
+
+  CPU5: cpu@500 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a55";
+   reg = <0x0 0x500>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD>;
+  };
+
+  CPU6: cpu@600 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a55";
+   reg = <0x0 0x600>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD>;
+  };
+
+  CPU7: cpu@700 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a55";
+   reg = <0x0 0x700>;
+   enable-method = "psci";
+   cpu-idle-states = <&CORE_PD>;
+  };
+ };
+
+ idle-states {
+  entry-method = "psci";
+  CORE_PD: core-pd {
+   compatible = "arm,idle-state";
+   entry-latency-us = <4000>;
+   exit-latency-us = <4000>;
+   min-residency-us = <10000>;
+   local-timer-stop;
+   arm,psci-suspend-param = <0x00010000>;
+  };
+ };
+
+ psci {
+  compatible = "arm,psci-0.2";
+  method = "smc";
+ };
+
+ timer {
+  compatible = "arm,armv8-timer";
+  interrupts = <1 13 4>,
+        <1 14 4>,
+        <1 11 4>,
+        <1 10 4>;
+ };
+
+ pmu {
+  compatible = "arm,armv8-pmuv3";
+  interrupts = <0 144 4>,
+        <0 145 4>,
+        <0 146 4>,
+        <0 147 4>,
+        <0 148 4>,
+        <0 149 4>,
+        <0 150 4>,
+        <0 151 4>;
+ };
+
+ soc {
+  gic: interrupt-controller@14000000 {
+   compatible = "arm,gic-v3";
+   #interrupt-cells = <3>;
+   #address-cells = <2>;
+   #size-cells = <2>;
+   ranges;
+   redistributor-stride = <0x0 0x20000>;
+   #redistributor-regions = <1>;
+   interrupt-controller;
+   reg = <0x0 0x14000000 0 0x20000>,
+         <0x0 0x14040000 0 0x100000>;
+   interrupts = <1 9 4>;
+  };
+
+  ap_clk: clock-controller@21500000 {
+   compatible = "sprd,sc9863a-ap-clk";
+   reg = <0 0x21500000 0 0x1000>;
+   clocks = <&ext_32k>, <&ext_26m>;
+   clock-names = "ext-32k", "ext-26m";
+   #clock-cells = <1>;
+  };
+
+  aon_clk: clock-controller@402d0000 {
+   compatible = "sprd,sc9863a-aon-clk";
+   reg = <0 0x402d0000 0 0x1000>;
+   clocks = <&ext_26m>, <&rco_100m>,
+     <&ext_32k>, <&ext_4m>;
+   clock-names = "ext-26m", "rco-100m",
+          "ext-32k", "ext-4m";
+   #clock-cells = <1>;
+  };
+
+  mm_clk: clock-controller@60900000 {
+   compatible = "sprd,sc9863a-mm-clk";
+   reg = <0 0x60900000 0 0x1000>;
+   #clock-cells = <1>;
+  };
+
+  funnel@10001000 {
+   compatible = "arm,coresight-dynamic-funnel", "arm,primecell";
+   reg = <0 0x10001000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     funnel_soc_out_port: endpoint {
+      remote-endpoint = <&etb_in>;
+     };
+    };
+   };
+
+   in-ports {
+    port {
+     funnel_soc_in_port: endpoint {
+      remote-endpoint =
+      <&funnel_ca55_out_port>;
+     };
+    };
+   };
+  };
+
+  etb@10003000 {
+   compatible = "arm,coresight-tmc", "arm,primecell";
+   reg = <0 0x10003000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   in-ports {
+    port {
+     etb_in: endpoint {
+      remote-endpoint =
+      <&funnel_soc_out_port>;
+     };
+    };
+   };
+  };
+
+  funnel@12001000 {
+   compatible = "arm,coresight-dynamic-funnel", "arm,primecell";
+   reg = <0 0x12001000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     funnel_little_out_port: endpoint {
+      remote-endpoint =
+      <&etf_little_in>;
+     };
+    };
+   };
+
+   in-ports {
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    port@0 {
+     reg = <0>;
+     funnel_little_in_port0: endpoint {
+      remote-endpoint = <&etm0_out>;
+     };
+    };
+
+    port@1 {
+     reg = <1>;
+     funnel_little_in_port1: endpoint {
+      remote-endpoint = <&etm1_out>;
+     };
+    };
+
+    port@2 {
+     reg = <2>;
+     funnel_little_in_port2: endpoint {
+      remote-endpoint = <&etm2_out>;
+     };
+    };
+
+    port@3 {
+     reg = <3>;
+     funnel_little_in_port3: endpoint {
+      remote-endpoint = <&etm3_out>;
+     };
+    };
+   };
+  };
+
+  etf@12002000 {
+   compatible = "arm,coresight-tmc", "arm,primecell";
+   reg = <0 0x12002000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etf_little_out: endpoint {
+      remote-endpoint =
+      <&funnel_ca55_in_port0>;
+     };
+    };
+   };
+
+   in-port {
+    port {
+     etf_little_in: endpoint {
+      remote-endpoint =
+      <&funnel_little_out_port>;
+     };
+    };
+   };
+  };
+
+  etf@12003000 {
+   compatible = "arm,coresight-tmc", "arm,primecell";
+   reg = <0 0x12003000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etf_big_out: endpoint {
+      remote-endpoint =
+      <&funnel_ca55_in_port1>;
+     };
+    };
+   };
+
+   in-ports {
+    port {
+     etf_big_in: endpoint {
+      remote-endpoint =
+      <&funnel_big_out_port>;
+     };
+    };
+   };
+  };
+
+  funnel@12004000 {
+   compatible = "arm,coresight-dynamic-funnel", "arm,primecell";
+   reg = <0 0x12004000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     funnel_ca55_out_port: endpoint {
+      remote-endpoint =
+      <&funnel_soc_in_port>;
+     };
+    };
+   };
+
+   in-ports {
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    port@0 {
+     reg = <0>;
+     funnel_ca55_in_port0: endpoint {
+      remote-endpoint =
+      <&etf_little_out>;
+     };
+    };
+
+    port@1 {
+     reg = <1>;
+     funnel_ca55_in_port1: endpoint {
+      remote-endpoint =
+      <&etf_big_out>;
+     };
+    };
+   };
+  };
+
+  funnel@12005000 {
+   compatible = "arm,coresight-dynamic-funnel", "arm,primecell";
+   reg = <0 0x12005000 0 0x1000>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     funnel_big_out_port: endpoint {
+      remote-endpoint =
+      <&etf_big_in>;
+     };
+    };
+   };
+
+   in-ports {
+    #address-cells = <1>;
+    #size-cells = <0>;
+
+    port@0 {
+     reg = <0>;
+     funnel_big_in_port0: endpoint {
+      remote-endpoint = <&etm4_out>;
+     };
+    };
+
+    port@1 {
+     reg = <1>;
+     funnel_big_in_port1: endpoint {
+      remote-endpoint = <&etm5_out>;
+     };
+    };
+
+    port@2 {
+     reg = <2>;
+     funnel_big_in_port2: endpoint {
+      remote-endpoint = <&etm6_out>;
+     };
+    };
+
+    port@3 {
+     reg = <3>;
+     funnel_big_in_port3: endpoint {
+      remote-endpoint = <&etm7_out>;
+     };
+    };
+   };
+  };
+
+  etm@13040000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x13040000 0 0x1000>;
+   cpu = <&CPU0>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm0_out: endpoint {
+      remote-endpoint =
+      <&funnel_little_in_port0>;
+     };
+    };
+   };
+  };
+
+  etm@13140000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x13140000 0 0x1000>;
+   cpu = <&CPU1>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm1_out: endpoint {
+      remote-endpoint =
+      <&funnel_little_in_port1>;
+     };
+    };
+   };
+  };
+
+  etm@13240000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x13240000 0 0x1000>;
+   cpu = <&CPU2>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm2_out: endpoint {
+      remote-endpoint =
+      <&funnel_little_in_port2>;
+     };
+    };
+   };
+  };
+
+  etm@13340000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x13340000 0 0x1000>;
+   cpu = <&CPU3>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm3_out: endpoint {
+      remote-endpoint =
+      <&funnel_little_in_port3>;
+     };
+    };
+   };
+  };
+
+  etm@13440000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x13440000 0 0x1000>;
+   cpu = <&CPU4>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm4_out: endpoint {
+      remote-endpoint =
+      <&funnel_big_in_port0>;
+     };
+    };
+   };
+  };
+
+  etm@13540000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x13540000 0 0x1000>;
+   cpu = <&CPU5>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm5_out: endpoint {
+      remote-endpoint =
+      <&funnel_big_in_port1>;
+     };
+    };
+   };
+  };
+
+  etm@13640000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x13640000 0 0x1000>;
+   cpu = <&CPU6>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm6_out: endpoint {
+      remote-endpoint =
+      <&funnel_big_in_port2>;
+     };
+    };
+   };
+  };
+
+  etm@13740000 {
+   compatible = "arm,coresight-etm4x", "arm,primecell";
+   reg = <0 0x13740000 0 0x1000>;
+   cpu = <&CPU7>;
+   clocks = <&ext_26m>;
+   clock-names = "apb_pclk";
+
+   out-ports {
+    port {
+     etm7_out: endpoint {
+      remote-endpoint =
+      <&funnel_big_in_port3>;
+     };
+    };
+   };
+  };
+
+  ap-ahb {
+   compatible = "simple-bus";
+   #address-cells = <2>;
+   #size-cells = <2>;
+   ranges;
+
+   sdio0: sdio@20300000 {
+    compatible = "sprd,sdhci-r11";
+    reg = <0 0x20300000 0 0x1000>;
+    interrupts = <0 57 4>;
+
+    clock-names = "sdio", "enable";
+    clocks = <&aon_clk 30>,
+      <&apahb_gate 4>;
+    assigned-clocks = <&aon_clk 30>;
+    assigned-clock-parents = <&rpll 2>;
+
+    bus-width = <4>;
+    no-sdio;
+    no-mmc;
+   };
+
+   sdio3: sdio@20600000 {
+    compatible = "sprd,sdhci-r11";
+    reg = <0 0x20600000 0 0x1000>;
+    interrupts = <0 60 4>;
+
+    clock-names = "sdio", "enable";
+    clocks = <&aon_clk 33>,
+      <&apahb_gate 7>;
+    assigned-clocks = <&aon_clk 33>;
+    assigned-clock-parents = <&rpll 2>;
+
+    bus-width = <8>;
+    non-removable;
+    no-sdio;
+    no-sd;
+    cap-mmc-hw-reset;
+   };
+  };
+ };
+};
+# 11 "arch/arm64/boot/dts/sprd/sp9863a-1h10.dts" 2
+
+/ {
+ model = "Spreadtrum SP9863A-1H10 Board";
+
+ compatible = "sprd,sp9863a-1h10", "sprd,sc9863a";
+
+ aliases {
+  serial0 = &uart0;
+  serial1 = &uart1;
+ };
+
+ memory@80000000 {
+  device_type = "memory";
+  reg = <0x0 0x80000000 0x0 0x80000000>;
+ };
+
+ chosen {
+  stdout-path = "serial1:115200n8";
+  bootargs = "earlycon";
+ };
+};
+
+&uart0 {
+ status = "okay";
+};
+
+&uart1 {
+ status = "okay";
+};

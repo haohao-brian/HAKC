@@ -1,0 +1,1 @@
+cmd_drivers/usb/gadget/function/usb_f_eem.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/usb/gadget/function/usb_f_eem.ko drivers/usb/gadget/function/usb_f_eem.o drivers/usb/gadget/function/usb_f_eem.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/crypto/caam/caam_jr.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/crypto/caam/caam_jr.o drivers/crypto/caam/jr.o drivers/crypto/caam/key_gen.o drivers/crypto/caam/caamalg.o drivers/crypto/caam/caamalg_qi.o drivers/crypto/caam/caamhash.o drivers/crypto/caam/caamrng.o drivers/crypto/caam/caampkc.o drivers/crypto/caam/pkc_desc.o

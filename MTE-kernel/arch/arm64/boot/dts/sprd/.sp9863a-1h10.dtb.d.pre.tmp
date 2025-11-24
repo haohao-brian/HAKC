@@ -1,0 +1,7 @@
+arch/arm64/boot/dts/sprd/.sp9863a-1h10.dtb.dts.tmp: \
+  arch/arm64/boot/dts/sprd/sp9863a-1h10.dts \
+  arch/arm64/boot/dts/sprd/sc9863a.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/sprd,sc9863a-clk.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  arch/arm64/boot/dts/sprd/sharkl3.dtsi

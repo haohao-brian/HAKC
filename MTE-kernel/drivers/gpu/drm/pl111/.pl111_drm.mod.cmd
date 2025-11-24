@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/pl111/pl111_drm.mod := { echo  drivers/gpu/drm/pl111/pl111_display.o drivers/gpu/drm/pl111/pl111_versatile.o drivers/gpu/drm/pl111/pl111_drv.o drivers/gpu/drm/pl111/pl111_debugfs.o;  echo; } > drivers/gpu/drm/pl111/pl111_drm.mod

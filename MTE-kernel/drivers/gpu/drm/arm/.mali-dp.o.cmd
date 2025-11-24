@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/arm/mali-dp.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/gpu/drm/arm/mali-dp.o drivers/gpu/drm/arm/malidp_drv.o drivers/gpu/drm/arm/malidp_hw.o drivers/gpu/drm/arm/malidp_planes.o drivers/gpu/drm/arm/malidp_crtc.o drivers/gpu/drm/arm/malidp_mw.o

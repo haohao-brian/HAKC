@@ -1,0 +1,1 @@
+cmd_drivers/net/ethernet/stmicro/stmmac/dwmac-altr-socfpga.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/net/ethernet/stmicro/stmmac/dwmac-altr-socfpga.o drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.o drivers/net/ethernet/stmicro/stmmac/dwmac-socfpga.o

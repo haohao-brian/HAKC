@@ -1,0 +1,1 @@
+cmd_drivers/media/platform/s5p-jpeg/s5p-jpeg.mod := { echo  drivers/media/platform/s5p-jpeg/jpeg-core.o drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.o drivers/media/platform/s5p-jpeg/jpeg-hw-exynos4.o drivers/media/platform/s5p-jpeg/jpeg-hw-s5p.o;  echo; } > drivers/media/platform/s5p-jpeg/s5p-jpeg.mod

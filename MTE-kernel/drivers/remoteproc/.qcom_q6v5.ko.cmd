@@ -1,0 +1,1 @@
+cmd_drivers/remoteproc/qcom_q6v5.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/remoteproc/qcom_q6v5.ko drivers/remoteproc/qcom_q6v5.o drivers/remoteproc/qcom_q6v5.mod.o;  true

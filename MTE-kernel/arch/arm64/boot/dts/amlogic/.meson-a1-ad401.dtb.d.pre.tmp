@@ -1,0 +1,6 @@
+arch/arm64/boot/dts/amlogic/.meson-a1-ad401.dtb.dts.tmp: \
+  arch/arm64/boot/dts/amlogic/meson-a1-ad401.dts \
+  arch/arm64/boot/dts/amlogic/meson-a1.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/meson-a1-gpio.h

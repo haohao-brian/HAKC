@@ -1,0 +1,1 @@
+cmd_drivers/video/fbdev/built-in.a := rm -f drivers/video/fbdev/built-in.a; llvm-ar cDPrST drivers/video/fbdev/built-in.a drivers/video/fbdev/core/built-in.a drivers/video/fbdev/omap2/built-in.a drivers/video/fbdev/xen-fbfront.o drivers/video/fbdev/efifb.o drivers/video/fbdev/mx3fb.o

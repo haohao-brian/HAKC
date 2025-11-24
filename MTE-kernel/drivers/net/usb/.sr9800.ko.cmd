@@ -1,0 +1,1 @@
+cmd_drivers/net/usb/sr9800.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/net/usb/sr9800.ko drivers/net/usb/sr9800.o drivers/net/usb/sr9800.mod.o;  true

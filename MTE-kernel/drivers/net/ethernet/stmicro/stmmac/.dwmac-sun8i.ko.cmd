@@ -1,0 +1,1 @@
+cmd_drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.ko drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.o drivers/net/ethernet/stmicro/stmmac/dwmac-sun8i.mod.o;  true

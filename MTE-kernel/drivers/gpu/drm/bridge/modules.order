@@ -1,0 +1,14 @@
+drivers/gpu/drm/bridge/analogix/analogix_dp.ko
+drivers/gpu/drm/bridge/synopsys/dw-hdmi.ko
+drivers/gpu/drm/bridge/synopsys/dw-hdmi-ahb-audio.ko
+drivers/gpu/drm/bridge/synopsys/dw-hdmi-i2s-audio.ko
+drivers/gpu/drm/bridge/synopsys/dw-hdmi-cec.ko
+drivers/gpu/drm/bridge/synopsys/dw-mipi-dsi.ko
+drivers/gpu/drm/bridge/display-connector.ko
+drivers/gpu/drm/bridge/lontium-lt9611.ko
+drivers/gpu/drm/bridge/sii902x.ko
+drivers/gpu/drm/bridge/simple-bridge.ko
+drivers/gpu/drm/bridge/thc63lvd1024.ko
+drivers/gpu/drm/bridge/adv7511/adv7511.ko
+drivers/gpu/drm/bridge/ti-sn65dsi86.ko
+drivers/gpu/drm/bridge/nwl-dsi.ko

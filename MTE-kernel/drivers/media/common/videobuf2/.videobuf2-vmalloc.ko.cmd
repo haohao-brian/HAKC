@@ -1,0 +1,1 @@
+cmd_drivers/media/common/videobuf2/videobuf2-vmalloc.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/common/videobuf2/videobuf2-vmalloc.ko drivers/media/common/videobuf2/videobuf2-vmalloc.o drivers/media/common/videobuf2/videobuf2-vmalloc.mod.o;  true

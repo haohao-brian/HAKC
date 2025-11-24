@@ -1,0 +1,1 @@
+cmd_drivers/media/rc/keymaps/rc-avermedia-dvbt.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/keymaps/rc-avermedia-dvbt.ko drivers/media/rc/keymaps/rc-avermedia-dvbt.o drivers/media/rc/keymaps/rc-avermedia-dvbt.mod.o;  true

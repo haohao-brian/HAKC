@@ -1,0 +1,7 @@
+drivers/interconnect/qcom/icc-bcm-voter.ko
+drivers/interconnect/qcom/qnoc-msm8916.ko
+drivers/interconnect/qcom/icc-rpmh.ko
+drivers/interconnect/qcom/qnoc-sdm845.ko
+drivers/interconnect/qcom/qnoc-sm8150.ko
+drivers/interconnect/qcom/qnoc-sm8250.ko
+drivers/interconnect/qcom/icc-smd-rpm.ko

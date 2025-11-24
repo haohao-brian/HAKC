@@ -1,0 +1,1 @@
+cmd_drivers/media/platform/s5p-jpeg/s5p-jpeg.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/platform/s5p-jpeg/s5p-jpeg.ko drivers/media/platform/s5p-jpeg/s5p-jpeg.o drivers/media/platform/s5p-jpeg/s5p-jpeg.mod.o;  true

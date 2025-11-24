@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/hisilicon/kirin/kirin-drm.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/gpu/drm/hisilicon/kirin/kirin-drm.o drivers/gpu/drm/hisilicon/kirin/kirin_drm_drv.o drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.o

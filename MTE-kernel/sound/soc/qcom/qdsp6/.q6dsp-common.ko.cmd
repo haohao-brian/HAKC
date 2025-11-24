@@ -1,0 +1,1 @@
+cmd_sound/soc/qcom/qdsp6/q6dsp-common.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/qcom/qdsp6/q6dsp-common.ko sound/soc/qcom/qdsp6/q6dsp-common.o sound/soc/qcom/qdsp6/q6dsp-common.mod.o;  true

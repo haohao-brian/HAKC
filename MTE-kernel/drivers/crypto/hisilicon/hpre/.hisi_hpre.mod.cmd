@@ -1,0 +1,1 @@
+cmd_drivers/crypto/hisilicon/hpre/hisi_hpre.mod := { echo  drivers/crypto/hisilicon/hpre/hpre_main.o drivers/crypto/hisilicon/hpre/hpre_crypto.o;  echo; } > drivers/crypto/hisilicon/hpre/hisi_hpre.mod

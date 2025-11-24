@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/pl111/pl111_drm.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/gpu/drm/pl111/pl111_drm.o drivers/gpu/drm/pl111/pl111_display.o drivers/gpu/drm/pl111/pl111_versatile.o drivers/gpu/drm/pl111/pl111_drv.o drivers/gpu/drm/pl111/pl111_debugfs.o

@@ -1,0 +1,1 @@
+cmd_drivers/crypto/hisilicon/zip/hisi_zip.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/crypto/hisilicon/zip/hisi_zip.ko drivers/crypto/hisilicon/zip/hisi_zip.o drivers/crypto/hisilicon/zip/hisi_zip.mod.o;  true

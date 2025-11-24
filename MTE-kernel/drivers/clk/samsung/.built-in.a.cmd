@@ -1,0 +1,1 @@
+cmd_drivers/clk/samsung/built-in.a := rm -f drivers/clk/samsung/built-in.a; llvm-ar cDPrST drivers/clk/samsung/built-in.a drivers/clk/samsung/clk.o drivers/clk/samsung/clk-pll.o drivers/clk/samsung/clk-cpu.o drivers/clk/samsung/clk-exynos5433.o drivers/clk/samsung/clk-exynos-audss.o drivers/clk/samsung/clk-exynos-clkout.o drivers/clk/samsung/clk-exynos7.o

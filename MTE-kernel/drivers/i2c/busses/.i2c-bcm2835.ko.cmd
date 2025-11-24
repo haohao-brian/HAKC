@@ -1,0 +1,1 @@
+cmd_drivers/i2c/busses/i2c-bcm2835.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/i2c/busses/i2c-bcm2835.ko drivers/i2c/busses/i2c-bcm2835.o drivers/i2c/busses/i2c-bcm2835.mod.o;  true

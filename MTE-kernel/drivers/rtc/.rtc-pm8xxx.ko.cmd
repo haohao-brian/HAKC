@@ -1,0 +1,1 @@
+cmd_drivers/rtc/rtc-pm8xxx.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/rtc/rtc-pm8xxx.ko drivers/rtc/rtc-pm8xxx.o drivers/rtc/rtc-pm8xxx.mod.o;  true

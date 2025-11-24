@@ -1,0 +1,1 @@
+cmd_drivers/extcon/built-in.a := rm -f drivers/extcon/built-in.a; llvm-ar cDPrST drivers/extcon/built-in.a drivers/extcon/extcon.o drivers/extcon/devres.o drivers/extcon/extcon-usb-gpio.o drivers/extcon/extcon-usbc-cros-ec.o

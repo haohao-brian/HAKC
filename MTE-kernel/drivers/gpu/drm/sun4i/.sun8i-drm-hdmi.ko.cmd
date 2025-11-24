@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/sun4i/sun8i-drm-hdmi.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/sun4i/sun8i-drm-hdmi.ko drivers/gpu/drm/sun4i/sun8i-drm-hdmi.o drivers/gpu/drm/sun4i/sun8i-drm-hdmi.mod.o;  true

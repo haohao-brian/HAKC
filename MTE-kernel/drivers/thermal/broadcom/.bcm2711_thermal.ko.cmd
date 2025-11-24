@@ -1,0 +1,1 @@
+cmd_drivers/thermal/broadcom/bcm2711_thermal.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/thermal/broadcom/bcm2711_thermal.ko drivers/thermal/broadcom/bcm2711_thermal.o drivers/thermal/broadcom/bcm2711_thermal.mod.o;  true

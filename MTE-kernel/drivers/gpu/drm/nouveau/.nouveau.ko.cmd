@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/nouveau/nouveau.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/nouveau/nouveau.ko drivers/gpu/drm/nouveau/nouveau.o drivers/gpu/drm/nouveau/nouveau.mod.o;  true

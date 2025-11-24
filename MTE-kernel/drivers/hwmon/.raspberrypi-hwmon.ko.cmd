@@ -1,0 +1,1 @@
+cmd_drivers/hwmon/raspberrypi-hwmon.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/hwmon/raspberrypi-hwmon.ko drivers/hwmon/raspberrypi-hwmon.o drivers/hwmon/raspberrypi-hwmon.mod.o;  true

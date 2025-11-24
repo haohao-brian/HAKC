@@ -1,0 +1,1 @@
+cmd_drivers/iio/adc/qcom-spmi-adc5.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/iio/adc/qcom-spmi-adc5.ko drivers/iio/adc/qcom-spmi-adc5.o drivers/iio/adc/qcom-spmi-adc5.mod.o;  true

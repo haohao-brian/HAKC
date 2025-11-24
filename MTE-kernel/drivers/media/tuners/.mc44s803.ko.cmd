@@ -1,0 +1,1 @@
+cmd_drivers/media/tuners/mc44s803.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/tuners/mc44s803.ko drivers/media/tuners/mc44s803.o drivers/media/tuners/mc44s803.mod.o;  true

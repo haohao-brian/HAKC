@@ -1,0 +1,1 @@
+cmd_drivers/crypto/ccree/ccree.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/crypto/ccree/ccree.ko drivers/crypto/ccree/ccree.o drivers/crypto/ccree/ccree.mod.o;  true

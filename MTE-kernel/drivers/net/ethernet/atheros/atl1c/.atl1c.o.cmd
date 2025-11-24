@@ -1,0 +1,1 @@
+cmd_drivers/net/ethernet/atheros/atl1c/atl1c.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/net/ethernet/atheros/atl1c/atl1c.o drivers/net/ethernet/atheros/atl1c/atl1c_main.o drivers/net/ethernet/atheros/atl1c/atl1c_hw.o drivers/net/ethernet/atheros/atl1c/atl1c_ethtool.o

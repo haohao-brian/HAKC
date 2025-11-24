@@ -1,0 +1,16 @@
+arch/arm64/boot/dts/broadcom/.bcm2711-rpi-4-b.dtb.dts.tmp: \
+  arch/arm64/boot/dts/broadcom/bcm2711-rpi-4-b.dts \
+  scripts/dtc/include-prefixes/arm/bcm2711-rpi-4-b.dts \
+  scripts/dtc/include-prefixes/arm/bcm2711.dtsi \
+  scripts/dtc/include-prefixes/arm/bcm283x.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/pinctrl/bcm2835.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/bcm2835.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/bcm2835-aux.h \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/soc/bcm2835-pm.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/arm/bcm2835-rpi.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/power/raspberrypi-power.h \
+  scripts/dtc/include-prefixes/arm/bcm283x-rpi-usb-peripheral.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/reset/raspberrypi,firmware-reset.h

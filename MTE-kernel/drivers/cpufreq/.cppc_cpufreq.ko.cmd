@@ -1,0 +1,1 @@
+cmd_drivers/cpufreq/cppc_cpufreq.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/cpufreq/cppc_cpufreq.ko drivers/cpufreq/cppc_cpufreq.o drivers/cpufreq/cppc_cpufreq.mod.o;  true

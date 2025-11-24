@@ -1,0 +1,1 @@
+cmd_drivers/pinctrl/visconti/built-in.a := rm -f drivers/pinctrl/visconti/built-in.a; llvm-ar cDPrST drivers/pinctrl/visconti/built-in.a drivers/pinctrl/visconti/pinctrl-common.o drivers/pinctrl/visconti/pinctrl-tmpv7700.o

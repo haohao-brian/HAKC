@@ -1,0 +1,1 @@
+cmd_drivers/crypto/caam/error.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/crypto/caam/error.ko drivers/crypto/caam/error.o drivers/crypto/caam/error.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/bus/built-in.a := rm -f drivers/bus/built-in.a; llvm-ar cDPrST drivers/bus/built-in.a drivers/bus/hisi_lpc.o drivers/bus/brcmstb_gisb.o drivers/bus/fsl-mc/built-in.a drivers/bus/qcom-ebi2.o drivers/bus/sun50i-de2.o drivers/bus/sunxi-rsb.o drivers/bus/simple-pm-bus.o drivers/bus/uniphier-system-bus.o drivers/bus/vexpress-config.o

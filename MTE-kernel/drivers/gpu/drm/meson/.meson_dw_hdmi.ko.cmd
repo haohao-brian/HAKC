@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/meson/meson_dw_hdmi.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/meson/meson_dw_hdmi.ko drivers/gpu/drm/meson/meson_dw_hdmi.o drivers/gpu/drm/meson/meson_dw_hdmi.mod.o;  true

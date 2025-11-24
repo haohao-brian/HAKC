@@ -1,0 +1,14 @@
+arch/arm64/boot/dts/renesas/.r8a77965-ulcb-kf.dtb.dts.tmp: \
+  arch/arm64/boot/dts/renesas/r8a77965-ulcb-kf.dts \
+  arch/arm64/boot/dts/renesas/r8a77965-ulcb.dts \
+  arch/arm64/boot/dts/renesas/r8a77965.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/r8a77965-cpg-mssr.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/renesas-cpg-mssr.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/power/r8a77965-sysc.h \
+  arch/arm64/boot/dts/renesas/ulcb.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/input/input.h \
+  scripts/dtc/include-prefixes/dt-bindings/input/linux-event-codes.h \
+  arch/arm64/boot/dts/renesas/ulcb-kf.dtsi

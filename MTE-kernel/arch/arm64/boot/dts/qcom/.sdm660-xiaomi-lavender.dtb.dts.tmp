@@ -1,0 +1,435 @@
+# 1 "arch/arm64/boot/dts/qcom/sdm660-xiaomi-lavender.dts"
+# 1 "<built-in>" 1
+# 1 "arch/arm64/boot/dts/qcom/sdm660-xiaomi-lavender.dts" 2
+
+
+
+
+
+/dts-v1/;
+
+
+# 1 "arch/arm64/boot/dts/qcom/sdm660.dtsi" 1
+
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 1
+
+
+
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h" 1
+# 10 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 2
+# 8 "arch/arm64/boot/dts/qcom/sdm660.dtsi" 2
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/clock/qcom,gcc-sdm660.h" 1
+# 9 "arch/arm64/boot/dts/qcom/sdm660.dtsi" 2
+
+/ {
+ interrupt-parent = <&intc>;
+
+ #address-cells = <2>;
+ #size-cells = <2>;
+
+ chosen { };
+
+ clocks {
+  xo_board: xo_board {
+   compatible = "fixed-clock";
+   #clock-cells = <0>;
+   clock-frequency = <19200000>;
+   clock-output-names = "xo_board";
+  };
+
+  sleep_clk: sleep_clk {
+   compatible = "fixed-clock";
+   #clock-cells = <0>;
+   clock-frequency = <32764>;
+   clock-output-names = "sleep_clk";
+  };
+ };
+
+ cpus {
+  #address-cells = <2>;
+  #size-cells = <0>;
+
+  CPU0: cpu@100 {
+   device_type = "cpu";
+   compatible = "qcom,kryo260";
+   reg = <0x0 0x100>;
+   enable-method = "psci";
+   capacity-dmips-mhz = <1024>;
+   next-level-cache = <&L2_1>;
+   L2_1: l2-cache {
+    compatible = "cache";
+    cache-level = <2>;
+   };
+   L1_I_100: l1-icache {
+    compatible = "cache";
+   };
+   L1_D_100: l1-dcache {
+    compatible = "cache";
+   };
+  };
+
+  CPU1: cpu@101 {
+   device_type = "cpu";
+   compatible = "qcom,kryo260";
+   reg = <0x0 0x101>;
+   enable-method = "psci";
+   capacity-dmips-mhz = <1024>;
+   next-level-cache = <&L2_1>;
+   L1_I_101: l1-icache {
+    compatible = "cache";
+   };
+   L1_D_101: l1-dcache {
+    compatible = "cache";
+   };
+  };
+
+  CPU2: cpu@102 {
+   device_type = "cpu";
+   compatible = "qcom,kryo260";
+   reg = <0x0 0x102>;
+   enable-method = "psci";
+   capacity-dmips-mhz = <1024>;
+   next-level-cache = <&L2_1>;
+   L1_I_102: l1-icache {
+    compatible = "cache";
+   };
+   L1_D_102: l1-dcache {
+    compatible = "cache";
+   };
+  };
+
+  CPU3: cpu@103 {
+   device_type = "cpu";
+   compatible = "qcom,kryo260";
+   reg = <0x0 0x103>;
+   enable-method = "psci";
+   capacity-dmips-mhz = <1024>;
+   next-level-cache = <&L2_1>;
+   L1_I_103: l1-icache {
+    compatible = "cache";
+   };
+   L1_D_103: l1-dcache {
+    compatible = "cache";
+   };
+  };
+
+  CPU4: cpu@0 {
+   device_type = "cpu";
+   compatible = "qcom,kryo260";
+   reg = <0x0 0x0>;
+   enable-method = "psci";
+   capacity-dmips-mhz = <640>;
+   next-level-cache = <&L2_0>;
+   L2_0: l2-cache {
+    compatible = "cache";
+    cache-level = <2>;
+   };
+   L1_I_0: l1-icache {
+    compatible = "cache";
+   };
+   L1_D_0: l1-dcache {
+    compatible = "cache";
+   };
+  };
+
+  CPU5: cpu@1 {
+   device_type = "cpu";
+   compatible = "qcom,kryo260";
+   reg = <0x0 0x1>;
+   enable-method = "psci";
+   capacity-dmips-mhz = <640>;
+   next-level-cache = <&L2_0>;
+   L1_I_1: l1-icache {
+    compatible = "cache";
+   };
+   L1_D_1: l1-dcache {
+    compatible = "cache";
+   };
+  };
+
+  CPU6: cpu@2 {
+   device_type = "cpu";
+   compatible = "qcom,kryo260";
+   reg = <0x0 0x2>;
+   enable-method = "psci";
+   capacity-dmips-mhz = <640>;
+   next-level-cache = <&L2_0>;
+   L1_I_2: l1-icache {
+    compatible = "cache";
+   };
+   L1_D_2: l1-dcache {
+    compatible = "cache";
+   };
+  };
+
+  CPU7: cpu@3 {
+   device_type = "cpu";
+   compatible = "qcom,kryo260";
+   reg = <0x0 0x3>;
+   enable-method = "psci";
+   capacity-dmips-mhz = <640>;
+   next-level-cache = <&L2_0>;
+   L1_I_3: l1-icache {
+    compatible = "cache";
+   };
+   L1_D_3: l1-dcache {
+    compatible = "cache";
+   };
+  };
+
+  cpu-map {
+   cluster0 {
+    core0 {
+     cpu = <&CPU4>;
+    };
+
+    core1 {
+     cpu = <&CPU5>;
+    };
+
+    core2 {
+     cpu = <&CPU6>;
+    };
+
+    core3 {
+     cpu = <&CPU7>;
+    };
+   };
+
+   cluster1 {
+    core0 {
+     cpu = <&CPU0>;
+    };
+
+    core1 {
+     cpu = <&CPU1>;
+    };
+
+    core2 {
+     cpu = <&CPU2>;
+    };
+
+    core3 {
+     cpu = <&CPU3>;
+    };
+   };
+  };
+ };
+
+ firmware {
+  scm {
+   compatible = "qcom,scm";
+  };
+ };
+
+ memory {
+  device_type = "memory";
+
+  reg = <0 0 0 0>;
+ };
+
+ psci {
+  compatible = "arm,psci-1.0";
+  method = "smc";
+ };
+
+ timer {
+  compatible = "arm,armv8-timer";
+  interrupts = <1 1 8>,
+        <1 2 8>,
+        <1 3 8>,
+        <1 0 8>;
+ };
+
+ soc: soc {
+  #address-cells = <1>;
+  #size-cells = <1>;
+  ranges = <0 0 0 0xffffffff>;
+  compatible = "simple-bus";
+
+  gcc: clock-controller@100000 {
+   compatible = "qcom,gcc-sdm660";
+   #clock-cells = <1>;
+   #reset-cells = <1>;
+   #power-domain-cells = <1>;
+   reg = <0x00100000 0x94000>;
+  };
+
+  tlmm: pinctrl@3100000 {
+   compatible = "qcom,sdm660-pinctrl";
+   reg = <0x03100000 0x400000>,
+         <0x03500000 0x400000>,
+         <0x03900000 0x400000>;
+   reg-names = "south", "center", "north";
+   interrupts = <0 208 4>;
+   gpio-controller;
+   gpio-ranges = <&tlmm 0 0 114>;
+   #gpio-cells = <2>;
+   interrupt-controller;
+   #interrupt-cells = <2>;
+
+   uart_console_active: uart_console_active {
+    pinmux {
+     pins = "gpio4", "gpio5";
+     function = "blsp_uart2";
+    };
+
+    pinconf {
+     pins = "gpio4", "gpio5";
+     drive-strength = <2>;
+     bias-disable;
+    };
+   };
+  };
+
+  spmi_bus: spmi@800f000 {
+   compatible = "qcom,spmi-pmic-arb";
+   reg = <0x0800f000 0x1000>,
+         <0x08400000 0x1000000>,
+         <0x09400000 0x1000000>,
+         <0x0a400000 0x220000>,
+         <0x0800a000 0x3000>;
+   reg-names = "core", "chnls", "obsrvr", "intr", "cnfg";
+   interrupt-names = "periph_irq";
+   interrupts = <0 326 4>;
+   qcom,ee = <0>;
+   qcom,channel = <0>;
+   #address-cells = <2>;
+   #size-cells = <0>;
+   interrupt-controller;
+   #interrupt-cells = <4>;
+   cell-index = <0>;
+  };
+
+  blsp1_uart2: serial@c170000 {
+   compatible = "qcom,msm-uartdm-v1.4", "qcom,msm-uartdm";
+   reg = <0x0c170000 0x1000>;
+   interrupts = <0 108 4>;
+   clocks = <&gcc 35>,
+     <&gcc 25>;
+   clock-names = "core", "iface";
+   status = "disabled";
+  };
+
+  timer@17920000 {
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges;
+   compatible = "arm,armv7-timer-mem";
+   reg = <0x17920000 0x1000>;
+
+   frame@17921000 {
+    frame-number = <0>;
+    interrupts = <0 8 4>,
+          <0 7 4>;
+    reg = <0x17921000 0x1000>,
+          <0x17922000 0x1000>;
+   };
+
+   frame@17923000 {
+    frame-number = <1>;
+    interrupts = <0 9 4>;
+    reg = <0x17923000 0x1000>;
+    status = "disabled";
+   };
+
+   frame@17924000 {
+    frame-number = <2>;
+    interrupts = <0 10 4>;
+    reg = <0x17924000 0x1000>;
+    status = "disabled";
+   };
+
+   frame@17925000 {
+    frame-number = <3>;
+    interrupts = <0 11 4>;
+    reg = <0x17925000 0x1000>;
+    status = "disabled";
+   };
+
+   frame@17926000 {
+    frame-number = <4>;
+    interrupts = <0 12 4>;
+    reg = <0x17926000 0x1000>;
+    status = "disabled";
+   };
+
+   frame@17927000 {
+    frame-number = <5>;
+    interrupts = <0 13 4>;
+    reg = <0x17927000 0x1000>;
+    status = "disabled";
+   };
+
+   frame@17928000 {
+    frame-number = <6>;
+    interrupts = <0 14 4>;
+    reg = <0x17928000 0x1000>;
+    status = "disabled";
+   };
+  };
+
+  intc: interrupt-controller@17a00000 {
+   compatible = "arm,gic-v3";
+   reg = <0x17a00000 0x10000>,
+         <0x17b00000 0x100000>;
+   #interrupt-cells = <3>;
+   #address-cells = <1>;
+   #size-cells = <1>;
+   ranges;
+   interrupt-controller;
+   #redistributor-regions = <1>;
+   redistributor-stride = <0x0 0x20000>;
+   interrupts = <1 9 4>;
+  };
+ };
+};
+# 9 "arch/arm64/boot/dts/qcom/sdm660-xiaomi-lavender.dts" 2
+
+/ {
+ model = "Xiaomi Redmi Note 7";
+ compatible = "xiaomi,lavender", "qcom,sdm660";
+
+ aliases {
+  serial0 = &blsp1_uart2;
+ };
+
+ chosen {
+  stdout-path = "serial0:115200n8";
+ };
+
+ reserved-memory {
+  #address-cells = <2>;
+  #size-cells = <2>;
+  ranges;
+
+  ramoops@a0000000 {
+   compatible = "ramoops";
+   reg = <0x0 0xa0000000 0x0 0x400000>;
+   console-size = <0x20000>;
+   record-size = <0x20000>;
+   ftrace-size = <0x0>;
+   pmsg-size = <0x20000>;
+  };
+ };
+};
+
+&blsp1_uart2 {
+ status = "okay";
+ pinctrl-names = "default";
+ pinctrl-0 = <&uart_console_active>;
+};
+
+&tlmm {
+ gpio-reserved-ranges = <8 4>;
+};

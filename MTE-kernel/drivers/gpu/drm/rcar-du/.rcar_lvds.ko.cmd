@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/rcar-du/rcar_lvds.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/rcar-du/rcar_lvds.ko drivers/gpu/drm/rcar-du/rcar_lvds.o drivers/gpu/drm/rcar-du/rcar_lvds.mod.o;  true

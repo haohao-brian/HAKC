@@ -1,0 +1,1 @@
+cmd_drivers/iio/adc/rockchip_saradc.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/iio/adc/rockchip_saradc.ko drivers/iio/adc/rockchip_saradc.o drivers/iio/adc/rockchip_saradc.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_arch/arm64/built-in.a := rm -f arch/arm64/built-in.a; llvm-ar cDPrST arch/arm64/built-in.a arch/arm64/kernel/built-in.a arch/arm64/mm/built-in.a arch/arm64/net/built-in.a arch/arm64/kvm/built-in.a arch/arm64/xen/built-in.a arch/arm64/crypto/built-in.a

@@ -1,0 +1,6 @@
+arch/arm64/boot/dts/altera/.socfpga_stratix10_socdk.dtb.dts.tmp: \
+  arch/arm64/boot/dts/altera/socfpga_stratix10_socdk.dts \
+  arch/arm64/boot/dts/altera/socfpga_stratix10.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/reset/altr,rst-mgr-s10.h \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/stratix10-clock.h

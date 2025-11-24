@@ -1,0 +1,8 @@
+arch/arm64/boot/dts/actions/.s900-bubblegum-96.dtb.dts.tmp: \
+  arch/arm64/boot/dts/actions/s900-bubblegum-96.dts \
+  arch/arm64/boot/dts/actions/s900.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/actions,s900-cmu.h \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/reset/actions,s900-reset.h

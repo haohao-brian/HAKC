@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/hisilicon/hibmc/hibmc-drm.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/gpu/drm/hisilicon/hibmc/hibmc-drm.o drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_drv.o drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_de.o drivers/gpu/drm/hisilicon/hibmc/hibmc_drm_vdac.o drivers/gpu/drm/hisilicon/hibmc/hibmc_ttm.o

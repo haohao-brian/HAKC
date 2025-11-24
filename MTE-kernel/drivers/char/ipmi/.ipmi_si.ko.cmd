@@ -1,0 +1,1 @@
+cmd_drivers/char/ipmi/ipmi_si.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/char/ipmi/ipmi_si.ko drivers/char/ipmi/ipmi_si.o drivers/char/ipmi/ipmi_si.mod.o;  true

@@ -1,0 +1,7 @@
+lib/crypto/libchacha.ko
+lib/crypto/libarc4.ko
+lib/crypto/libdes.ko
+lib/zstd/zstd_compress.ko
+lib/crc-ccitt.ko
+lib/libcrc32c.ko
+lib/raid6/raid6_pq.ko

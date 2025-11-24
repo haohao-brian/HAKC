@@ -1,0 +1,1 @@
+cmd_drivers/bus/tegra-aconnect.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/bus/tegra-aconnect.ko drivers/bus/tegra-aconnect.o drivers/bus/tegra-aconnect.mod.o;  true

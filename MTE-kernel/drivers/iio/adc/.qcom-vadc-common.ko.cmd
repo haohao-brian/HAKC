@@ -1,0 +1,1 @@
+cmd_drivers/iio/adc/qcom-vadc-common.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/iio/adc/qcom-vadc-common.ko drivers/iio/adc/qcom-vadc-common.o drivers/iio/adc/qcom-vadc-common.mod.o;  true

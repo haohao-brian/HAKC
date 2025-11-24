@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/hisilicon/kirin/kirin-drm.mod := { echo  drivers/gpu/drm/hisilicon/kirin/kirin_drm_drv.o drivers/gpu/drm/hisilicon/kirin/kirin_drm_ade.o;  echo; } > drivers/gpu/drm/hisilicon/kirin/kirin-drm.mod

@@ -1,0 +1,1 @@
+cmd_drivers/gpio/gpio-altera.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpio/gpio-altera.ko drivers/gpio/gpio-altera.o drivers/gpio/gpio-altera.mod.o;  true

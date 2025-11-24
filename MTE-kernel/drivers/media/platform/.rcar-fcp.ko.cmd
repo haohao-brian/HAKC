@@ -1,0 +1,1 @@
+cmd_drivers/media/platform/rcar-fcp.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/platform/rcar-fcp.ko drivers/media/platform/rcar-fcp.o drivers/media/platform/rcar-fcp.mod.o;  true

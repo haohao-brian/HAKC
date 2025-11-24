@@ -1,0 +1,1 @@
+cmd_drivers/leds/trigger/built-in.a := rm -f drivers/leds/trigger/built-in.a; llvm-ar cDPrST drivers/leds/trigger/built-in.a drivers/leds/trigger/ledtrig-timer.o drivers/leds/trigger/ledtrig-disk.o drivers/leds/trigger/ledtrig-heartbeat.o drivers/leds/trigger/ledtrig-cpu.o drivers/leds/trigger/ledtrig-default-on.o drivers/leds/trigger/ledtrig-panic.o

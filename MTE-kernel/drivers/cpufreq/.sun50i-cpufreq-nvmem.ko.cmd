@@ -1,0 +1,1 @@
+cmd_drivers/cpufreq/sun50i-cpufreq-nvmem.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/cpufreq/sun50i-cpufreq-nvmem.ko drivers/cpufreq/sun50i-cpufreq-nvmem.o drivers/cpufreq/sun50i-cpufreq-nvmem.mod.o;  true

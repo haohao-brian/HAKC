@@ -1,0 +1,8 @@
+arch/arm64/boot/dts/socionext/.uniphier-ld20-akebi96.dtb.dts.tmp: \
+  arch/arm64/boot/dts/socionext/uniphier-ld20-akebi96.dts \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/uniphier-gpio.h \
+  arch/arm64/boot/dts/socionext/uniphier-ld20.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/thermal/thermal.h \
+  arch/arm64/boot/dts/socionext/uniphier-pinctrl.dtsi \
+  scripts/dtc/include-prefixes/arm/uniphier-pinctrl.dtsi

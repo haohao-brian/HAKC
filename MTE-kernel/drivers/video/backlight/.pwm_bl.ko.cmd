@@ -1,0 +1,1 @@
+cmd_drivers/video/backlight/pwm_bl.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/video/backlight/pwm_bl.ko drivers/video/backlight/pwm_bl.o drivers/video/backlight/pwm_bl.mod.o;  true

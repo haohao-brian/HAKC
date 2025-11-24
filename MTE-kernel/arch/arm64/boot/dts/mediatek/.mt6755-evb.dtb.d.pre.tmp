@@ -1,0 +1,5 @@
+arch/arm64/boot/dts/mediatek/.mt6755-evb.dtb.dts.tmp: \
+  arch/arm64/boot/dts/mediatek/mt6755-evb.dts \
+  arch/arm64/boot/dts/mediatek/mt6755.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h

@@ -1,0 +1,641 @@
+# 1 "arch/arm64/boot/dts/actions/s900-bubblegum-96.dts"
+# 1 "<built-in>" 1
+# 1 "arch/arm64/boot/dts/actions/s900-bubblegum-96.dts" 2
+
+
+
+
+
+/dts-v1/;
+
+
+# 1 "arch/arm64/boot/dts/actions/s900.dtsi" 1
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/clock/actions,s900-cmu.h" 1
+# 7 "arch/arm64/boot/dts/actions/s900.dtsi" 2
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h" 1
+# 8 "arch/arm64/boot/dts/actions/s900.dtsi" 2
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 1
+
+
+
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h" 1
+# 10 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 2
+# 9 "arch/arm64/boot/dts/actions/s900.dtsi" 2
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/reset/actions,s900-reset.h" 1
+# 10 "arch/arm64/boot/dts/actions/s900.dtsi" 2
+
+/ {
+ compatible = "actions,s900";
+ interrupt-parent = <&gic>;
+ #address-cells = <2>;
+ #size-cells = <2>;
+
+ cpus {
+  #address-cells = <2>;
+  #size-cells = <0>;
+
+  cpu0: cpu@0 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x0>;
+   enable-method = "psci";
+  };
+
+  cpu1: cpu@1 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x1>;
+   enable-method = "psci";
+  };
+
+  cpu2: cpu@2 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x2>;
+   enable-method = "psci";
+  };
+
+  cpu3: cpu@3 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x3>;
+   enable-method = "psci";
+  };
+ };
+
+ reserved-memory {
+  #address-cells = <2>;
+  #size-cells = <2>;
+  ranges;
+
+  secmon@1f000000 {
+   reg = <0x0 0x1f000000 0x0 0x1000000>;
+   no-map;
+  };
+ };
+
+ psci {
+  compatible = "arm,psci-0.2";
+  method = "smc";
+ };
+
+ arm-pmu {
+  compatible = "arm,cortex-a53-pmu";
+  interrupts = <0 4 4>,
+               <0 5 4>,
+               <0 6 4>,
+               <0 7 4>;
+  interrupt-affinity = <&cpu0>, <&cpu1>, <&cpu2>, <&cpu3>;
+ };
+
+ timer {
+  compatible = "arm,armv8-timer";
+  interrupts = <1 13
+   ((((1 << (4)) - 1) << 8) | 8)>,
+        <1 14
+   ((((1 << (4)) - 1) << 8) | 8)>,
+        <1 11
+   ((((1 << (4)) - 1) << 8) | 8)>,
+        <1 10
+   ((((1 << (4)) - 1) << 8) | 8)>;
+ };
+
+ hosc: hosc {
+  compatible = "fixed-clock";
+  clock-frequency = <24000000>;
+  #clock-cells = <0>;
+ };
+
+ losc: losc {
+  compatible = "fixed-clock";
+  clock-frequency = <32768>;
+  #clock-cells = <0>;
+ };
+
+ diff24M: diff24M {
+  compatible = "fixed-clock";
+  clock-frequency = <24000000>;
+  #clock-cells = <0>;
+ };
+
+ soc {
+  compatible = "simple-bus";
+  #address-cells = <2>;
+  #size-cells = <2>;
+  ranges;
+
+  gic: interrupt-controller@e00f1000 {
+   compatible = "arm,gic-400";
+   reg = <0x0 0xe00f1000 0x0 0x1000>,
+         <0x0 0xe00f2000 0x0 0x2000>,
+         <0x0 0xe00f4000 0x0 0x2000>,
+         <0x0 0xe00f6000 0x0 0x2000>;
+   interrupts = <1 9 ((((1 << (4)) - 1) << 8) | 8)>;
+   interrupt-controller;
+   #interrupt-cells = <3>;
+  };
+
+  uart0: serial@e0120000 {
+   compatible = "actions,s900-uart", "actions,owl-uart";
+   reg = <0x0 0xe0120000 0x0 0x2000>;
+   clocks = <&cmu 67>;
+   interrupts = <0 29 4>;
+   status = "disabled";
+  };
+
+  uart1: serial@e0122000 {
+   compatible = "actions,s900-uart", "actions,owl-uart";
+   reg = <0x0 0xe0122000 0x0 0x2000>;
+   clocks = <&cmu 68>;
+   interrupts = <0 30 4>;
+   status = "disabled";
+  };
+
+  uart2: serial@e0124000 {
+   compatible = "actions,s900-uart", "actions,owl-uart";
+   reg = <0x0 0xe0124000 0x0 0x2000>;
+   clocks = <&cmu 69>;
+   interrupts = <0 31 4>;
+   status = "disabled";
+  };
+
+  uart3: serial@e0126000 {
+   compatible = "actions,s900-uart", "actions,owl-uart";
+   reg = <0x0 0xe0126000 0x0 0x2000>;
+   clocks = <&cmu 70>;
+   interrupts = <0 32 4>;
+   status = "disabled";
+  };
+
+  uart4: serial@e0128000 {
+   compatible = "actions,s900-uart", "actions,owl-uart";
+   reg = <0x0 0xe0128000 0x0 0x2000>;
+   clocks = <&cmu 71>;
+   interrupts = <0 33 4>;
+   status = "disabled";
+  };
+
+  uart5: serial@e012a000 {
+   compatible = "actions,s900-uart", "actions,owl-uart";
+   reg = <0x0 0xe012a000 0x0 0x2000>;
+   clocks = <&cmu 72>;
+   interrupts = <0 34 4>;
+   status = "disabled";
+  };
+
+  uart6: serial@e012c000 {
+   compatible = "actions,s900-uart", "actions,owl-uart";
+   reg = <0x0 0xe012c000 0x0 0x2000>;
+   clocks = <&cmu 73>;
+   interrupts = <0 35 4>;
+   status = "disabled";
+  };
+
+  sps: power-controller@e012e000 {
+   compatible = "actions,s900-sps";
+   reg = <0x0 0xe012e000 0x0 0x2000>;
+   #power-domain-cells = <1>;
+  };
+
+  cmu: clock-controller@e0160000 {
+   compatible = "actions,s900-cmu";
+   reg = <0x0 0xe0160000 0x0 0x1000>;
+   clocks = <&hosc>, <&losc>;
+   #clock-cells = <1>;
+   #reset-cells = <1>;
+  };
+
+  i2c0: i2c@e0170000 {
+   compatible = "actions,s900-i2c";
+   reg = <0 0xe0170000 0 0x1000>;
+   clocks = <&cmu 38>;
+   interrupts = <0 25 4>;
+   #address-cells = <1>;
+   #size-cells = <0>;
+   status = "disabled";
+  };
+
+  i2c1: i2c@e0172000 {
+   compatible = "actions,s900-i2c";
+   reg = <0 0xe0172000 0 0x1000>;
+   clocks = <&cmu 39>;
+   interrupts = <0 26 4>;
+   #address-cells = <1>;
+   #size-cells = <0>;
+   status = "disabled";
+  };
+
+  i2c2: i2c@e0174000 {
+   compatible = "actions,s900-i2c";
+   reg = <0 0xe0174000 0 0x1000>;
+   clocks = <&cmu 40>;
+   interrupts = <0 27 4>;
+   #address-cells = <1>;
+   #size-cells = <0>;
+   status = "disabled";
+  };
+
+  i2c3: i2c@e0176000 {
+   compatible = "actions,s900-i2c";
+   reg = <0 0xe0176000 0 0x1000>;
+   clocks = <&cmu 41>;
+   interrupts = <0 28 4>;
+   #address-cells = <1>;
+   #size-cells = <0>;
+   status = "disabled";
+  };
+
+  i2c4: i2c@e0178000 {
+   compatible = "actions,s900-i2c";
+   reg = <0 0xe0178000 0 0x1000>;
+   clocks = <&cmu 42>;
+   interrupts = <0 8 4>;
+   #address-cells = <1>;
+   #size-cells = <0>;
+   status = "disabled";
+  };
+
+  i2c5: i2c@e017a000 {
+   compatible = "actions,s900-i2c";
+   reg = <0 0xe017a000 0 0x1000>;
+   clocks = <&cmu 43>;
+   interrupts = <0 9 4>;
+   #address-cells = <1>;
+   #size-cells = <0>;
+   status = "disabled";
+  };
+
+  pinctrl: pinctrl@e01b0000 {
+   compatible = "actions,s900-pinctrl";
+   reg = <0x0 0xe01b0000 0x0 0x1000>;
+   clocks = <&cmu 23>;
+   gpio-controller;
+   gpio-ranges = <&pinctrl 0 0 146>;
+   #gpio-cells = <2>;
+   interrupt-controller;
+   #interrupt-cells = <2>;
+   interrupts = <0 36 4>,
+         <0 37 4>,
+         <0 38 4>,
+         <0 39 4>,
+         <0 40 4>,
+         <0 16 4>;
+  };
+
+  timer: timer@e0228000 {
+   compatible = "actions,s900-timer";
+   reg = <0x0 0xe0228000 0x0 0x8000>;
+   interrupts = <0 11 4>;
+   interrupt-names = "timer1";
+  };
+
+  dma: dma-controller@e0260000 {
+   compatible = "actions,s900-dma";
+   reg = <0x0 0xe0260000 0x0 0x1000>;
+   interrupts = <0 57 4>,
+         <0 58 4>,
+         <0 59 4>,
+         <0 60 4>;
+   #dma-cells = <1>;
+   dma-channels = <12>;
+   dma-requests = <46>;
+   clocks = <&cmu 22>;
+  };
+
+  mmc0: mmc@e0330000 {
+   compatible = "actions,owl-mmc";
+   reg = <0x0 0xe0330000 0x0 0x4000>;
+   interrupts = <0 42 4>;
+   clocks = <&cmu 56>;
+   resets = <&cmu 23>;
+   dmas = <&dma 2>;
+   dma-names = "mmc";
+   status = "disabled";
+  };
+
+  mmc1: mmc@e0334000 {
+   compatible = "actions,owl-mmc";
+   reg = <0x0 0xe0334000 0x0 0x4000>;
+   interrupts = <0 43 4>;
+   clocks = <&cmu 57>;
+   resets = <&cmu 24>;
+   dmas = <&dma 3>;
+   dma-names = "mmc";
+   status = "disabled";
+  };
+
+  mmc2: mmc@e0338000 {
+   compatible = "actions,owl-mmc";
+   reg = <0x0 0xe0338000 0x0 0x4000>;
+   interrupts = <0 44 4>;
+   clocks = <&cmu 58>;
+   resets = <&cmu 25>;
+   dmas = <&dma 4>;
+   dma-names = "mmc";
+   status = "disabled";
+  };
+
+  mmc3: mmc@e033c000 {
+   compatible = "actions,owl-mmc";
+   reg = <0x0 0xe033c000 0x0 0x4000>;
+   interrupts = <0 62 4>;
+   clocks = <&cmu 59>;
+   resets = <&cmu 26>;
+   dmas = <&dma 46>;
+   dma-names = "mmc";
+   status = "disabled";
+  };
+ };
+};
+# 9 "arch/arm64/boot/dts/actions/s900-bubblegum-96.dts" 2
+
+/ {
+ compatible = "ucrobotics,bubblegum-96", "actions,s900";
+ model = "Bubblegum-96";
+
+ aliases {
+  mmc0 = &mmc0;
+  mmc1 = &mmc1;
+  mmc2 = &mmc2;
+  serial5 = &uart5;
+ };
+
+ chosen {
+  stdout-path = "serial5:115200n8";
+ };
+
+ memory@0 {
+  device_type = "memory";
+  reg = <0x0 0x0 0x0 0x80000000>;
+ };
+
+
+ vcc_3v1: vcc-3v1 {
+  compatible = "regulator-fixed";
+  regulator-name = "fixed-3.1V";
+  regulator-min-microvolt = <3100000>;
+  regulator-max-microvolt = <3100000>;
+  regulator-always-on;
+ };
+
+
+ sd_vcc: sd-vcc {
+  compatible = "regulator-fixed";
+  regulator-name = "fixed-3.1V";
+  regulator-min-microvolt = <3100000>;
+  regulator-max-microvolt = <3100000>;
+  regulator-always-on;
+ };
+};
+
+&i2c0 {
+ status = "disabled";
+ pinctrl-names = "default";
+ pinctrl-0 = <&i2c0_default>;
+};
+
+&i2c1 {
+ status = "okay";
+ pinctrl-names = "default";
+ pinctrl-0 = <&i2c1_default>;
+};
+
+&i2c2 {
+ status = "okay";
+ pinctrl-names = "default";
+ pinctrl-0 = <&i2c2_default>;
+};
+# 92 "arch/arm64/boot/dts/actions/s900-bubblegum-96.dts"
+&pinctrl {
+ gpio-line-names =
+  "GPIO-A",
+  "GPIO-B",
+  "GPIO-C",
+  "GPIO-D",
+  "GPIO-E",
+  "GPIO-F",
+  "GPIO-G",
+  "GPIO-H",
+  "GPIO-I",
+  "GPIO-J",
+  "NC",
+  "NC",
+  "SIRQ2_1V8",
+  "PCM0_OUT",
+  "WIFI_LED",
+  "PCM0_SYNC",
+  "PCM0_CLK",
+  "PCM0_IN",
+  "BT_LED",
+  "LED0",
+  "LED1",
+  "JTAG_TCK",
+  "JTAG_TMS",
+  "JTAG_TDI",
+  "JTAG_TDO",
+  "[UART1_RxD]",
+  "NC",
+  "[UART1_TxD]",
+  "SD0_D0",
+  "SD0_D1",
+  "SD0_D2",
+  "SD0_D3",
+  "SD1_D0",
+  "SD1_D1",
+  "SD1_D2",
+  "SD1_D3",
+  "SD0_CMD",
+  "SD0_CLK",
+  "SD1_CMD",
+  "SD1_CLK",
+  "SPI0_SCLK",
+  "SPI0_CS",
+  "SPI0_DIN",
+  "SPI0_DOUT",
+  "I2C5_SDATA",
+  "I2C5_SCLK",
+  "UART0_RX",
+  "UART0_TX",
+  "UART0_RTSB",
+  "UART0_CTSB",
+  "I2C4_SCLK",
+  "I2C4_SDATA",
+  "I2C0_SCLK",
+  "I2C0_SDATA",
+  "I2C1_SCLK",
+  "I2C1_SDATA",
+  "I2C2_SCLK",
+  "I2C2_SDATA",
+  "CSI0_DN0",
+  "CSI0_DP0",
+  "CSI0_DN1",
+  "CSI0_DP1",
+  "CSI0_CN",
+  "CSI0_CP",
+  "CSI0_DN2",
+  "CSI0_DP2",
+  "CSI0_DN3",
+  "CSI0_DP3",
+  "[CLK0]",
+  "CSI1_DN0",
+  "CSI1_DP0",
+  "CSI1_DN1",
+  "CSI1_DP1",
+  "CSI1_CN",
+  "CSI1_CP",
+  "[CLK1]",
+  "[GPIOD0]",
+  "[GPIOD1]",
+  "BT_RST_N",
+  "EXT_DC_EN",
+  "[PCM_DI]",
+  "[PCM_DO]",
+  "[PCM_CLK]",
+  "[PCM_FS]",
+  "WAKE_BT",
+  "WL_REG_ON",
+  "NC",
+  "NC",
+  "NC",
+  "NC",
+  "NC",
+  "WIFI_WAKE",
+  "BT_WAKE",
+  "NC",
+  "OTG_EN2",
+  "OTG_EN",
+  "DSI_DP3",
+  "DSI_DN3",
+  "DSI_DP1",
+  "DSI_DN1",
+  "DSI_CP",
+  "DSI_CN",
+  "DSI_DP0",
+  "DSI_DN0",
+  "DSI_DP2",
+  "DSI_DN2",
+  "N0_D0",
+  "N0_D1",
+  "N0_D2",
+  "N0_D3",
+  "N0_D4",
+  "N0_D5",
+  "N0_D6",
+  "N0_D7",
+  "N0_DQS",
+  "N0_DQSN",
+  "NC",
+  "NC",
+  "NC",
+  "N0_CEB1",
+  "CARD_DT",
+  "N0_CEB3",
+  "SD_DAT0",
+  "SD_DAT1",
+  "SD_DAT2",
+  "SD_DAT3",
+  "NC",
+  "NC",
+  "[PWR_BTN_N]",
+  "[RST_BTN_N]",
+  "NC",
+  "SD_CMD",
+  "GPIO-L",
+  "GPIO-K",
+  "NC",
+  "SD_SCLK",
+  "NC",
+  "JTAG_TRST",
+  "I2C3_SCLK",
+  "LED2",
+  "LED3",
+  "I2C3_SDATA",
+  "UART3_RX",
+  "UART3_TX",
+  "UART3_RTSB",
+  "UART3_CTSB";
+
+ i2c0_default: i2c0-default {
+  pinmux {
+   groups = "i2c0_mfp";
+   function = "i2c0";
+  };
+  pinconf {
+   pins = "i2c0_sclk", "i2c0_sdata";
+   bias-pull-up;
+  };
+ };
+
+ i2c1_default: i2c1-default {
+  pinconf {
+   pins = "i2c1_sclk", "i2c1_sdata";
+   bias-pull-up;
+  };
+ };
+
+ i2c2_default: i2c2-default {
+  pinconf {
+   pins = "i2c2_sclk", "i2c2_sdata";
+   bias-pull-up;
+  };
+ };
+
+ mmc0_default: mmc0_default {
+  pinmux {
+   groups = "sd0_d0_mfp", "sd0_d1_mfp", "sd0_d2_d3_mfp",
+     "sd0_cmd_mfp", "sd0_clk_mfp";
+   function = "sd0";
+  };
+ };
+
+ mmc2_default: mmc2_default {
+  pinmux {
+   groups = "nand0_d0_ceb3_mfp";
+   function = "sd2";
+  };
+ };
+};
+
+
+&mmc0 {
+ status = "okay";
+ pinctrl-names = "default";
+ pinctrl-0 = <&mmc0_default>;
+ no-sdio;
+ no-mmc;
+ no-1-8-v;
+ cd-gpios = <&pinctrl 120 1>;
+ bus-width = <4>;
+ vmmc-supply = <&sd_vcc>;
+ vqmmc-supply = <&sd_vcc>;
+};
+
+
+&mmc2 {
+ status = "okay";
+ pinctrl-names = "default";
+ pinctrl-0 = <&mmc2_default>;
+ no-sdio;
+ no-sd;
+ non-removable;
+ bus-width = <8>;
+ vmmc-supply = <&vcc_3v1>;
+};
+
+&timer {
+ clocks = <&hosc>;
+};
+
+&uart5 {
+ status = "okay";
+};

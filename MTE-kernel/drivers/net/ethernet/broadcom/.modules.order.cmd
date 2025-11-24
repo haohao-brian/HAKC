@@ -1,0 +1,1 @@
+cmd_drivers/net/ethernet/broadcom/modules.order := {   cat drivers/net/ethernet/broadcom/genet/modules.order;   cat drivers/net/ethernet/broadcom/bnx2x/modules.order; :; } | awk '!x[$$0]++' - > drivers/net/ethernet/broadcom/modules.order

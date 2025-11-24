@@ -1,0 +1,15 @@
+drivers/crypto/allwinner/sun8i-ce/sun8i-ce.ko
+drivers/crypto/hisilicon/hpre/hisi_hpre.ko
+drivers/crypto/hisilicon/sec2/hisi_sec2.ko
+drivers/crypto/hisilicon/hisi_qm.ko
+drivers/crypto/hisilicon/zip/hisi_zip.ko
+drivers/crypto/ccree/ccree.ko
+drivers/crypto/caam/error.ko
+drivers/crypto/caam/caam.ko
+drivers/crypto/caam/caam_jr.ko
+drivers/crypto/caam/caamalg_desc.ko
+drivers/crypto/caam/caamhash_desc.ko
+drivers/crypto/caam/dpaa2_caam.ko
+drivers/crypto/qcom-rng.ko
+drivers/crypto/bcm/bcm_crypto_spu.ko
+drivers/crypto/amlogic/amlogic-gxl-crypto.ko

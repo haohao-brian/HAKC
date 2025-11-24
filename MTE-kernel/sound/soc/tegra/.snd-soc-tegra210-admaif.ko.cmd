@@ -1,0 +1,1 @@
+cmd_sound/soc/tegra/snd-soc-tegra210-admaif.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/tegra/snd-soc-tegra210-admaif.ko sound/soc/tegra/snd-soc-tegra210-admaif.o sound/soc/tegra/snd-soc-tegra210-admaif.mod.o;  true

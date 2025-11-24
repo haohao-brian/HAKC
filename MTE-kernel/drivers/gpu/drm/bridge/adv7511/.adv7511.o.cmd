@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/bridge/adv7511/adv7511.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/gpu/drm/bridge/adv7511/adv7511.o drivers/gpu/drm/bridge/adv7511/adv7511_drv.o drivers/gpu/drm/bridge/adv7511/adv7533.o drivers/gpu/drm/bridge/adv7511/adv7511_audio.o drivers/gpu/drm/bridge/adv7511/adv7511_cec.o

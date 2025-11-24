@@ -1,0 +1,1 @@
+cmd_drivers/base/regmap/regmap-slimbus.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/base/regmap/regmap-slimbus.ko drivers/base/regmap/regmap-slimbus.o drivers/base/regmap/regmap-slimbus.mod.o;  true

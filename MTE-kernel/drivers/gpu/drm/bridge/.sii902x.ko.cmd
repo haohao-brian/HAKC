@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/bridge/sii902x.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/bridge/sii902x.ko drivers/gpu/drm/bridge/sii902x.o drivers/gpu/drm/bridge/sii902x.mod.o;  true

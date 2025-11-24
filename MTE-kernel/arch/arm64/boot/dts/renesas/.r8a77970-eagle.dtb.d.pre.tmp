@@ -1,0 +1,8 @@
+arch/arm64/boot/dts/renesas/.r8a77970-eagle.dtb.dts.tmp: \
+  arch/arm64/boot/dts/renesas/r8a77970-eagle.dts \
+  arch/arm64/boot/dts/renesas/r8a77970.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/r8a77970-cpg-mssr.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/renesas-cpg-mssr.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/power/r8a77970-sysc.h

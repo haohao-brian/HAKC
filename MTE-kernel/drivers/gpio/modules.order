@@ -1,0 +1,5 @@
+drivers/gpio/gpio-regmap.ko
+drivers/gpio/gpio-altera.ko
+drivers/gpio/gpio-bd9571mwv.ko
+drivers/gpio/gpio-sl28cpld.ko
+drivers/gpio/gpio-wcd934x.ko

@@ -1,0 +1,1 @@
+cmd_drivers/net/ethernet/freescale/modules.order := {   cat drivers/net/ethernet/freescale/fman/modules.order;   cat drivers/net/ethernet/freescale/dpaa/modules.order;   cat drivers/net/ethernet/freescale/dpaa2/modules.order;   cat drivers/net/ethernet/freescale/enetc/modules.order; :; } | awk '!x[$$0]++' - > drivers/net/ethernet/freescale/modules.order

@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/bridge/synopsys/dw-hdmi-ahb-audio.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/gpu/drm/bridge/synopsys/dw-hdmi-ahb-audio.ko drivers/gpu/drm/bridge/synopsys/dw-hdmi-ahb-audio.o drivers/gpu/drm/bridge/synopsys/dw-hdmi-ahb-audio.mod.o;  true

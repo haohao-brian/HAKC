@@ -1,0 +1,11 @@
+arch/arm64/boot/dts/mediatek/.mt8183-evb.dtb.dts.tmp: \
+  arch/arm64/boot/dts/mediatek/mt8183-evb.dts \
+  arch/arm64/boot/dts/mediatek/mt8183.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/mt8183-clk.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/reset-controller/mt8183-resets.h \
+  scripts/dtc/include-prefixes/dt-bindings/phy/phy.h \
+  arch/arm64/boot/dts/mediatek/mt8183-pinfunc.h \
+  scripts/dtc/include-prefixes/dt-bindings/pinctrl/mt65xx.h \
+  arch/arm64/boot/dts/mediatek/mt6358.dtsi

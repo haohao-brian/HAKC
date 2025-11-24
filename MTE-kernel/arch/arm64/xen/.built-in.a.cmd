@@ -1,0 +1,1 @@
+cmd_arch/arm64/xen/built-in.a := rm -f arch/arm64/xen/built-in.a; llvm-ar cDPrST arch/arm64/xen/built-in.a arch/arm64/xen/../../arm/xen/enlighten.o arch/arm64/xen/../../arm/xen/grant-table.o arch/arm64/xen/../../arm/xen/p2m.o arch/arm64/xen/../../arm/xen/mm.o arch/arm64/xen/hypercall.o

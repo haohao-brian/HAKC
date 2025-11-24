@@ -1,0 +1,1 @@
+cmd_drivers/soc/bcm/built-in.a := rm -f drivers/soc/bcm/built-in.a; llvm-ar cDPrST drivers/soc/bcm/built-in.a drivers/soc/bcm/bcm2835-power.o drivers/soc/bcm/raspberrypi-power.o drivers/soc/bcm/brcmstb/built-in.a

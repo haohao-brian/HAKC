@@ -1,0 +1,10 @@
+arch/arm64/boot/dts/socionext/.uniphier-pxs3-ref.dtb.dts.tmp: \
+  arch/arm64/boot/dts/socionext/uniphier-pxs3-ref.dts \
+  arch/arm64/boot/dts/socionext/uniphier-pxs3.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/uniphier-gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/thermal/thermal.h \
+  arch/arm64/boot/dts/socionext/uniphier-pinctrl.dtsi \
+  scripts/dtc/include-prefixes/arm/uniphier-pinctrl.dtsi \
+  arch/arm64/boot/dts/socionext/uniphier-support-card.dtsi \
+  scripts/dtc/include-prefixes/arm/uniphier-support-card.dtsi

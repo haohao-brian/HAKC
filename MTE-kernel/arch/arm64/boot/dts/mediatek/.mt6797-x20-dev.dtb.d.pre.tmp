@@ -1,0 +1,8 @@
+arch/arm64/boot/dts/mediatek/.mt6797-x20-dev.dtb.dts.tmp: \
+  arch/arm64/boot/dts/mediatek/mt6797-x20-dev.dts \
+  arch/arm64/boot/dts/mediatek/mt6797.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/mt6797-clk.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/pinctrl/mt6797-pinfunc.h \
+  scripts/dtc/include-prefixes/dt-bindings/pinctrl/mt65xx.h

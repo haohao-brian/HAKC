@@ -1,0 +1,6 @@
+arch/arm64/boot/dts/sprd/.sc9836-openphone.dtb.dts.tmp: \
+  arch/arm64/boot/dts/sprd/sc9836-openphone.dts \
+  arch/arm64/boot/dts/sprd/sc9836.dtsi \
+  arch/arm64/boot/dts/sprd/sharkl64.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h

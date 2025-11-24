@@ -1,0 +1,3 @@
+drivers/clk/meson/clk-phase.ko
+drivers/clk/meson/sclk-div.ko
+drivers/clk/meson/axg-audio.ko

@@ -1,0 +1,1 @@
+cmd_drivers/i2c/busses/i2c-qcom-geni.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/i2c/busses/i2c-qcom-geni.ko drivers/i2c/busses/i2c-qcom-geni.o drivers/i2c/busses/i2c-qcom-geni.mod.o;  true

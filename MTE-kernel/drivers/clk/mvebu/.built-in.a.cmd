@@ -1,0 +1,1 @@
+cmd_drivers/clk/mvebu/built-in.a := rm -f drivers/clk/mvebu/built-in.a; llvm-ar cDPrST drivers/clk/mvebu/built-in.a drivers/clk/mvebu/armada_ap_cp_helper.o drivers/clk/mvebu/armada-37xx-xtal.o drivers/clk/mvebu/armada-37xx-tbg.o drivers/clk/mvebu/armada-37xx-periph.o drivers/clk/mvebu/ap806-system-controller.o drivers/clk/mvebu/cp110-system-controller.o

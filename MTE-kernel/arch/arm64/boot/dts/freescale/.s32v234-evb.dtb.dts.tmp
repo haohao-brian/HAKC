@@ -1,0 +1,180 @@
+# 1 "arch/arm64/boot/dts/freescale/s32v234-evb.dts"
+# 1 "<built-in>" 1
+# 1 "arch/arm64/boot/dts/freescale/s32v234-evb.dts" 2
+
+
+
+
+
+
+/dts-v1/;
+
+# 1 "arch/arm64/boot/dts/freescale/s32v234.dtsi" 1
+
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 1
+
+
+
+
+
+
+
+
+# 1 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h" 1
+# 10 "./scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h" 2
+# 8 "arch/arm64/boot/dts/freescale/s32v234.dtsi" 2
+
+/memreserve/ 0x80000000 0x00010000;
+
+/ {
+ compatible = "fsl,s32v234";
+ interrupt-parent = <&gic>;
+ #address-cells = <2>;
+ #size-cells = <2>;
+
+ aliases {
+  serial0 = &uart0;
+  serial1 = &uart1;
+ };
+
+ cpus {
+  #address-cells = <2>;
+  #size-cells = <0>;
+
+  cpu0: cpu@0 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x0>;
+   enable-method = "spin-table";
+   cpu-release-addr = <0x0 0x80000000>;
+   next-level-cache = <&cluster0_l2_cache>;
+  };
+
+  cpu1: cpu@1 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x1>;
+   enable-method = "spin-table";
+   cpu-release-addr = <0x0 0x80000000>;
+   next-level-cache = <&cluster0_l2_cache>;
+  };
+
+  cpu2: cpu@100 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x100>;
+   enable-method = "spin-table";
+   cpu-release-addr = <0x0 0x80000000>;
+   next-level-cache = <&cluster1_l2_cache>;
+  };
+
+  cpu3: cpu@101 {
+   device_type = "cpu";
+   compatible = "arm,cortex-a53";
+   reg = <0x0 0x101>;
+   enable-method = "spin-table";
+   cpu-release-addr = <0x0 0x80000000>;
+   next-level-cache = <&cluster1_l2_cache>;
+  };
+
+  cluster0_l2_cache: l2-cache0 {
+   compatible = "cache";
+  };
+
+  cluster1_l2_cache: l2-cache1 {
+   compatible = "cache";
+  };
+ };
+
+ timer {
+  compatible = "arm,armv8-timer";
+  interrupts = <1 13 ((((1 << (4)) - 1) << 8) |
+       8)>,
+        <1 14 ((((1 << (4)) - 1) << 8) |
+       8)>,
+        <1 11 ((((1 << (4)) - 1) << 8) |
+       8)>,
+        <1 10 ((((1 << (4)) - 1) << 8) |
+       8)>;
+
+
+
+  clock-frequency = <10000000>;
+ };
+
+ gic: interrupt-controller@7d001000 {
+  compatible = "arm,cortex-a15-gic", "arm,cortex-a9-gic";
+  #interrupt-cells = <3>;
+  #address-cells = <0>;
+  interrupt-controller;
+  reg = <0 0x7d001000 0 0x1000>,
+        <0 0x7d002000 0 0x2000>,
+        <0 0x7d004000 0 0x2000>,
+        <0 0x7d006000 0 0x2000>;
+  interrupts = <1 9 ((((1 << (4)) - 1) << 8) |
+      4)>;
+ };
+
+ soc {
+  #address-cells = <2>;
+  #size-cells = <2>;
+  compatible = "simple-bus";
+  interrupt-parent = <&gic>;
+  ranges;
+
+  aips0: bus@40000000 {
+   compatible = "simple-bus";
+   #address-cells = <2>;
+   #size-cells = <2>;
+   interrupt-parent = <&gic>;
+   reg = <0x0 0x40000000 0x0 0x7d000>;
+   ranges;
+
+   uart0: serial@40053000 {
+    compatible = "fsl,s32v234-linflexuart";
+    reg = <0x0 0x40053000 0x0 0x1000>;
+    interrupts = <0 59 1>;
+    status = "disabled";
+   };
+  };
+
+  aips1: bus@40080000 {
+   compatible = "simple-bus";
+   #address-cells = <2>;
+   #size-cells = <2>;
+   interrupt-parent = <&gic>;
+   reg = <0x0 0x40080000 0x0 0x70000>;
+   ranges;
+
+   uart1: serial@400bc000 {
+    compatible = "fsl,s32v234-linflexuart";
+    reg = <0x0 0x400bc000 0x0 0x1000>;
+    interrupts = <0 60 1>;
+    status = "disabled";
+   };
+  };
+ };
+};
+# 9 "arch/arm64/boot/dts/freescale/s32v234-evb.dts" 2
+
+/ {
+ model = "NXP S32V234-EVB2 Board";
+ compatible = "fsl,s32v234-evb", "fsl,s32v234";
+
+ chosen {
+  stdout-path = "serial0:115200n8";
+ };
+};
+
+&uart0 {
+ status = "okay";
+};
+
+&uart1 {
+ status = "okay";
+};

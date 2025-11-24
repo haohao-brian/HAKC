@@ -1,0 +1,1 @@
+cmd_drivers/i2c/busses/i2c-qcom-cci.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/i2c/busses/i2c-qcom-cci.ko drivers/i2c/busses/i2c-qcom-cci.o drivers/i2c/busses/i2c-qcom-cci.mod.o;  true

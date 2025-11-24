@@ -1,0 +1,1 @@
+cmd_drivers/pci/controller/pcie-rockchip-host.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/pci/controller/pcie-rockchip-host.ko drivers/pci/controller/pcie-rockchip-host.o drivers/pci/controller/pcie-rockchip-host.mod.o;  true

@@ -1,0 +1,5 @@
+arch/arm64/boot/dts/synaptics/.berlin4ct-dmp.dtb.dts.tmp: \
+  arch/arm64/boot/dts/synaptics/berlin4ct-dmp.dts \
+  arch/arm64/boot/dts/synaptics/berlin4ct.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h

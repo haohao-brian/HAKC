@@ -1,0 +1,1 @@
+cmd_drivers/crypto/caam/dpaa2_caam.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/crypto/caam/dpaa2_caam.o drivers/crypto/caam/caamalg_qi2.o drivers/crypto/caam/dpseci.o drivers/crypto/caam/dpseci-debugfs.o

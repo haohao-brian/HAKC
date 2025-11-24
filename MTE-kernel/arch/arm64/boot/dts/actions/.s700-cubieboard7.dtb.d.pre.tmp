@@ -1,0 +1,8 @@
+arch/arm64/boot/dts/actions/.s700-cubieboard7.dtb.dts.tmp: \
+  arch/arm64/boot/dts/actions/s700-cubieboard7.dts \
+  arch/arm64/boot/dts/actions/s700.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/actions,s700-cmu.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/power/owl-s700-powergate.h \
+  scripts/dtc/include-prefixes/dt-bindings/reset/actions,s700-reset.h

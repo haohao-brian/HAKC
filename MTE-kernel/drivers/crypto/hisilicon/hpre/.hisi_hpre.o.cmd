@@ -1,0 +1,1 @@
+cmd_drivers/crypto/hisilicon/hpre/hisi_hpre.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/crypto/hisilicon/hpre/hisi_hpre.o drivers/crypto/hisilicon/hpre/hpre_main.o drivers/crypto/hisilicon/hpre/hpre_crypto.o

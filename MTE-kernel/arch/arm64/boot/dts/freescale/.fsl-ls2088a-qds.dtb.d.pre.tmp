@@ -1,0 +1,8 @@
+arch/arm64/boot/dts/freescale/.fsl-ls2088a-qds.dtb.dts.tmp: \
+  arch/arm64/boot/dts/freescale/fsl-ls2088a-qds.dts \
+  arch/arm64/boot/dts/freescale/fsl-ls2088a.dtsi \
+  arch/arm64/boot/dts/freescale/fsl-ls208xa.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/thermal/thermal.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  arch/arm64/boot/dts/freescale/fsl-ls208xa-qds.dtsi

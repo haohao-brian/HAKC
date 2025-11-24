@@ -1,0 +1,15 @@
+arch/arm64/boot/dts/mediatek/.mt8173-evb.dtb.dts.tmp: \
+  arch/arm64/boot/dts/mediatek/mt8173-evb.dts \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  arch/arm64/boot/dts/mediatek/mt8173.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/mt8173-clk.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/memory/mt8173-larb-port.h \
+  scripts/dtc/include-prefixes/dt-bindings/phy/phy.h \
+  scripts/dtc/include-prefixes/dt-bindings/power/mt8173-power.h \
+  scripts/dtc/include-prefixes/dt-bindings/reset/mt8173-resets.h \
+  scripts/dtc/include-prefixes/dt-bindings/gce/mt8173-gce.h \
+  scripts/dtc/include-prefixes/dt-bindings/thermal/thermal.h \
+  arch/arm64/boot/dts/mediatek/mt8173-pinfunc.h \
+  scripts/dtc/include-prefixes/dt-bindings/pinctrl/mt65xx.h

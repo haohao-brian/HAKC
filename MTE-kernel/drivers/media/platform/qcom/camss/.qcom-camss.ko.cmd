@@ -1,0 +1,1 @@
+cmd_drivers/media/platform/qcom/camss/qcom-camss.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/platform/qcom/camss/qcom-camss.ko drivers/media/platform/qcom/camss/qcom-camss.o drivers/media/platform/qcom/camss/qcom-camss.mod.o;  true

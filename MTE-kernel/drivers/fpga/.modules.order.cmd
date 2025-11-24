@@ -1,0 +1,1 @@
+cmd_drivers/fpga/modules.order := {   echo drivers/fpga/stratix10-soc.ko;   echo drivers/fpga/fpga-bridge.ko;   echo drivers/fpga/altera-freeze-bridge.ko;   echo drivers/fpga/fpga-region.ko;   echo drivers/fpga/of-fpga-region.ko; :; } | awk '!x[$$0]++' - > drivers/fpga/modules.order

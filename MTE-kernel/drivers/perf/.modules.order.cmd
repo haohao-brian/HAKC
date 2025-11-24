@@ -1,0 +1,1 @@
+cmd_drivers/perf/modules.order := {   cat drivers/perf/hisilicon/modules.order;   echo drivers/perf/arm_smmuv3_pmu.ko;   echo drivers/perf/fsl_imx8_ddr_perf.ko;   echo drivers/perf/thunderx2_pmu.ko; :; } | awk '!x[$$0]++' - > drivers/perf/modules.order

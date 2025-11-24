@@ -1,0 +1,7 @@
+arch/arm64/boot/dts/broadcom/northstar2/.ns2-xmc.dtb.dts.tmp: \
+  arch/arm64/boot/dts/broadcom/northstar2/ns2-xmc.dts \
+  arch/arm64/boot/dts/broadcom/northstar2/ns2.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/bcm-ns2.h \
+  arch/arm64/boot/dts/broadcom/northstar2/ns2-clock.dtsi

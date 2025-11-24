@@ -1,0 +1,17 @@
+arch/arm64/boot/dts/ti/.k3-j721e-common-proc-board.dtb.dts.tmp: \
+  arch/arm64/boot/dts/ti/k3-j721e-common-proc-board.dts \
+  arch/arm64/boot/dts/ti/k3-j721e-som-p0.dtsi \
+  arch/arm64/boot/dts/ti/k3-j721e.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/pinctrl/k3.h \
+  scripts/dtc/include-prefixes/dt-bindings/soc/ti,sci_pm_domain.h \
+  arch/arm64/boot/dts/ti/k3-j721e-main.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/phy/phy.h \
+  scripts/dtc/include-prefixes/dt-bindings/mux/mux.h \
+  scripts/dtc/include-prefixes/dt-bindings/mux/ti-serdes.h \
+  arch/arm64/boot/dts/ti/k3-j721e-mcu-wakeup.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/input/input.h \
+  scripts/dtc/include-prefixes/dt-bindings/input/linux-event-codes.h \
+  scripts/dtc/include-prefixes/dt-bindings/net/ti-dp83867.h

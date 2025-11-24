@@ -1,0 +1,6 @@
+drivers/cpufreq/cpufreq_powersave.ko
+drivers/cpufreq/cpufreq_conservative.ko
+drivers/cpufreq/cppc_cpufreq.ko
+drivers/cpufreq/imx-cpufreq-dt.ko
+drivers/cpufreq/raspberrypi-cpufreq.ko
+drivers/cpufreq/sun50i-cpufreq-nvmem.ko

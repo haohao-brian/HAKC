@@ -1,0 +1,1 @@
+cmd_drivers/rtc/rtc-pcf85363.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/rtc/rtc-pcf85363.ko drivers/rtc/rtc-pcf85363.o drivers/rtc/rtc-pcf85363.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/crypto/amlogic/amlogic-gxl-crypto.mod := { echo  drivers/crypto/amlogic/amlogic-gxl-core.o drivers/crypto/amlogic/amlogic-gxl-cipher.o;  echo; } > drivers/crypto/amlogic/amlogic-gxl-crypto.mod

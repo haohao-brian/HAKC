@@ -1,0 +1,11 @@
+arch/arm64/boot/dts/socionext/.uniphier-ld11-ref.dtb.dts.tmp: \
+  arch/arm64/boot/dts/socionext/uniphier-ld11-ref.dts \
+  arch/arm64/boot/dts/socionext/uniphier-ld11.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/uniphier-gpio.h \
+  arch/arm64/boot/dts/socionext/uniphier-pinctrl.dtsi \
+  scripts/dtc/include-prefixes/arm/uniphier-pinctrl.dtsi \
+  arch/arm64/boot/dts/socionext/uniphier-ref-daughter.dtsi \
+  scripts/dtc/include-prefixes/arm/uniphier-ref-daughter.dtsi \
+  arch/arm64/boot/dts/socionext/uniphier-support-card.dtsi \
+  scripts/dtc/include-prefixes/arm/uniphier-support-card.dtsi

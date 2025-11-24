@@ -1,0 +1,1 @@
+cmd_drivers/gpio/modules.order := {   echo drivers/gpio/gpio-regmap.ko;   echo drivers/gpio/gpio-altera.ko;   echo drivers/gpio/gpio-bd9571mwv.ko;   echo drivers/gpio/gpio-sl28cpld.ko;   echo drivers/gpio/gpio-wcd934x.ko; :; } | awk '!x[$$0]++' - > drivers/gpio/modules.order

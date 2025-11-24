@@ -1,0 +1,1 @@
+cmd_drivers/crypto/bcm/bcm_crypto_spu.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/crypto/bcm/bcm_crypto_spu.ko drivers/crypto/bcm/bcm_crypto_spu.o drivers/crypto/bcm/bcm_crypto_spu.mod.o;  true

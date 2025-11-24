@@ -1,0 +1,1 @@
+cmd_drivers/net/can/rcar/rcar_canfd.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/net/can/rcar/rcar_canfd.ko drivers/net/can/rcar/rcar_canfd.o drivers/net/can/rcar/rcar_canfd.mod.o;  true

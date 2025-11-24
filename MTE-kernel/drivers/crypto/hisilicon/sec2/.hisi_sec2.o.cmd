@@ -1,0 +1,1 @@
+cmd_drivers/crypto/hisilicon/sec2/hisi_sec2.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/crypto/hisilicon/sec2/hisi_sec2.o drivers/crypto/hisilicon/sec2/sec_main.o drivers/crypto/hisilicon/sec2/sec_crypto.o

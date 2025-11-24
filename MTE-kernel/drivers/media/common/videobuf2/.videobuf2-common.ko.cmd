@@ -1,0 +1,1 @@
+cmd_drivers/media/common/videobuf2/videobuf2-common.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/common/videobuf2/videobuf2-common.ko drivers/media/common/videobuf2/videobuf2-common.o drivers/media/common/videobuf2/videobuf2-common.mod.o;  true

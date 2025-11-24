@@ -1,0 +1,1 @@
+cmd_sound/soc/tegra/snd-soc-tegra20-spdif.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/tegra/snd-soc-tegra20-spdif.ko sound/soc/tegra/snd-soc-tegra20-spdif.o sound/soc/tegra/snd-soc-tegra20-spdif.mod.o;  true

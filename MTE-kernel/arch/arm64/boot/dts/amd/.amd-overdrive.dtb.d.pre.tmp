@@ -1,0 +1,2 @@
+arch/arm64/boot/dts/amd/.amd-overdrive.dtb.dts.tmp: \
+  arch/arm64/boot/dts/amd/amd-overdrive.dts

@@ -1,0 +1,1 @@
+cmd_drivers/media/rc/keymaps/rc-powercolor-real-angel.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/keymaps/rc-powercolor-real-angel.ko drivers/media/rc/keymaps/rc-powercolor-real-angel.o drivers/media/rc/keymaps/rc-powercolor-real-angel.mod.o;  true

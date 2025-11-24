@@ -1,0 +1,13 @@
+arch/arm64/boot/dts/renesas/.r8a774a1-beacon-rzg2m-kit.dtb.dts.tmp: \
+  arch/arm64/boot/dts/renesas/r8a774a1-beacon-rzg2m-kit.dts \
+  arch/arm64/boot/dts/renesas/r8a774a1.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/r8a774a1-cpg-mssr.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/renesas-cpg-mssr.h \
+  scripts/dtc/include-prefixes/dt-bindings/power/r8a774a1-sysc.h \
+  arch/arm64/boot/dts/renesas/beacon-renesom-som.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h \
+  arch/arm64/boot/dts/renesas/beacon-renesom-baseboard.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/input/input.h \
+  scripts/dtc/include-prefixes/dt-bindings/input/linux-event-codes.h

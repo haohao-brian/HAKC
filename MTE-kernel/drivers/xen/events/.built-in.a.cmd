@@ -1,0 +1,1 @@
+cmd_drivers/xen/events/built-in.a := rm -f drivers/xen/events/built-in.a; llvm-ar cDPrST drivers/xen/events/built-in.a drivers/xen/events/events_base.o drivers/xen/events/events_2l.o drivers/xen/events/events_fifo.o

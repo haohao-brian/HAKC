@@ -1,0 +1,5 @@
+drivers/input/keyboard/adc-keys.ko
+drivers/input/keyboard/imx_sc_key.ko
+drivers/input/keyboard/snvs_pwrkey.ko
+drivers/input/touchscreen/atmel_mxt_ts.ko
+drivers/input/misc/pm8xxx-vibrator.ko

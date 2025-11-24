@@ -1,0 +1,1 @@
+cmd_drivers/gpu/drm/hisilicon/modules.order := {   cat drivers/gpu/drm/hisilicon/hibmc/modules.order;   cat drivers/gpu/drm/hisilicon/kirin/modules.order; :; } | awk '!x[$$0]++' - > drivers/gpu/drm/hisilicon/modules.order

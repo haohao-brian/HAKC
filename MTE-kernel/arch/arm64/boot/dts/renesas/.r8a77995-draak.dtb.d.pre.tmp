@@ -1,0 +1,9 @@
+arch/arm64/boot/dts/renesas/.r8a77995-draak.dtb.dts.tmp: \
+  arch/arm64/boot/dts/renesas/r8a77995-draak.dts \
+  arch/arm64/boot/dts/renesas/r8a77995.dtsi \
+  scripts/dtc/include-prefixes/dt-bindings/clock/r8a77995-cpg-mssr.h \
+  scripts/dtc/include-prefixes/dt-bindings/clock/renesas-cpg-mssr.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/arm-gic.h \
+  scripts/dtc/include-prefixes/dt-bindings/interrupt-controller/irq.h \
+  scripts/dtc/include-prefixes/dt-bindings/power/r8a77995-sysc.h \
+  scripts/dtc/include-prefixes/dt-bindings/gpio/gpio.h

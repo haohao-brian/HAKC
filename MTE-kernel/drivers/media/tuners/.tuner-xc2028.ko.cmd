@@ -1,0 +1,1 @@
+cmd_drivers/media/tuners/tuner-xc2028.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/tuners/tuner-xc2028.ko drivers/media/tuners/tuner-xc2028.o drivers/media/tuners/tuner-xc2028.mod.o;  true

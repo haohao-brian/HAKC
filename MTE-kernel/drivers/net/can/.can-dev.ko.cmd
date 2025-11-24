@@ -1,0 +1,1 @@
+cmd_drivers/net/can/can-dev.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/net/can/can-dev.ko drivers/net/can/can-dev.o drivers/net/can/can-dev.mod.o;  true

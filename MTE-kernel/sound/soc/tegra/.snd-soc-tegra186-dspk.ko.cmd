@@ -1,0 +1,1 @@
+cmd_sound/soc/tegra/snd-soc-tegra186-dspk.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/tegra/snd-soc-tegra186-dspk.ko sound/soc/tegra/snd-soc-tegra186-dspk.o sound/soc/tegra/snd-soc-tegra186-dspk.mod.o;  true

@@ -1,0 +1,1 @@
+cmd_drivers/clk/meson/axg-audio.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/clk/meson/axg-audio.ko drivers/clk/meson/axg-audio.o drivers/clk/meson/axg-audio.mod.o;  true
