@@ -385,11 +385,109 @@ err_ip:
 
 /* FIXED: add explicit transfer for neigh_parms_alloc() result to satisfy PMCPass
  * and keep the rest of ipv6_add_dev confined to this function only. */
+/* HAKC token & helpers (adjust if your tree already declares these) */
+#define HAKC_TOK 0x20007UL
+
+/* HAKC tokens / access check */
+#include <linux/hakc.h>   /* adjust to your actual header, e.g. <linux/hakc/tokens.h> */
+/* Fallbacks in case the header doesn’t export the READ/WRITE split yet */
+#define HAKC_TOK_FAMILY  0x20004ULL
+#define HAKC_TOK_READ   (HAKC_TOK_FAMILY | 0x1ULL)
+#define HAKC_TOK_WRITE  (HAKC_TOK_FAMILY | 0x2ULL)
+#define HAKC_TOK        (HAKC_TOK_FAMILY | 0x3ULL)
+
+/* 只做欄位回寫：欄位永遠只存 SILVER 的 __percpu handle */
+static noinline __attribute__((optnone))
+void hakc_percpu_assign_stats(struct ipv6_devstat __percpu **slot,
+                              struct ipv6_devstat __percpu  *h)
+{
+    WRITE_ONCE(*slot, h);
+}
+
+/*
+ * 只在 (idev)->stats 的型別是「struct ipv6_devstat __percpu *」時才生效；
+ * 若是內嵌 struct（非 percpu），就展開成 (void)0。
+ */
+#define HAKC_PCPU_ASSIGN_STATS(_idev)                                            \
+do {                                                                             \
+    typeof((_idev)->stats) __hps = (_idev)->stats;                               \
+    (void)_Generic(__hps,                                                        \
+        struct ipv6_devstat __percpu * :                                         \
+            (hakc_percpu_assign_stats(                                           \
+                 (struct ipv6_devstat __percpu **)&((_idev)->stats), __hps), 0), \
+        default : 0);                                                            \
+} while (0)
+
+#include <linux/printk.h>
+#include <linux/percpu.h>
+#include <linux/preempt.h>
+#include <linux/uaccess.h>
+
+#ifndef HAKC_TOK_WRITE
+#define HAKC_TOK_WRITE  (0x20007ULL)   /* adjust if your token differs */
+#endif
+
+/* Clear top byte and canonicalize back into kernel VA (sign-extend bit 47). */
+static __always_inline void *hakc_canonical_safe(const void *p)
+{
+	u64 v = (u64)p;
+	u64 lo56 = v & ((1ULL << 56) - 1);   /* drop top byte (color) */
+	/* sign-extend from bit 47 (48-bit VA) to get ffff.... form */
+	u64 safe = (u64)((s64)(lo56 << (63 - 47)) >> (63 - 47));
+	return (void *)safe;
+}
+
+static __always_inline u8 hakc_topbyte(const void *p)
+{
+	return (u8)((u64)p >> 56);
+}
+
+static void hakc_dump_dev_handles(struct net_device *dev)
+{
+	/* dev itself (likely already colored if you ran check_hakc_data_access) */
+	void *dev_col = (void *)dev;
+	void *dev_safe = hakc_canonical_safe(dev);
+
+	pr_info("[HAKC] dev:      colored=%px  top=0x%02x  low56=0x%013llx  safe=%px\n",
+		dev_col, hakc_topbyte(dev_col),
+		((unsigned long long)dev_col) & ((1ULL<<56)-1),
+		dev_safe);
+
+	/* PCPU refcount handle (this is a handle, not a direct VA) */
+	int __percpu *refp_handle = READ_ONCE(dev->pcpu_refcnt);
+	pr_info("[HAKC] refp_hdl: handle=%px  top=0x%02x  low56=0x%013llx\n",
+		refp_handle, hakc_topbyte(refp_handle),
+		((unsigned long long)refp_handle) & ((1ULL<<56)-1));
+
+	if (!refp_handle)
+		return;
+
+	/* Translate handle -> current CPU VA, then compare before/after coloring */
+	preempt_disable();
+	{
+		int *cell_va = this_cpu_ptr(refp_handle);           /* tpidr + handle */
+		void *cell_col = check_hakc_data_access(cell_va, HAKC_TOK_WRITE);
+		void *cell_safe = hakc_canonical_safe(cell_col);
+
+		pr_info("[HAKC] cell:     va=%px  top=0x%02x  low56=0x%013llx\n",
+			cell_va, hakc_topbyte(cell_va),
+			((unsigned long long)cell_va) & ((1ULL<<56)-1));
+
+		pr_info("[HAKC] cell_chk: colored=%px  top=0x%02x  low56=0x%013llx  safe=%px\n",
+			cell_col, hakc_topbyte(cell_col),
+			((unsigned long long)cell_col) & ((1ULL<<56)-1),
+			cell_safe);
+	}
+	preempt_enable();
+}
+
 static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 {
+	dev = (struct net_device *)check_hakc_data_access((void *)dev, HAKC_TOK);
 	struct inet6_dev *ndev;
-	int err = -ENOMEM;
 	const struct ipv6_devconf *dflt;
+	struct neigh_parms *np_raw = NULL, *np = NULL;
+	int err = -ENOMEM;
 
 	ASSERT_RTNL();
 
@@ -402,8 +500,8 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 		return ERR_PTR(err);
 
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-	/* Make the freshly allocated ndev belong to this clique. */
-	ndev = (struct inet6_dev *)hakc_transfer_to_clique(
+	/* Transfer freshly allocated ndev into our clique. */
+	//ndev = (struct inet6_dev *)hakc_transfer_to_clique( \
 		(void *)ndev, sizeof(*ndev), __claque_id, __color, false);
 #endif
 
@@ -413,8 +511,12 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 	timer_setup(&ndev->rs_timer, addrconf_rs_timer, 0);
 
 	/* Copy default device configuration (protected by rtnl) */
-	dflt = rcu_dereference_protected(dev_net(dev)->ipv6.devconf_dflt,
+	//dflt = rcu_dereference_protected(dev_net(dev)->ipv6.devconf_dflt, \
 					 lockdep_rtnl_is_held());
+	struct net *net = (struct net *)check_hakc_data_access((void *)dev_net(dev), HAKC_TOK_READ);
+	dflt = rcu_dereference_protected(net->ipv6.devconf_dflt, lockdep_rtnl_is_held());
+	dflt = (const struct ipv6_devconf *) \
+    	check_hakc_data_access((void *)dflt, HAKC_TOK_READ);
 	if (WARN_ON(!dflt)) {
 		kfree(ndev);
 		return ERR_PTR(-EINVAL);
@@ -426,76 +528,57 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 
 	ndev->cnf.mtu6 = dev->mtu;
 
-	/* --- neigh_parms_alloc() + REQUIRED TRANSFER (fix for PMCPass) --- */
-	pr_info("ipv6_add_dev: before neigh_parms_alloc ndev->nd_parms=%p\n",
-		ndev->nd_parms);
-
-	/* raw allocation from core neighbor table */
-	{
-		struct neigh_parms *np_raw, *np;
-
-		np_raw = neigh_parms_alloc(dev, &nd_tbl);
+	/* --- neigh_parms_alloc() + REQUIRED TRANSFER (PMCPass requirement) --- */
+	np_raw = neigh_parms_alloc(dev, &nd_tbl);
 
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-		/* Transfer the returned struct neigh_parms into our clique.
-		 * This is the critical piece PMCPass requires at this callsite. */
-		if (likely(np_raw)) {
-			np = (struct neigh_parms *)hakc_transfer_to_clique(
-				(void *)np_raw, sizeof(*np_raw),
-				__claque_id, __color, false);
-		} else {
-			np = NULL;
-		}
-#else
-		np = np_raw;
-#endif
-		ndev->nd_parms = np;
+	if (likely(np_raw)) {
+		np = (struct neigh_parms *)hakc_transfer_to_clique( \
+			(void *)np_raw, sizeof(*np_raw), __claque_id, 242, false);
 	}
-
-	pr_info("ipv6_add_dev: after neigh_parms_alloc ndev->nd_parms=%p\n",
-		ndev->nd_parms);
+#else
+	np = np_raw;
+#endif
+	ndev->nd_parms = np;
 
 	if (!ndev->nd_parms) {
 		kfree(ndev);
 		return ERR_PTR(err);
 	}
 
-	/* Optional: log configured NEIGH variables for visibility */
-	{
-		struct neigh_parms *p = ndev->nd_parms;
-		pr_info("IPv6 nd_parms@%px: "
-			"base_reachable_time=%u delay_probe_time=%u retrans_time=%u "
-			"gc_staletime=%u gc_interval=%u "
-			"ucast_probes=%u mcast_probes=%u app_probes=%u "
-			"proxy_delay=%u anycast_delay=%u proxy_qlen=%u locktime=%u\n",
-			p,
-			NEIGH_VAR(p, BASE_REACHABLE_TIME),
-			NEIGH_VAR(p, DELAY_PROBE_TIME),
-			NEIGH_VAR(p, RETRANS_TIME),
-			NEIGH_VAR(p, GC_STALETIME),
-			NEIGH_VAR(p, GC_INTERVAL),
-			NEIGH_VAR(p, UCAST_PROBES),
-			NEIGH_VAR(p, MCAST_PROBES),
-			NEIGH_VAR(p, APP_PROBES),
-			NEIGH_VAR(p, PROXY_DELAY),
-			NEIGH_VAR(p, ANYCAST_DELAY),
-			NEIGH_VAR(p, PROXY_QLEN),
-			NEIGH_VAR(p, LOCKTIME));
-	}
-
 	if (ndev->cnf.forwarding)
 		dev_disable_lro(dev);
 
 	/* Hold a ref on the net_device for this inet6_dev */
-	dev_hold(dev);
+	pr_info("dev_hold before dev=%px name=%s ifindex=%d mtu=%u\n",
+        dev, dev->name, dev->ifindex, dev->mtu);
+	
+	pr_info("dev->pcpu_refcnt = 0x%p\n",dev->pcpu_refcnt);
+	int __percpu *refp_raw = dev->pcpu_refcnt;
+	pr_info("maybe write deref dev->pcpu_refcnt = 0x%p\n",refp_raw);
+	int *cell_readonly = this_cpu_ptr(refp_raw);        // tpidr + handle → final VA 
+	pr_info("read only deref cell_readonly = 0x%p\n",cell_readonly);
+
+	//int *cell = this_cpu_ptr(refp_raw);        // tpidr + handle → final VA 
+	int __percpu *refp = dev->pcpu_refcnt;
+
+	int *cell = this_cpu_ptr(refp);
+	
+	cell = hakc_sign_pointer_with_color(cell, 2, false);
+
+	(*cell)++;                                  // 或 this_cpu_inc(*refp_raw) 
+	
+	pr_info("dev_hold after\n");
 
 	err = snmp6_alloc_dev(ndev);
+	
 	if (err < 0) {
 		netdev_dbg(dev, "%s: cannot allocate memory for statistics\n",
 			   __func__);
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-		neigh_parms_release(&nd_tbl, (struct neigh_parms *)
-			check_hakc_data_access((void *)ndev->nd_parms, 0x20007));
+		neigh_parms_release(&nd_tbl, ndev->nd_parms);
+		//neigh_parms_release(&nd_tbl, (struct neigh_parms *) \
+			check_hakc_data_access((void *)ndev->nd_parms, HAKC_TOK));
 #else
 		neigh_parms_release(&nd_tbl, ndev->nd_parms);
 #endif
@@ -503,6 +586,8 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 		kfree(ndev);
 		return ERR_PTR(err);
 	}
+
+	//HAKC_PCPU_ASSIGN_STATS(ndev);
 
 	err = snmp6_register_dev(ndev);
 	if (err < 0) {
@@ -518,10 +603,8 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 		ndev->cnf.accept_dad = -1;
 
 #if IS_ENABLED(CONFIG_IPV6_SIT)
-	if (dev->type == ARPHRD_SIT && (dev->priv_flags & IFF_ISATAP)) {
-		pr_info("%s: Disabled Multicast RS\n", dev->name);
+	if (dev->type == ARPHRD_SIT && (dev->priv_flags & IFF_ISATAP))
 		ndev->cnf.rtr_solicits = 0;
-	}
 #endif
 
 	INIT_LIST_HEAD(&ndev->tempaddr_list);
@@ -549,7 +632,7 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 		goto err_release;
 	}
 
-	/* Publish ip6_ptr. Keep encoded when configured. */
+	/* Publish ip6_ptr (signed when HAKC is enabled). */
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
 	rcu_assign_pointer(dev->ip6_ptr, (struct inet6_dev *)
 		hakc_sign_pointer_with_color((void *)ndev, __claque_id, false));
@@ -567,8 +650,8 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 
 err_release:
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-	neigh_parms_release(&nd_tbl, (struct neigh_parms *)
-		check_hakc_data_access((void *)ndev->nd_parms, 0x20007));
+	neigh_parms_release(&nd_tbl, (struct neigh_parms *)\
+		check_hakc_data_access((void *)ndev->nd_parms, HAKC_TOK));
 #else
 	neigh_parms_release(&nd_tbl, ndev->nd_parms);
 #endif
@@ -853,7 +936,7 @@ static int inet6_netconf_dump_devconf(struct sk_buff *skb,
 		struct netconfmsg *ncm;
 
 		if (nlh->nlmsg_len < nlmsg_msg_size(sizeof(*ncm))) {
-			NL_SET_ERR_MSG_MOD(extack, "Invalid header for netconf dump request");
+			NL_SET_ERR_MSG_MOD(extack, "Invalid header for netconf dump request"); // line 838 is here
 			return -EINVAL;
 		}
 
@@ -6101,6 +6184,7 @@ static int inet6_fill_ifla6_attrs(struct sk_buff *skb, struct inet6_dev *idev,
 	nla = nla_reserve(skb, IFLA_INET6_STATS, IPSTATS_MIB_MAX * sizeof(u64));
 	if (!nla)
 		goto nla_put_failure;
+	
 	snmp6_fill_stats(nla_data(nla), idev, IFLA_INET6_STATS, nla_len(nla));
 
 	nla = nla_reserve(skb, IFLA_INET6_ICMP6STATS, ICMP6_MIB_MAX * sizeof(u64));
