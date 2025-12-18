@@ -1,1 +1,0 @@
-cmd_drivers/nvmem/built-in.a := rm -f drivers/nvmem/built-in.a; llvm-ar cDPrST drivers/nvmem/built-in.a drivers/nvmem/core.o drivers/nvmem/bcm-ocotp.o drivers/nvmem/imx-ocotp.o drivers/nvmem/imx-ocotp-scu.o drivers/nvmem/qfprom.o drivers/nvmem/rockchip-efuse.o drivers/nvmem/sunxi_sid.o drivers/nvmem/uniphier-efuse.o

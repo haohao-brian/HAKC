@@ -1,1 +1,0 @@
-cmd_drivers/memory/tegra/built-in.a := rm -f drivers/memory/tegra/built-in.a; llvm-ar cDPrST drivers/memory/tegra/built-in.a drivers/memory/tegra/mc.o drivers/memory/tegra/tegra124.o drivers/memory/tegra/tegra210.o drivers/memory/tegra/tegra186.o drivers/memory/tegra/tegra186-emc.o

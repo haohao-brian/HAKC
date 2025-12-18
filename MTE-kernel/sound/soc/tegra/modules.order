@@ -1,8 +1,0 @@
-sound/soc/tegra/snd-soc-tegra-pcm.ko
-sound/soc/tegra/snd-soc-tegra-utils.ko
-sound/soc/tegra/snd-soc-tegra20-spdif.ko
-sound/soc/tegra/snd-soc-tegra210-dmic.ko
-sound/soc/tegra/snd-soc-tegra210-ahub.ko
-sound/soc/tegra/snd-soc-tegra210-i2s.ko
-sound/soc/tegra/snd-soc-tegra186-dspk.ko
-sound/soc/tegra/snd-soc-tegra210-admaif.ko

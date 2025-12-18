@@ -1,1 +1,0 @@
-cmd_drivers/net/ethernet/broadcom/bnx2x/bnx2x.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/net/ethernet/broadcom/bnx2x/bnx2x.ko drivers/net/ethernet/broadcom/bnx2x/bnx2x.o drivers/net/ethernet/broadcom/bnx2x/bnx2x.mod.o;  true

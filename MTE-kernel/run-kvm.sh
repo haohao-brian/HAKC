@@ -102,6 +102,7 @@ qemu-system-aarch64 -nographic -machine virt,mte=on,gic-version=3,virtualization
         -netdev user,id=net1,hostfwd=tcp::2333-:22 \
         -device virtio-net-pci,netdev=net1,mac=de:ad:be:ef:41:49 \
 	-virtfs local,path=$SHARED_DIR,mount_tag=shared,security_model=mapped \
-	-append "console=ttyAMA0 root=/dev/vda rw earlycon=pl011,0x09000000 initcall_debug rcupdate.rcu_cpu_stall_timeout=20"
+	-append "console=ttyAMA0 root=/dev/vda rw earlycon=pl011,0x09000000 initcall_debug rcupdate.rcu_cpu_stall_timeout=20 \
+                    log_buf_len=16M"
 #	  -s -S \
 

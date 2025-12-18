@@ -1,1 +1,0 @@
-cmd_drivers/soc/tegra/built-in.a := rm -f drivers/soc/tegra/built-in.a; llvm-ar cDPrST drivers/soc/tegra/built-in.a drivers/soc/tegra/fuse/built-in.a drivers/soc/tegra/common.o drivers/soc/tegra/flowctrl.o drivers/soc/tegra/pmc.o drivers/soc/tegra/powergate-bpmp.o

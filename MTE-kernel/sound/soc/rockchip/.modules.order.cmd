@@ -1,1 +1,0 @@
-cmd_sound/soc/rockchip/modules.order := {   echo sound/soc/rockchip/snd-soc-rockchip-i2s.ko;   echo sound/soc/rockchip/snd-soc-rockchip-pcm.ko;   echo sound/soc/rockchip/snd-soc-rockchip-spdif.ko;   echo sound/soc/rockchip/snd-soc-rockchip-rt5645.ko;   echo sound/soc/rockchip/snd-soc-rk3399-gru-sound.ko; :; } | awk '!x[$$0]++' - > sound/soc/rockchip/modules.order

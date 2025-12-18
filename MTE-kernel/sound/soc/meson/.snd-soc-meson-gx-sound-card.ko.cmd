@@ -1,1 +1,0 @@
-cmd_sound/soc/meson/snd-soc-meson-gx-sound-card.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/meson/snd-soc-meson-gx-sound-card.ko sound/soc/meson/snd-soc-meson-gx-sound-card.o sound/soc/meson/snd-soc-meson-gx-sound-card.mod.o;  true

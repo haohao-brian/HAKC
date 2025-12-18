@@ -1,1 +1,0 @@
-cmd_drivers/net/ethernet/broadcom/genet/genet.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/net/ethernet/broadcom/genet/genet.ko drivers/net/ethernet/broadcom/genet/genet.o drivers/net/ethernet/broadcom/genet/genet.mod.o;  true

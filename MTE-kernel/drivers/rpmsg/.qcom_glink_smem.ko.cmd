@@ -1,1 +1,0 @@
-cmd_drivers/rpmsg/qcom_glink_smem.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/rpmsg/qcom_glink_smem.ko drivers/rpmsg/qcom_glink_smem.o drivers/rpmsg/qcom_glink_smem.mod.o;  true

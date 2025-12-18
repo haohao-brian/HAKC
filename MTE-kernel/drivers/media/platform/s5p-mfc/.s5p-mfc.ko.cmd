@@ -1,1 +1,0 @@
-cmd_drivers/media/platform/s5p-mfc/s5p-mfc.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/platform/s5p-mfc/s5p-mfc.ko drivers/media/platform/s5p-mfc/s5p-mfc.o drivers/media/platform/s5p-mfc/s5p-mfc.mod.o;  true

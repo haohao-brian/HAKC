@@ -1,1 +1,0 @@
-cmd_drivers/phy/rockchip/phy-rockchip-pcie.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/phy/rockchip/phy-rockchip-pcie.ko drivers/phy/rockchip/phy-rockchip-pcie.o drivers/phy/rockchip/phy-rockchip-pcie.mod.o;  true

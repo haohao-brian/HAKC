@@ -1,1 +1,0 @@
-cmd_drivers/misc/eeprom/at25.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/misc/eeprom/at25.ko drivers/misc/eeprom/at25.o drivers/misc/eeprom/at25.mod.o;  true

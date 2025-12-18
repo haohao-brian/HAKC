@@ -1,1 +1,0 @@
-cmd_drivers/soc/qcom/modules.order := {   echo drivers/soc/qcom/mdt_loader.ko;   echo drivers/soc/qcom/pdr_interface.ko;   echo drivers/soc/qcom/qmi_helpers.ko;   echo drivers/soc/qcom/rmtfs_mem.ko;   echo drivers/soc/qcom/socinfo.ko;   echo drivers/soc/qcom/apr.ko; :; } | awk '!x[$$0]++' - > drivers/soc/qcom/modules.order

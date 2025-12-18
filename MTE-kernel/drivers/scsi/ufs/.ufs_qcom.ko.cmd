@@ -1,1 +1,0 @@
-cmd_drivers/scsi/ufs/ufs_qcom.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/scsi/ufs/ufs_qcom.ko drivers/scsi/ufs/ufs_qcom.o drivers/scsi/ufs/ufs_qcom.mod.o;  true

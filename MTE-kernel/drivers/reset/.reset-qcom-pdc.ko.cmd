@@ -1,1 +1,0 @@
-cmd_drivers/reset/reset-qcom-pdc.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/reset/reset-qcom-pdc.ko drivers/reset/reset-qcom-pdc.o drivers/reset/reset-qcom-pdc.mod.o;  true

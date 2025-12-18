@@ -1,1 +1,0 @@
-cmd_drivers/media/platform/rcar-vin/rcar-vin.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/media/platform/rcar-vin/rcar-vin.o drivers/media/platform/rcar-vin/rcar-core.o drivers/media/platform/rcar-vin/rcar-dma.o drivers/media/platform/rcar-vin/rcar-v4l2.o

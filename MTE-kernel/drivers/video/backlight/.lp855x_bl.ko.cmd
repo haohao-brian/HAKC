@@ -1,1 +1,0 @@
-cmd_drivers/video/backlight/lp855x_bl.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/video/backlight/lp855x_bl.ko drivers/video/backlight/lp855x_bl.o drivers/video/backlight/lp855x_bl.mod.o;  true

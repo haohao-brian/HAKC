@@ -1,1 +1,0 @@
-cmd_drivers/net/ethernet/mellanox/mlx4/modules.order := {   echo drivers/net/ethernet/mellanox/mlx4/mlx4_core.ko;   echo drivers/net/ethernet/mellanox/mlx4/mlx4_en.ko; :; } | awk '!x[$$0]++' - > drivers/net/ethernet/mellanox/mlx4/modules.order

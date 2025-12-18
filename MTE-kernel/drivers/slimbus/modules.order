@@ -1,3 +1,0 @@
-drivers/slimbus/slimbus.ko
-drivers/slimbus/slim-qcom-ctrl.ko
-drivers/slimbus/slim-qcom-ngd-ctrl.ko

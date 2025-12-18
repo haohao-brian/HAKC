@@ -1,1 +1,0 @@
-cmd_net/netfilter/nf_nat.o := ld.lld -EL  -maarch64elf -z norelro   -r -o net/netfilter/nf_nat.o net/netfilter/nf_nat_core.o net/netfilter/nf_nat_proto.o net/netfilter/nf_nat_helper.o net/netfilter/nf_nat_masquerade.o

@@ -1,1 +1,0 @@
-cmd_drivers/net/ethernet/stmicro/stmmac/stmmac-platform.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/net/ethernet/stmicro/stmmac/stmmac-platform.o drivers/net/ethernet/stmicro/stmmac/stmmac_platform.o

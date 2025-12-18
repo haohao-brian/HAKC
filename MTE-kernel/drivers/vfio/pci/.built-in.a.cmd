@@ -1,1 +1,0 @@
-cmd_drivers/vfio/pci/built-in.a := rm -f drivers/vfio/pci/built-in.a; llvm-ar cDPrST drivers/vfio/pci/built-in.a drivers/vfio/pci/vfio_pci.o drivers/vfio/pci/vfio_pci_intrs.o drivers/vfio/pci/vfio_pci_rdwr.o drivers/vfio/pci/vfio_pci_config.o

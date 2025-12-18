@@ -1,1 +1,0 @@
-cmd_sound/pci/hda/snd-hda-tegra.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/pci/hda/snd-hda-tegra.ko sound/pci/hda/snd-hda-tegra.o sound/pci/hda/snd-hda-tegra.mod.o;  true

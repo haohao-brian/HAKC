@@ -1,1 +1,0 @@
-cmd_drivers/pwm/modules.order := {   echo drivers/pwm/pwm-bcm2835.ko;   echo drivers/pwm/pwm-cros-ec.ko;   echo drivers/pwm/pwm-meson.ko;   echo drivers/pwm/pwm-rcar.ko;   echo drivers/pwm/pwm-sl28cpld.ko;   echo drivers/pwm/pwm-sun4i.ko;   echo drivers/pwm/pwm-tegra.ko; :; } | awk '!x[$$0]++' - > drivers/pwm/modules.order

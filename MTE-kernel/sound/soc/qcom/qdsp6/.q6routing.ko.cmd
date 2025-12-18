@@ -1,1 +1,0 @@
-cmd_sound/soc/qcom/qdsp6/q6routing.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/qcom/qdsp6/q6routing.ko sound/soc/qcom/qdsp6/q6routing.o sound/soc/qcom/qdsp6/q6routing.mod.o;  true

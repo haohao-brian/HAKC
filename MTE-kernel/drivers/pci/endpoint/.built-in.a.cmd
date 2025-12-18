@@ -1,1 +1,0 @@
-cmd_drivers/pci/endpoint/built-in.a := rm -f drivers/pci/endpoint/built-in.a; llvm-ar cDPrST drivers/pci/endpoint/built-in.a drivers/pci/endpoint/pci-ep-cfs.o drivers/pci/endpoint/pci-epc-core.o drivers/pci/endpoint/pci-epf-core.o drivers/pci/endpoint/pci-epc-mem.o drivers/pci/endpoint/functions/built-in.a

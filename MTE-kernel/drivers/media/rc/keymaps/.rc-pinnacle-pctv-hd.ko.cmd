@@ -1,1 +1,0 @@
-cmd_drivers/media/rc/keymaps/rc-pinnacle-pctv-hd.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/keymaps/rc-pinnacle-pctv-hd.ko drivers/media/rc/keymaps/rc-pinnacle-pctv-hd.o drivers/media/rc/keymaps/rc-pinnacle-pctv-hd.mod.o;  true

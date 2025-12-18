@@ -1,1 +1,0 @@
-cmd_drivers/pci/controller/modules.order := {   cat drivers/pci/controller/dwc/modules.order;   cat drivers/pci/controller/mobiveil/modules.order;   echo drivers/pci/controller/pcie-rockchip-host.ko;   echo drivers/pci/controller/pcie-brcmstb.ko; :; } | awk '!x[$$0]++' - > drivers/pci/controller/modules.order

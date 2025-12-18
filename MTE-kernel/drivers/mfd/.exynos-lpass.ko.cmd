@@ -1,1 +1,0 @@
-cmd_drivers/mfd/exynos-lpass.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/mfd/exynos-lpass.ko drivers/mfd/exynos-lpass.o drivers/mfd/exynos-lpass.mod.o;  true

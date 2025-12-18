@@ -1,1 +1,0 @@
-cmd_drivers/media/rc/sunxi-cir.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/sunxi-cir.ko drivers/media/rc/sunxi-cir.o drivers/media/rc/sunxi-cir.mod.o;  true

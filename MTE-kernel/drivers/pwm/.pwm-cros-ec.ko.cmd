@@ -1,1 +1,0 @@
-cmd_drivers/pwm/pwm-cros-ec.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/pwm/pwm-cros-ec.ko drivers/pwm/pwm-cros-ec.o drivers/pwm/pwm-cros-ec.mod.o;  true

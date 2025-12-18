@@ -1,1 +1,0 @@
-cmd_drivers/phy/hisilicon/built-in.a := rm -f drivers/phy/hisilicon/built-in.a; llvm-ar cDPrST drivers/phy/hisilicon/built-in.a drivers/phy/hisilicon/phy-hi6220-usb.o drivers/phy/hisilicon/phy-histb-combphy.o drivers/phy/hisilicon/phy-hisi-inno-usb2.o

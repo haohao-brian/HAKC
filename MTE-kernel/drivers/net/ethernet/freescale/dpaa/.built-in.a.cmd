@@ -1,1 +1,0 @@
-cmd_drivers/net/ethernet/freescale/dpaa/built-in.a := rm -f drivers/net/ethernet/freescale/dpaa/built-in.a; llvm-ar cDPrST drivers/net/ethernet/freescale/dpaa/built-in.a drivers/net/ethernet/freescale/dpaa/dpaa_eth.o drivers/net/ethernet/freescale/dpaa/dpaa_ethtool.o drivers/net/ethernet/freescale/dpaa/dpaa_eth_sysfs.o

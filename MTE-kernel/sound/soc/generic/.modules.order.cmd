@@ -1,1 +1,0 @@
-cmd_sound/soc/generic/modules.order := {   echo sound/soc/generic/snd-soc-simple-card-utils.ko;   echo sound/soc/generic/snd-soc-simple-card.ko;   echo sound/soc/generic/snd-soc-audio-graph-card.ko; :; } | awk '!x[$$0]++' - > sound/soc/generic/modules.order

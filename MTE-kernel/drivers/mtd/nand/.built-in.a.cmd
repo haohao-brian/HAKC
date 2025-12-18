@@ -1,1 +1,0 @@
-cmd_drivers/mtd/nand/built-in.a := rm -f drivers/mtd/nand/built-in.a; llvm-ar cDPrST drivers/mtd/nand/built-in.a drivers/mtd/nand/core.o drivers/mtd/nand/bbt.o drivers/mtd/nand/ecc.o drivers/mtd/nand/onenand/built-in.a drivers/mtd/nand/raw/built-in.a drivers/mtd/nand/spi/built-in.a

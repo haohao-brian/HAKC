@@ -1,1 +1,0 @@
-cmd_drivers/phy/marvell/built-in.a := rm -f drivers/phy/marvell/built-in.a; llvm-ar cDPrST drivers/phy/marvell/built-in.a drivers/phy/marvell/phy-mvebu-a3700-comphy.o drivers/phy/marvell/phy-mvebu-a3700-utmi.o drivers/phy/marvell/phy-mvebu-cp110-comphy.o

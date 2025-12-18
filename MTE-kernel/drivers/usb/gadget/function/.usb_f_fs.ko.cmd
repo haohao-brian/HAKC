@@ -1,1 +1,0 @@
-cmd_drivers/usb/gadget/function/usb_f_fs.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/usb/gadget/function/usb_f_fs.ko drivers/usb/gadget/function/usb_f_fs.o drivers/usb/gadget/function/usb_f_fs.mod.o;  true

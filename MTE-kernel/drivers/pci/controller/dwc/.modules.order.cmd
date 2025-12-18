@@ -1,1 +1,0 @@
-cmd_drivers/pci/controller/dwc/modules.order := {   echo drivers/pci/controller/dwc/pci-meson.ko;   echo drivers/pci/controller/dwc/pcie-tegra194.ko; :; } | awk '!x[$$0]++' - > drivers/pci/controller/dwc/modules.order

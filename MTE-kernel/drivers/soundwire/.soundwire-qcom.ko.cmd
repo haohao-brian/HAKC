@@ -1,1 +1,0 @@
-cmd_drivers/soundwire/soundwire-qcom.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/soundwire/soundwire-qcom.ko drivers/soundwire/soundwire-qcom.o drivers/soundwire/soundwire-qcom.mod.o;  true

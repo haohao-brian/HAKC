@@ -1,1 +1,0 @@
-cmd_drivers/net/ethernet/hisilicon/built-in.a := rm -f drivers/net/ethernet/hisilicon/built-in.a; llvm-ar cDPrST drivers/net/ethernet/hisilicon/built-in.a drivers/net/ethernet/hisilicon/hix5hd2_gmac.o drivers/net/ethernet/hisilicon/hns_mdio.o drivers/net/ethernet/hisilicon/hns/built-in.a drivers/net/ethernet/hisilicon/hns3/built-in.a

@@ -1,1 +1,0 @@
-cmd_drivers/phy/renesas/built-in.a := rm -f drivers/phy/renesas/built-in.a; llvm-ar cDPrST drivers/phy/renesas/built-in.a drivers/phy/renesas/phy-rcar-gen3-pcie.o drivers/phy/renesas/phy-rcar-gen3-usb2.o

@@ -1,1 +1,0 @@
-cmd_drivers/media/rc/keymaps/rc-evga-indtube.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/keymaps/rc-evga-indtube.ko drivers/media/rc/keymaps/rc-evga-indtube.o drivers/media/rc/keymaps/rc-evga-indtube.mod.o;  true

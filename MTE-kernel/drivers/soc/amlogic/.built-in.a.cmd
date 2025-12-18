@@ -1,1 +1,0 @@
-cmd_drivers/soc/amlogic/built-in.a := rm -f drivers/soc/amlogic/built-in.a; llvm-ar cDPrST drivers/soc/amlogic/built-in.a drivers/soc/amlogic/meson-clk-measure.o drivers/soc/amlogic/meson-gx-socinfo.o drivers/soc/amlogic/meson-gx-pwrc-vpu.o drivers/soc/amlogic/meson-mx-socinfo.o drivers/soc/amlogic/meson-ee-pwrc.o drivers/soc/amlogic/meson-secure-pwrc.o

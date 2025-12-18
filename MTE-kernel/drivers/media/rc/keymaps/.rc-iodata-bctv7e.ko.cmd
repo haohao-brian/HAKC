@@ -1,1 +1,0 @@
-cmd_drivers/media/rc/keymaps/rc-iodata-bctv7e.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/keymaps/rc-iodata-bctv7e.ko drivers/media/rc/keymaps/rc-iodata-bctv7e.o drivers/media/rc/keymaps/rc-iodata-bctv7e.mod.o;  true

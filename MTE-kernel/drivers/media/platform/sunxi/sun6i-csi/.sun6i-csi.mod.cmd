@@ -1,1 +1,0 @@
-cmd_drivers/media/platform/sunxi/sun6i-csi/sun6i-csi.mod := { echo  drivers/media/platform/sunxi/sun6i-csi/sun6i_video.o drivers/media/platform/sunxi/sun6i-csi/sun6i_csi.o;  echo; } > drivers/media/platform/sunxi/sun6i-csi/sun6i-csi.mod

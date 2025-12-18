@@ -237,6 +237,8 @@ static void *sign_data(const void *address, pac_salt_t modifier)
 		: "=r"(result)
 		: [addr] "0"(address), [mod] "r"(modifier)
 		:);
+	HAKC_INFO("Signed data pointer %lx with salt %lx\n", result,
+		modifier);
 	return result;
 }
 
@@ -466,6 +468,26 @@ static void *check_hakc_access(const void *address,
 	u64 *lr_slot = (u64 *)((char *)__builtin_frame_address(0) + 8);
 	u64 saved_lr = *lr_slot;
 
+	static char *b0,*end;
+	static int once = 0;
+	if (once==0){
+		once = 1;
+		int cpu;
+		
+		char *b1,*base_end;
+		
+		b0 = per_cpu_ptr((void __percpu *)NULL, 0);
+		b1 = per_cpu_ptr((void __percpu *)NULL, 1);
+		unsigned long stride = (unsigned long)(b1 - b0);  // unit size per CPU
+	    for_each_possible_cpu(cpu) {
+			base_end = per_cpu_ptr((void __percpu *)NULL, cpu); // per-CPU base
+			//pr_info("CPU%d per-CPU base: %p\n", cpu, base_end);
+		}
+		end = (char *)base_end + (b1 - b0);
+		pr_info(" per-CPU start : %px\n", b0);
+		pr_info(" per-CPU end : %px\n", end);
+	}
+
 	pac_salt_t salt;
 	unsigned long result;
 	const void *ctx_addr;
@@ -474,16 +496,31 @@ static void *check_hakc_access(const void *address,
 	void *safe_addr;
 
 	if (is_userspace_addr(address)) {
+		HAKC_INFO("return immediately\n");
 		return (void *)address;
 	} else if (IS_ERR(address)) {
+		HAKC_INFO("return immediately\n");
 		return (void *)address;
 	}
 	u64 a = (u64)address;
     // clear top byte tag (TBI/MTE) so we read the canonical high bits
     if((a >> 48) == 0xFFFFull){
+		HAKC_INFO("return immediately\n");
 		return (void *)address;
 	}
 
+    // clear top byte tag (TBI/MTE) so we read the canonical high bits
+    if(((a >> 48) << 8) == 0xFFull){
+		HAKC_INFO("return immediately because of 0x**ff...\n");
+		return (void *)address;
+	}
+	
+	if (is_percpu_va(address)){
+		HAKC_INFO("is_percpu_va so skip %p\n",address);
+		__s64 aa = (__s64)address;     // ptr might be 0x02ea… (unauthenticated alias), or even attacker-crafted
+		aa |= 0xFFFF000000000000;//(aa << 16) >> 16;  // canonicalize to 0xffff…
+		return (void *)aa;
+	}
 
 	safe_addr = (void*)HAKC_GET_SAFE_PTR(address);
 
@@ -491,19 +528,17 @@ static void *check_hakc_access(const void *address,
 	  (void *)_RET_IP_, address, safe_addr, access_tok);
 	addr_claque = get_hakc_address_claque(address);
 
-	if (is_percpu_va(address)){
-		pr_info("is_percpu_va so skip %p\n",address);
-		__s64 aa = (__s64)address;     // ptr might be 0x02ea… (unauthenticated alias), or even attacker-crafted
-		aa |= 0xFFFF000000000000;//(aa << 16) >> 16;  // canonicalize to 0xffff…
-		return (void *)aa;
-	}
+	
 
 	addr_color = _get_mte_tag(safe_addr);
 	HAKC_INFO("hakc_access: addr=%px color=%s claque=%lu\n", \
 		  address, get_hakc_color_name(addr_color), addr_claque);
 
 	ctx_addr = (const void *)HAKC_CONTEXT_ADDR(address);
-	salt = obtain_modifier_cert(addr_color, addr_claque) & access_tok;
+	pac_salt_t m =obtain_modifier_cert(addr_color, addr_claque);
+	HAKC_INFO("obtain_modifier_cert(addr_color, addr_claque)=0x%lx\n",m);
+	salt = m & access_tok;
+
 	HAKC_INFO("hakc_access: ctx_addr=%px salt=%lx\n", ctx_addr, salt);
 
 	result = (unsigned long)auth_func(ctx_addr, salt); //autia
@@ -522,7 +557,7 @@ static void *check_hakc_access(const void *address,
 	__s64 aa = (__s64)result;     // ptr might be 0x02ea… (unauthenticated alias), or even attacker-crafted
 	aa |= 0xFFFF000000000000;//(aa << 16) >> 16;  // canonicalize to 0xffff…
 
-	pr_info("CHK: leaving check_hakc_data_access addr=%px\n", aa);
+	HAKC_INFO("CHK: leaving check_hakc_data_access addr=%px\n", aa);
 	
 	return (void *)aa;
 }
@@ -565,9 +600,9 @@ void *check_hakc_data_access(const void *address,
         return (void *)address; // DO NOT touch percpu tokens
     }
 		*/
-	pr_info("CHK: enter check_hakc_data_access addr=%px tok=0x%lx caller=%pS\n",\
+	HAKC_INFO("CHK: enter check_hakc_data_access addr=%px tok=0x%lx caller=%pS\n",\
             address, (unsigned long)access_tok, (void *)_RET_IP_);
-	pr_info("check_hakc_data_access: address=%px access_tok=%x\n", address, access_tok);
+	HAKC_INFO("check_hakc_data_access: address=%px access_tok=%x\n", address, access_tok);
 	
 	return check_hakc_access(address, access_tok, hakc_auth_data_ptr);
 }

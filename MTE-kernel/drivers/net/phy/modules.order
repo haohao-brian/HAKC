@@ -1,9 +1,0 @@
-drivers/net/phy/bcm7xxx.ko
-drivers/net/phy/bcm-phy-lib.ko
-drivers/net/phy/broadcom.ko
-drivers/net/phy/marvell10g.ko
-drivers/net/phy/marvell.ko
-drivers/net/phy/meson-gxl.ko
-drivers/net/phy/microchip.ko
-drivers/net/phy/realtek.ko
-drivers/net/phy/smsc.ko

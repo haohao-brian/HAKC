@@ -1,1 +1,0 @@
-cmd_drivers/net/wireless/ath/ath10k/ath10k_pci.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/net/wireless/ath/ath10k/ath10k_pci.ko drivers/net/wireless/ath/ath10k/ath10k_pci.o drivers/net/wireless/ath/ath10k/ath10k_pci.mod.o;  true

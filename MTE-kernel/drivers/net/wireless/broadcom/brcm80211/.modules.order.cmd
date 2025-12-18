@@ -1,1 +1,0 @@
-cmd_drivers/net/wireless/broadcom/brcm80211/modules.order := {   cat drivers/net/wireless/broadcom/brcm80211/brcmutil/modules.order;   cat drivers/net/wireless/broadcom/brcm80211/brcmfmac/modules.order; :; } | awk '!x[$$0]++' - > drivers/net/wireless/broadcom/brcm80211/modules.order

@@ -1,1 +1,0 @@
-cmd_sound/soc/rockchip/snd-soc-rockchip-pcm.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/rockchip/snd-soc-rockchip-pcm.ko sound/soc/rockchip/snd-soc-rockchip-pcm.o sound/soc/rockchip/snd-soc-rockchip-pcm.mod.o;  true

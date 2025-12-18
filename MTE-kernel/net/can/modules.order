@@ -1,4 +1,0 @@
-net/can/can.ko
-net/can/can-raw.ko
-net/can/can-bcm.ko
-net/can/can-gw.ko

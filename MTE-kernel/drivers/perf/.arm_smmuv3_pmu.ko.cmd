@@ -1,1 +1,0 @@
-cmd_drivers/perf/arm_smmuv3_pmu.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/perf/arm_smmuv3_pmu.ko drivers/perf/arm_smmuv3_pmu.o drivers/perf/arm_smmuv3_pmu.mod.o;  true

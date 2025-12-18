@@ -1,1 +1,0 @@
-cmd_drivers/net/wireless/ath/ath10k/ath10k_snoc.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/net/wireless/ath/ath10k/ath10k_snoc.o drivers/net/wireless/ath/ath10k/qmi.o drivers/net/wireless/ath/ath10k/qmi_wlfw_v01.o drivers/net/wireless/ath/ath10k/snoc.o

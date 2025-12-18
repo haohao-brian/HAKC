@@ -1,1 +1,0 @@
-cmd_drivers/net/wireless/broadcom/brcm80211/brcmutil/brcmutil.mod := { echo  drivers/net/wireless/broadcom/brcm80211/brcmutil/utils.o drivers/net/wireless/broadcom/brcm80211/brcmutil/d11.o;  echo; } > drivers/net/wireless/broadcom/brcm80211/brcmutil/brcmutil.mod

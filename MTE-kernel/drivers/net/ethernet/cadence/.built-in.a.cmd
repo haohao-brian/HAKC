@@ -1,1 +1,0 @@
-cmd_drivers/net/ethernet/cadence/built-in.a := rm -f drivers/net/ethernet/cadence/built-in.a; llvm-ar cDPrST drivers/net/ethernet/cadence/built-in.a drivers/net/ethernet/cadence/macb_main.o drivers/net/ethernet/cadence/macb_ptp.o

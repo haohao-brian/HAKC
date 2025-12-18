@@ -1,1 +1,0 @@
-cmd_drivers/soc/qcom/socinfo.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/soc/qcom/socinfo.ko drivers/soc/qcom/socinfo.o drivers/soc/qcom/socinfo.mod.o;  true

@@ -1,1 +1,0 @@
-cmd_drivers/rtc/rtc-rx8581.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/rtc/rtc-rx8581.ko drivers/rtc/rtc-rx8581.o drivers/rtc/rtc-rx8581.mod.o;  true

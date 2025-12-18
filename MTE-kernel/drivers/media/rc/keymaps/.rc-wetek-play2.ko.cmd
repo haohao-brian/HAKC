@@ -1,1 +1,0 @@
-cmd_drivers/media/rc/keymaps/rc-wetek-play2.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/keymaps/rc-wetek-play2.ko drivers/media/rc/keymaps/rc-wetek-play2.o drivers/media/rc/keymaps/rc-wetek-play2.mod.o;  true

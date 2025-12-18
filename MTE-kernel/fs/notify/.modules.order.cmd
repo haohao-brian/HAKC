@@ -1,1 +1,0 @@
-cmd_fs/notify/modules.order := {   cat fs/notify/dnotify/modules.order;   cat fs/notify/inotify/modules.order;   cat fs/notify/fanotify/modules.order; :; } | awk '!x[$$0]++' - > fs/notify/modules.order

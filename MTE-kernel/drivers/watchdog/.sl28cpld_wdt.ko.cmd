@@ -1,1 +1,0 @@
-cmd_drivers/watchdog/sl28cpld_wdt.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/watchdog/sl28cpld_wdt.ko drivers/watchdog/sl28cpld_wdt.o drivers/watchdog/sl28cpld_wdt.mod.o;  true

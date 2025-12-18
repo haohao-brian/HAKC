@@ -1,1 +1,0 @@
-obj-m += pcpu_set_demo.o

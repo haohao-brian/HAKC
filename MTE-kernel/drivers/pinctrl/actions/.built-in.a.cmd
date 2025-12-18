@@ -1,1 +1,0 @@
-cmd_drivers/pinctrl/actions/built-in.a := rm -f drivers/pinctrl/actions/built-in.a; llvm-ar cDPrST drivers/pinctrl/actions/built-in.a drivers/pinctrl/actions/pinctrl-owl.o drivers/pinctrl/actions/pinctrl-s700.o drivers/pinctrl/actions/pinctrl-s900.o

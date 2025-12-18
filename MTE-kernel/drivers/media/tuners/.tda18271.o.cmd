@@ -1,1 +1,0 @@
-cmd_drivers/media/tuners/tda18271.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/media/tuners/tda18271.o drivers/media/tuners/tda18271-maps.o drivers/media/tuners/tda18271-common.o drivers/media/tuners/tda18271-fe.o

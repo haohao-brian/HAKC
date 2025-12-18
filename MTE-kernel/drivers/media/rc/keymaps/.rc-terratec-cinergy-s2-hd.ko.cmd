@@ -1,1 +1,0 @@
-cmd_drivers/media/rc/keymaps/rc-terratec-cinergy-s2-hd.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/keymaps/rc-terratec-cinergy-s2-hd.ko drivers/media/rc/keymaps/rc-terratec-cinergy-s2-hd.o drivers/media/rc/keymaps/rc-terratec-cinergy-s2-hd.mod.o;  true

@@ -1,9 +1,0 @@
-drivers/thermal/broadcom/bcm2711_thermal.ko
-drivers/thermal/broadcom/bcm2835_thermal.ko
-drivers/thermal/broadcom/brcmstb_thermal.ko
-drivers/thermal/qcom/qcom-spmi-temp-alarm.ko
-drivers/thermal/tegra/tegra-bpmp-thermal.ko
-drivers/thermal/rockchip_thermal.ko
-drivers/thermal/imx_sc_thermal.ko
-drivers/thermal/imx8mm_thermal.ko
-drivers/thermal/qoriq_thermal.ko

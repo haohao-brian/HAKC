@@ -1,1 +1,0 @@
-cmd_drivers/media/platform/sunxi/sun6i-csi/sun6i-csi.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/media/platform/sunxi/sun6i-csi/sun6i-csi.o drivers/media/platform/sunxi/sun6i-csi/sun6i_video.o drivers/media/platform/sunxi/sun6i-csi/sun6i_csi.o

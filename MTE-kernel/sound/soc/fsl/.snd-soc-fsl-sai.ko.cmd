@@ -1,1 +1,0 @@
-cmd_sound/soc/fsl/snd-soc-fsl-sai.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/fsl/snd-soc-fsl-sai.ko sound/soc/fsl/snd-soc-fsl-sai.o sound/soc/fsl/snd-soc-fsl-sai.mod.o;  true

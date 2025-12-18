@@ -1,1 +1,0 @@
-cmd_drivers/net/ethernet/atheros/atl1c/atl1c.mod := { echo  drivers/net/ethernet/atheros/atl1c/atl1c_main.o drivers/net/ethernet/atheros/atl1c/atl1c_hw.o drivers/net/ethernet/atheros/atl1c/atl1c_ethtool.o;  echo; } > drivers/net/ethernet/atheros/atl1c/atl1c.mod

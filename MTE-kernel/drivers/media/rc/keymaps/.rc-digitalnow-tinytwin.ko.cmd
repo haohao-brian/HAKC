@@ -1,1 +1,0 @@
-cmd_drivers/media/rc/keymaps/rc-digitalnow-tinytwin.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/keymaps/rc-digitalnow-tinytwin.ko drivers/media/rc/keymaps/rc-digitalnow-tinytwin.o drivers/media/rc/keymaps/rc-digitalnow-tinytwin.mod.o;  true

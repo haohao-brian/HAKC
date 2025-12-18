@@ -1,1 +1,0 @@
-cmd_drivers/media/rc/modules.order := {   cat drivers/media/rc/keymaps/modules.order;   echo drivers/media/rc/rc-core.ko;   echo drivers/media/rc/meson-ir.ko;   echo drivers/media/rc/sunxi-cir.ko; :; } | awk '!x[$$0]++' - > drivers/media/rc/modules.order

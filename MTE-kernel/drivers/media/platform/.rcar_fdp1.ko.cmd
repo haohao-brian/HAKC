@@ -1,1 +1,0 @@
-cmd_drivers/media/platform/rcar_fdp1.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/platform/rcar_fdp1.ko drivers/media/platform/rcar_fdp1.o drivers/media/platform/rcar_fdp1.mod.o;  true

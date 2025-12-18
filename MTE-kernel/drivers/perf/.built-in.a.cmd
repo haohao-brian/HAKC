@@ -1,1 +1,0 @@
-cmd_drivers/perf/built-in.a := rm -f drivers/perf/built-in.a; llvm-ar cDPrST drivers/perf/built-in.a drivers/perf/arm_pmu.o drivers/perf/arm_pmu_platform.o drivers/perf/arm_pmu_acpi.o drivers/perf/hisilicon/built-in.a drivers/perf/qcom_l2_pmu.o drivers/perf/qcom_l3_pmu.o

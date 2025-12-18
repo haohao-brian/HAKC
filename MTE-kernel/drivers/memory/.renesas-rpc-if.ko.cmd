@@ -1,1 +1,0 @@
-cmd_drivers/memory/renesas-rpc-if.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/memory/renesas-rpc-if.ko drivers/memory/renesas-rpc-if.o drivers/memory/renesas-rpc-if.mod.o;  true

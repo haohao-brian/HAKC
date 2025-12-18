@@ -1,1 +1,0 @@
-cmd_drivers/thermal/broadcom/modules.order := {   echo drivers/thermal/broadcom/bcm2711_thermal.ko;   echo drivers/thermal/broadcom/bcm2835_thermal.ko;   echo drivers/thermal/broadcom/brcmstb_thermal.ko; :; } | awk '!x[$$0]++' - > drivers/thermal/broadcom/modules.order

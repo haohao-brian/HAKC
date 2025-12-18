@@ -1,1 +1,0 @@
-cmd_drivers/net/wireless/ath/modules.order := {   cat drivers/net/wireless/ath/ath10k/modules.order;   echo drivers/net/wireless/ath/ath.ko; :; } | awk '!x[$$0]++' - > drivers/net/wireless/ath/modules.order

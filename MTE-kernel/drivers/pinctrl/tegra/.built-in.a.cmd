@@ -1,1 +1,0 @@
-cmd_drivers/pinctrl/tegra/built-in.a := rm -f drivers/pinctrl/tegra/built-in.a; llvm-ar cDPrST drivers/pinctrl/tegra/built-in.a drivers/pinctrl/tegra/pinctrl-tegra.o drivers/pinctrl/tegra/pinctrl-tegra124.o drivers/pinctrl/tegra/pinctrl-tegra210.o drivers/pinctrl/tegra/pinctrl-tegra194.o drivers/pinctrl/tegra/pinctrl-tegra-xusb.o

@@ -1,1 +1,0 @@
-cmd_drivers/media/rc/keymaps/rc-em-terratec.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/media/rc/keymaps/rc-em-terratec.ko drivers/media/rc/keymaps/rc-em-terratec.o drivers/media/rc/keymaps/rc-em-terratec.mod.o;  true

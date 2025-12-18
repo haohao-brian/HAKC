@@ -1,1 +1,0 @@
-cmd_sound/soc/meson/snd-soc-meson-t9015.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o sound/soc/meson/snd-soc-meson-t9015.ko sound/soc/meson/snd-soc-meson-t9015.o sound/soc/meson/snd-soc-meson-t9015.mod.o;  true

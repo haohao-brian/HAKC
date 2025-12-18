@@ -1,1 +1,0 @@
-cmd_drivers/pwm/pwm-sl28cpld.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/pwm/pwm-sl28cpld.ko drivers/pwm/pwm-sl28cpld.o drivers/pwm/pwm-sl28cpld.mod.o;  true

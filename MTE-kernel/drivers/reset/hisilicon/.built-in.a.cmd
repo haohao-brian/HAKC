@@ -1,1 +1,0 @@
-cmd_drivers/reset/hisilicon/built-in.a := rm -f drivers/reset/hisilicon/built-in.a; llvm-ar cDPrST drivers/reset/hisilicon/built-in.a drivers/reset/hisilicon/hi6220_reset.o drivers/reset/hisilicon/reset-hi3660.o

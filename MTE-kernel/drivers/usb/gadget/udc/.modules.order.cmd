@@ -1,1 +1,0 @@
-cmd_drivers/usb/gadget/udc/modules.order := {   cat drivers/usb/gadget/udc/bdc/modules.order;   echo drivers/usb/gadget/udc/tegra-xudc.ko;   echo drivers/usb/gadget/udc/renesas_usb3.ko; :; } | awk '!x[$$0]++' - > drivers/usb/gadget/udc/modules.order

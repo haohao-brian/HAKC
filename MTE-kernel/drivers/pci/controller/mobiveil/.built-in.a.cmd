@@ -1,1 +1,0 @@
-cmd_drivers/pci/controller/mobiveil/built-in.a := rm -f drivers/pci/controller/mobiveil/built-in.a; llvm-ar cDPrST drivers/pci/controller/mobiveil/built-in.a drivers/pci/controller/mobiveil/pcie-mobiveil.o drivers/pci/controller/mobiveil/pcie-mobiveil-host.o drivers/pci/controller/mobiveil/pcie-layerscape-gen4.o

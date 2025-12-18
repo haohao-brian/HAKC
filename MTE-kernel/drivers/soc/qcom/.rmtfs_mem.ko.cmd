@@ -1,1 +1,0 @@
-cmd_drivers/soc/qcom/rmtfs_mem.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/soc/qcom/rmtfs_mem.ko drivers/soc/qcom/rmtfs_mem.o drivers/soc/qcom/rmtfs_mem.mod.o;  true

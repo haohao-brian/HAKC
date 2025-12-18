@@ -1,1 +1,0 @@
-cmd_drivers/watchdog/meson_wdt.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/watchdog/meson_wdt.ko drivers/watchdog/meson_wdt.o drivers/watchdog/meson_wdt.mod.o;  true

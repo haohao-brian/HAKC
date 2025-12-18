@@ -1,1 +1,0 @@
-cmd_drivers/phy/qualcomm/phy-qcom-qmp.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/phy/qualcomm/phy-qcom-qmp.ko drivers/phy/qualcomm/phy-qcom-qmp.o drivers/phy/qualcomm/phy-qcom-qmp.mod.o;  true

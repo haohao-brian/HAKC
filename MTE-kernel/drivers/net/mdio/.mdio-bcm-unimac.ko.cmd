@@ -1,1 +1,0 @@
-cmd_drivers/net/mdio/mdio-bcm-unimac.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/net/mdio/mdio-bcm-unimac.ko drivers/net/mdio/mdio-bcm-unimac.o drivers/net/mdio/mdio-bcm-unimac.mod.o;  true

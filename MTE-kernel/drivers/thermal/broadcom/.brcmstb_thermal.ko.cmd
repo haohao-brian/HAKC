@@ -1,1 +1,0 @@
-cmd_drivers/thermal/broadcom/brcmstb_thermal.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/thermal/broadcom/brcmstb_thermal.ko drivers/thermal/broadcom/brcmstb_thermal.o drivers/thermal/broadcom/brcmstb_thermal.mod.o;  true

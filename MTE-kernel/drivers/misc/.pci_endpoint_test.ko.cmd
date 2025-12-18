@@ -1,1 +1,0 @@
-cmd_drivers/misc/pci_endpoint_test.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/misc/pci_endpoint_test.ko drivers/misc/pci_endpoint_test.o drivers/misc/pci_endpoint_test.mod.o;  true

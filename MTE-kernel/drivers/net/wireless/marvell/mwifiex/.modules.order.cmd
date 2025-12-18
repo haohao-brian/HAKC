@@ -1,1 +1,0 @@
-cmd_drivers/net/wireless/marvell/mwifiex/modules.order := {   echo drivers/net/wireless/marvell/mwifiex/mwifiex.ko;   echo drivers/net/wireless/marvell/mwifiex/mwifiex_pcie.ko; :; } | awk '!x[$$0]++' - > drivers/net/wireless/marvell/mwifiex/modules.order

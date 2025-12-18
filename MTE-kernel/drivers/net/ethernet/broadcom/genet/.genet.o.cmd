@@ -1,1 +1,0 @@
-cmd_drivers/net/ethernet/broadcom/genet/genet.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/net/ethernet/broadcom/genet/genet.o drivers/net/ethernet/broadcom/genet/bcmgenet.o drivers/net/ethernet/broadcom/genet/bcmmii.o drivers/net/ethernet/broadcom/genet/bcmgenet_wol.o

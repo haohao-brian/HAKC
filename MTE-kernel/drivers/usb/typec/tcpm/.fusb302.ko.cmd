@@ -1,1 +1,0 @@
-cmd_drivers/usb/typec/tcpm/fusb302.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/usb/typec/tcpm/fusb302.ko drivers/usb/typec/tcpm/fusb302.o drivers/usb/typec/tcpm/fusb302.mod.o;  true

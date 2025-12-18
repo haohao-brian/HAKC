@@ -1,1 +1,0 @@
-cmd_net/netfilter/xt_MASQUERADE.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o net/netfilter/xt_MASQUERADE.ko net/netfilter/xt_MASQUERADE.o net/netfilter/xt_MASQUERADE.mod.o;  true

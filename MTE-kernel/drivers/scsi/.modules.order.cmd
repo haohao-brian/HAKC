@@ -1,1 +1,0 @@
-cmd_drivers/scsi/modules.order := {   cat drivers/scsi/libsas/modules.order;   cat drivers/scsi/megaraid/modules.order;   cat drivers/scsi/ufs/modules.order;   cat drivers/scsi/hisi_sas/modules.order;   echo drivers/scsi/raid_class.ko;   cat drivers/scsi/mpt3sas/modules.order; :; } | awk '!x[$$0]++' - > drivers/scsi/modules.order

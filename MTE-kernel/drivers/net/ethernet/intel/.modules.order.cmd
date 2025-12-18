@@ -1,1 +1,0 @@
-cmd_drivers/net/ethernet/intel/modules.order := {   cat drivers/net/ethernet/intel/e1000/modules.order;   cat drivers/net/ethernet/intel/e1000e/modules.order;   cat drivers/net/ethernet/intel/igb/modules.order;   cat drivers/net/ethernet/intel/igbvf/modules.order; :; } | awk '!x[$$0]++' - > drivers/net/ethernet/intel/modules.order

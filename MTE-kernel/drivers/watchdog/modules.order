@@ -1,6 +1,0 @@
-drivers/watchdog/sunxi_wdt.ko
-drivers/watchdog/imx_sc_wdt.ko
-drivers/watchdog/qcom-wdt.ko
-drivers/watchdog/meson_gxbb_wdt.ko
-drivers/watchdog/meson_wdt.ko
-drivers/watchdog/sl28cpld_wdt.ko

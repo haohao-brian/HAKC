@@ -1,1 +1,0 @@
-cmd_drivers/nvme/host/nvme-core.ko := ld.lld -r -EL  -maarch64elf -z norelro --build-id=sha1  -T scripts/module.lds -o drivers/nvme/host/nvme-core.ko drivers/nvme/host/nvme-core.o drivers/nvme/host/nvme-core.mod.o;  true
