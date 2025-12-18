@@ -1,0 +1,1 @@
+obj-m += hakc_tpidr_color_demo.o
