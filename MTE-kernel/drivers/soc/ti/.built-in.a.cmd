@@ -1,0 +1,1 @@
+cmd_drivers/soc/ti/built-in.a := rm -f drivers/soc/ti/built-in.a; llvm-ar cDPrST drivers/soc/ti/built-in.a drivers/soc/ti/ti_sci_pm_domains.o drivers/soc/ti/ti_sci_inta_msi.o drivers/soc/ti/k3-ringacc.o drivers/soc/ti/k3-socinfo.o

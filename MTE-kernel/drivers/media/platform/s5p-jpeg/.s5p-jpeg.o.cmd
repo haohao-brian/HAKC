@@ -1,0 +1,1 @@
+cmd_drivers/media/platform/s5p-jpeg/s5p-jpeg.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/media/platform/s5p-jpeg/s5p-jpeg.o drivers/media/platform/s5p-jpeg/jpeg-core.o drivers/media/platform/s5p-jpeg/jpeg-hw-exynos3250.o drivers/media/platform/s5p-jpeg/jpeg-hw-exynos4.o drivers/media/platform/s5p-jpeg/jpeg-hw-s5p.o

@@ -1,0 +1,1 @@
+cmd_drivers/scsi/ufs/built-in.a := rm -f drivers/scsi/ufs/built-in.a; llvm-ar cDPrST drivers/scsi/ufs/built-in.a drivers/scsi/ufs/ufshcd.o drivers/scsi/ufs/ufs-sysfs.o drivers/scsi/ufs/ufshcd-pltfrm.o drivers/scsi/ufs/ufs-hisi.o

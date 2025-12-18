@@ -1,0 +1,1 @@
+cmd_drivers/xen/modules.order := {   cat drivers/xen/events/modules.order;   cat drivers/xen/xenbus/modules.order;   cat drivers/xen/xenfs/modules.order; :; } | awk '!x[$$0]++' - > drivers/xen/modules.order

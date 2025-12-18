@@ -1,0 +1,1 @@
+cmd_drivers/usb/gadget/udc/bdc/built-in.a := rm -f drivers/usb/gadget/udc/bdc/built-in.a; llvm-ar cDPrST drivers/usb/gadget/udc/bdc/built-in.a drivers/usb/gadget/udc/bdc/bdc_core.o drivers/usb/gadget/udc/bdc/bdc_cmd.o drivers/usb/gadget/udc/bdc/bdc_ep.o drivers/usb/gadget/udc/bdc/bdc_udc.o

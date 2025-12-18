@@ -1,0 +1,1 @@
+cmd_drivers/phy/rockchip/modules.order := {   echo drivers/phy/rockchip/phy-rockchip-inno-hdmi.ko;   echo drivers/phy/rockchip/phy-rockchip-pcie.ko; :; } | awk '!x[$$0]++' - > drivers/phy/rockchip/modules.order

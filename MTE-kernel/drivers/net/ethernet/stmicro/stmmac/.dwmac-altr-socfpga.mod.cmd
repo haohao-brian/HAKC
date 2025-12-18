@@ -1,0 +1,1 @@
+cmd_drivers/net/ethernet/stmicro/stmmac/dwmac-altr-socfpga.mod := { echo  drivers/net/ethernet/stmicro/stmmac/altr_tse_pcs.o drivers/net/ethernet/stmicro/stmmac/dwmac-socfpga.o;  echo; } > drivers/net/ethernet/stmicro/stmmac/dwmac-altr-socfpga.mod

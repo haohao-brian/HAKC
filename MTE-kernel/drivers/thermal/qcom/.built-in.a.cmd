@@ -1,0 +1,1 @@
+cmd_drivers/thermal/qcom/built-in.a := rm -f drivers/thermal/qcom/built-in.a; llvm-ar cDPrST drivers/thermal/qcom/built-in.a drivers/thermal/qcom/tsens.o drivers/thermal/qcom/tsens-v2.o drivers/thermal/qcom/tsens-v1.o drivers/thermal/qcom/tsens-v0_1.o drivers/thermal/qcom/tsens-8960.o

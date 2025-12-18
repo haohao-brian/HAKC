@@ -1,0 +1,1 @@
+cmd_drivers/watchdog/modules.order := {   echo drivers/watchdog/sunxi_wdt.ko;   echo drivers/watchdog/imx_sc_wdt.ko;   echo drivers/watchdog/qcom-wdt.ko;   echo drivers/watchdog/meson_gxbb_wdt.ko;   echo drivers/watchdog/meson_wdt.ko;   echo drivers/watchdog/sl28cpld_wdt.ko; :; } | awk '!x[$$0]++' - > drivers/watchdog/modules.order

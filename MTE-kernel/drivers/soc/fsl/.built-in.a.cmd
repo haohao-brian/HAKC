@@ -1,0 +1,1 @@
+cmd_drivers/soc/fsl/built-in.a := rm -f drivers/soc/fsl/built-in.a; llvm-ar cDPrST drivers/soc/fsl/built-in.a drivers/soc/fsl/qbman/built-in.a drivers/soc/fsl/guts.o drivers/soc/fsl/dpio/built-in.a drivers/soc/fsl/dpaa2-console.o

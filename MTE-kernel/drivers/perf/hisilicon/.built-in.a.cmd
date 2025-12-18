@@ -1,0 +1,1 @@
+cmd_drivers/perf/hisilicon/built-in.a := rm -f drivers/perf/hisilicon/built-in.a; llvm-ar cDPrST drivers/perf/hisilicon/built-in.a drivers/perf/hisilicon/hisi_uncore_pmu.o drivers/perf/hisilicon/hisi_uncore_l3c_pmu.o drivers/perf/hisilicon/hisi_uncore_hha_pmu.o drivers/perf/hisilicon/hisi_uncore_ddrc_pmu.o

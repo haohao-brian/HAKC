@@ -1,0 +1,1 @@
+cmd_drivers/pinctrl/uniphier/built-in.a := rm -f drivers/pinctrl/uniphier/built-in.a; llvm-ar cDPrST drivers/pinctrl/uniphier/built-in.a drivers/pinctrl/uniphier/pinctrl-uniphier-core.o drivers/pinctrl/uniphier/pinctrl-uniphier-ld11.o drivers/pinctrl/uniphier/pinctrl-uniphier-ld20.o drivers/pinctrl/uniphier/pinctrl-uniphier-pxs3.o

@@ -1,0 +1,1 @@
+cmd_drivers/pinctrl/bcm/built-in.a := rm -f drivers/pinctrl/bcm/built-in.a; llvm-ar cDPrST drivers/pinctrl/bcm/built-in.a drivers/pinctrl/bcm/pinctrl-bcm2835.o drivers/pinctrl/bcm/pinctrl-iproc-gpio.o drivers/pinctrl/bcm/pinctrl-ns2-mux.o

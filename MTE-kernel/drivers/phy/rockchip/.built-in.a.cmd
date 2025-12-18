@@ -1,0 +1,1 @@
+cmd_drivers/phy/rockchip/built-in.a := rm -f drivers/phy/rockchip/built-in.a; llvm-ar cDPrST drivers/phy/rockchip/built-in.a drivers/phy/rockchip/phy-rockchip-emmc.o drivers/phy/rockchip/phy-rockchip-inno-usb2.o drivers/phy/rockchip/phy-rockchip-typec.o

@@ -1,0 +1,1 @@
+cmd_drivers/media/platform/rcar-vin/modules.order := {   echo drivers/media/platform/rcar-vin/rcar-csi2.ko;   echo drivers/media/platform/rcar-vin/rcar-vin.ko; :; } | awk '!x[$$0]++' - > drivers/media/platform/rcar-vin/modules.order

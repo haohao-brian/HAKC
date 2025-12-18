@@ -1,0 +1,1 @@
+cmd_drivers/scsi/hisi_sas/built-in.a := rm -f drivers/scsi/hisi_sas/built-in.a; llvm-ar cDPrST drivers/scsi/hisi_sas/built-in.a drivers/scsi/hisi_sas/hisi_sas_main.o drivers/scsi/hisi_sas/hisi_sas_v1_hw.o drivers/scsi/hisi_sas/hisi_sas_v2_hw.o drivers/scsi/hisi_sas/hisi_sas_v3_hw.o

@@ -1,0 +1,1 @@
+cmd_drivers/phy/socionext/built-in.a := rm -f drivers/phy/socionext/built-in.a; llvm-ar cDPrST drivers/phy/socionext/built-in.a drivers/phy/socionext/phy-uniphier-usb2.o drivers/phy/socionext/phy-uniphier-usb3hs.o drivers/phy/socionext/phy-uniphier-usb3ss.o drivers/phy/socionext/phy-uniphier-ahci.o

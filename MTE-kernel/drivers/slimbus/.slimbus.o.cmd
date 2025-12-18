@@ -1,0 +1,1 @@
+cmd_drivers/slimbus/slimbus.o := ld.lld -EL  -maarch64elf -z norelro   -r -o drivers/slimbus/slimbus.o drivers/slimbus/core.o drivers/slimbus/messaging.o drivers/slimbus/sched.o drivers/slimbus/stream.o

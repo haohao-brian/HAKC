@@ -1,0 +1,1 @@
+cmd_drivers/net/ethernet/renesas/built-in.a := rm -f drivers/net/ethernet/renesas/built-in.a; llvm-ar cDPrST drivers/net/ethernet/renesas/built-in.a drivers/net/ethernet/renesas/sh_eth.o drivers/net/ethernet/renesas/ravb_main.o drivers/net/ethernet/renesas/ravb_ptp.o

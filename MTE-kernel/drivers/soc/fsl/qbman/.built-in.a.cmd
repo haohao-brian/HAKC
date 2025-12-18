@@ -1,0 +1,1 @@
+cmd_drivers/soc/fsl/qbman/built-in.a := rm -f drivers/soc/fsl/qbman/built-in.a; llvm-ar cDPrST drivers/soc/fsl/qbman/built-in.a drivers/soc/fsl/qbman/bman_ccsr.o drivers/soc/fsl/qbman/qman_ccsr.o drivers/soc/fsl/qbman/bman_portal.o drivers/soc/fsl/qbman/qman_portal.o drivers/soc/fsl/qbman/bman.o drivers/soc/fsl/qbman/qman.o drivers/soc/fsl/qbman/dpaa_sys.o

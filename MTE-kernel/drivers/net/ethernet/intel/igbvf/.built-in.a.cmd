@@ -1,0 +1,1 @@
+cmd_drivers/net/ethernet/intel/igbvf/built-in.a := rm -f drivers/net/ethernet/intel/igbvf/built-in.a; llvm-ar cDPrST drivers/net/ethernet/intel/igbvf/built-in.a drivers/net/ethernet/intel/igbvf/vf.o drivers/net/ethernet/intel/igbvf/mbx.o drivers/net/ethernet/intel/igbvf/ethtool.o drivers/net/ethernet/intel/igbvf/netdev.o

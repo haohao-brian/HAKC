@@ -1,0 +1,1 @@
+cmd_drivers/power/reset/built-in.a := rm -f drivers/power/reset/built-in.a; llvm-ar cDPrST drivers/power/reset/built-in.a drivers/power/reset/brcmstb-reboot.o drivers/power/reset/msm-poweroff.o drivers/power/reset/xgene-reboot.o drivers/power/reset/syscon-reboot.o drivers/power/reset/reboot-mode.o drivers/power/reset/syscon-reboot-mode.o

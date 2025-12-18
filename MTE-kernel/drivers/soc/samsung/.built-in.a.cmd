@@ -1,0 +1,1 @@
+cmd_drivers/soc/samsung/built-in.a := rm -f drivers/soc/samsung/built-in.a; llvm-ar cDPrST drivers/soc/samsung/built-in.a drivers/soc/samsung/exynos-chipid.o drivers/soc/samsung/exynos-pmu.o drivers/soc/samsung/pm_domains.o

@@ -1,0 +1,1 @@
+cmd_drivers/rpmsg/built-in.a := rm -f drivers/rpmsg/built-in.a; llvm-ar cDPrST drivers/rpmsg/built-in.a drivers/rpmsg/rpmsg_core.o drivers/rpmsg/qcom_glink_native.o drivers/rpmsg/qcom_glink_ssr.o drivers/rpmsg/qcom_glink_rpm.o drivers/rpmsg/qcom_smd.o

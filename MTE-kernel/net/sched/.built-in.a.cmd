@@ -1,0 +1,1 @@
+cmd_net/sched/built-in.a := rm -f net/sched/built-in.a; llvm-ar cDPrST net/sched/built-in.a net/sched/sch_generic.o net/sched/sch_mq.o net/sched/sch_api.o net/sched/sch_blackhole.o net/sched/cls_api.o net/sched/act_api.o net/sched/sch_fifo.o
