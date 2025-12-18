@@ -1,6 +1,7 @@
 # IPv6 module test
 
-ps. This repo contains run-kvm.sh and make-image.sh
+ps. This repo contains run-kvm.sh, make-image.sh, and PMCPass.so.
+
 ## step 1: compile kernel and get vmlinux:
 ```
 cd MTE-kernel
