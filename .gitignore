@@ -33,3 +33,35 @@ PMC-Pass/build
 *.exe
 *.out
 *.app
+*.ko
+*.ko.*
+
+MTE-kernel/make-image-output.img
+MTE-kernel/*root*.tar*
+make-image-output.img
+
+# --- Kernel build artifacts (MTE-kernel) ---
+
+# top-level images & maps
+MTE-kernel/vmlinux
+MTE-kernel/System.map
+MTE-kernel/.version
+
+# temporary maps / kallsyms
+MTE-kernel/.tmp_*
+MTE-kernel/tmp.*
+
+# generated headers
+MTE-kernel/include/generated/
+
+# module metadata
+MTE-kernel/**/*.mod.c
+MTE-kernel/**/modules.order
+MTE-kernel/**/Module.symvers
+MTE-kernel/**/Module.markers
+
+# objects / modules
+MTE-kernel/**/*.o
+MTE-kernel/**/*.ko
+MTE-kernel/**/*.mod
+MTE-kernel/**/*.mod.o
