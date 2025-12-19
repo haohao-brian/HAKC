@@ -1,6 +1,6 @@
 # IPv6 module test
 
-ps. This repo is rady-to-go and contains run-kvm.sh, make-image.sh
+ps. This repo is ready-to-go and contains run-kvm.sh, make-image.sh
 
 ## step 1: compile kernel and get vmlinux:
 ```
