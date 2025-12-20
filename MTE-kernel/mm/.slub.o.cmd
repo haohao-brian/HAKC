@@ -3,6 +3,7 @@ cmd_mm/slub.o := clang-11 -Wp,-MMD,mm/.slub.o.d -nostdinc -isystem /usr/lib/llvm
 source_mm/slub.o := mm/slub.c
 
 deps_mm/slub.o := \
+    $(wildcard include/config/pac/mte/compart/debug/print.h) \
     $(wildcard include/config/slub/debug.h) \
     $(wildcard include/config/slub/debug/on.h) \
     $(wildcard include/config/slub/cpu/partial.h) \

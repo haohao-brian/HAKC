@@ -99,7 +99,7 @@ qemu-system-aarch64 -nographic -machine virt,mte=on,gic-version=3,virtualization
         -append "console=ttyAMA0 root=/dev/vda rw $CMDLINE" \
         -netdev user,id=net0,ipv6=on,ipv6-net=fdf2:5e8e:743d::0/43 \
         -device virtio-net-pci,netdev=net0 \
-        -netdev user,id=net1,hostfwd=tcp::2331-:21 \
+        -netdev user,id=net1,hostfwd=tcp::2333-:22 \
         -device virtio-net-pci,netdev=net1,mac=de:ad:be:ef:41:49 \
 	-virtfs local,path=$SHARED_DIR,mount_tag=shared,security_model=mapped \
 	-append "console=ttyAMA0 root=/dev/vda rw earlycon=pl011,0x09000000 initcall_debug rcupdate.rcu_cpu_stall_timeout=20 \

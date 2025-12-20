@@ -658,8 +658,8 @@ int ping_common_sendmsg(int family, struct msghdr *msg, size_t len,
 	 *	Fetch the ICMP header provided by the userland.
 	 *	iovec is modified! The ICMP header is consumed.
 	 */
-	check_hakc_data_access(user_icmph,0x20001);
-	if (memcpy_from_msg(user_icmph, msg, icmph_len))
+	
+	if (memcpy_from_msg(check_hakc_data_access(user_icmph,0x20004), msg, icmph_len))
 		return -EFAULT;
 
 	if (family == AF_INET) {

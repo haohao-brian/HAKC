@@ -52,10 +52,31 @@ static inline u64 siphash_4u32(const u32 a, const u32 b, const u32 c,
 	return siphash_2u64((u64)b << 32 | a, (u64)d << 32 | c, key);
 }
 
-
-static inline u64 ___siphash_aligned(const __le64 *data, size_t len,
+#include <linux/hakc.h>
+static noinline u64 ___siphash_aligned(const __le64 *data, size_t len,
 				     const siphash_key_t *key)
 {
+		const __le64 *safe;
+
+	/*
+	 * 如果 data 是 HAKC colored pointer（例如 0x02be8...），
+	 * 這裡用 check_hakc_data_access 把它 AUTH + canonicalize。
+	 *
+	 * token 要選「讀 RED data clique」那個，從你的 log 看起來像 0x20004，
+	 * 如果你 policy 不一樣，這裡改成對應的 READ token。
+	 *
+	 * 如果 data 原本就是 0xffff... 或 0x0000...，check_hakc_data_access 內部會早退，
+	 * 不會有額外效果。
+	 */
+	safe = (const __le64 *)check_hakc_data_access((void *)data, 0x20004);
+	/* 如果你目前的 check_hakc_data_access 回傳的是 u64，而不是 void *，
+	 * 就改成：
+	 *
+	 *   unsigned long tmp = check_hakc_data_access((void *)data, 0x20004);
+	 *   safe = (const __le64 *)tmp; // 不要再自己 & mask，因為 HAKC 已經給 canonical 了
+	 */
+
+	data = safe;
 	if (__builtin_constant_p(len) && len == 4)
 		return siphash_1u32(le32_to_cpup((const __le32 *)data), key);
 	if (__builtin_constant_p(len) && len == 8)
@@ -70,6 +91,7 @@ static inline u64 ___siphash_aligned(const __le64 *data, size_t len,
 		return siphash_4u64(le64_to_cpu(data[0]), le64_to_cpu(data[1]),
 				    le64_to_cpu(data[2]), le64_to_cpu(data[3]),
 				    key);
+	
 	return __siphash_aligned(data, len, key);
 }
 

@@ -3,6 +3,7 @@ cmd_net/ipv6/ping.o := clang-11 -Wp,-MMD,net/ipv6/.ping.o.d -nostdinc -isystem /
 source_net/ipv6/ping.o := net/ipv6/ping.c
 
 deps_net/ipv6/ping.o := \
+    $(wildcard include/config/pac/mte/compart/debug/print.h) \
     $(wildcard include/config/pac/mte/compart/ipv6.h) \
     $(wildcard include/config/proc/fs.h) \
   include/linux/kconfig.h \
