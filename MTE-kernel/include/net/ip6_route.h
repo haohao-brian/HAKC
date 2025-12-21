@@ -243,8 +243,9 @@ void ip6_sk_dst_store_flow(struct sock *sk, struct dst_entry *dst,
 
 static inline bool ipv6_unicast_destination(const struct sk_buff *skb)
 {
+	pr_info("enter ipv6_unicast_destination\n");
 	struct rt6_info *rt = (struct rt6_info *) skb_dst(skb);
-
+	pr_info("before struct rt6_info *rt = (struct rt6_info *) skb_dst(skb);\n");
 	return rt->rt6i_flags & RTF_LOCAL;
 }
 

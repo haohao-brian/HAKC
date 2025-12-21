@@ -65,3 +65,4 @@ MTE-kernel/**/*.o
 MTE-kernel/**/*.ko
 MTE-kernel/**/*.mod
 MTE-kernel/**/*.mod.o
+MTE-kernel/run-kvm.sh

@@ -172,7 +172,7 @@ ip6_finish_output_gso_slowpath_drop(struct net *net, struct sock *sk,
 static noinline int __ip6_finish_output(struct net *net, struct sock *sk, struct sk_buff *skb)
 {
 	unsigned int mtu;
-
+	HAKC_INFO("enter __ip6_finish_output\n");
 #if defined(CONFIG_NETFILTER) && defined(CONFIG_XFRM)
 	/* Policy lookup after SNAT yielded a new policy */
 	if (skb_dst(skb)->xfrm) {
@@ -180,17 +180,22 @@ static noinline int __ip6_finish_output(struct net *net, struct sock *sk, struct
 		return dst_output(net, sk, skb);
 	}
 #endif
-
+	HAKC_INFO("enter ip6_skb_dst_mtu\n");
 	mtu = ip6_skb_dst_mtu(skb);
-	if (skb_is_gso(skb) && !skb_gso_validate_network_len(skb, mtu))
+	HAKC_INFO("enter skb_is_gso, skb_gso_validate_network_len \n");
+	if (skb_is_gso(skb) && !skb_gso_validate_network_len(skb, mtu)){
 		return ip6_finish_output_gso_slowpath_drop(net, sk, skb, mtu);
-
+	}
+	HAKC_INFO("enter skb_is_gso dst_allfrag\n");
 	if ((skb->len > mtu && !skb_is_gso(skb)) ||
 	    dst_allfrag(skb_dst(skb)) ||
-	    (IP6CB(skb)->frag_max_size && skb->len > IP6CB(skb)->frag_max_size))
+	    (IP6CB(skb)->frag_max_size && skb->len > IP6CB(skb)->frag_max_size)){
+			HAKC_INFO("enter ip6_fragment\n");
 		return ip6_fragment(net, sk, skb, ip6_finish_output2);
-	else
+	}else{
+		HAKC_INFO("enter ip6_finish_output2\n");
 		return ip6_finish_output2(net, sk, skb);
+	}
 }
 
 static int ip6_finish_output(struct net *net, struct sock *sk, struct sk_buff *skb)
@@ -1393,21 +1398,24 @@ static int ip6_setup_cork(struct sock *sk, struct inet_cork_full *cork,
     if (dev)
         idev = __in6_dev_get(dev);  /* 這行如果原本就有，重用原本的變數 */
 
-    HAKC_INFO("HAKC ip6_setup_cork(): sk=%px cork=%px v6_cork=%px ipc6=%px fl6=%px dst=%px dev=%px idev=%px\n",
+    HAKC_INFO("ip6_setup_cork: sk=%px cork=%px v6_cork=%px ipc6=%px fl6=%px dst=%px dev=%px idev=%px\n",
             sk, cork, v6_cork, ipc6, fl6, dst, dev, idev);
-
 			
 	struct ipv6_pinfo *np = inet6_sk(sk);
+	HAKC_INFO("ip6_setup_cork\n");
 	unsigned int mtu;
+	//ipc6 = hakc_sign_pointer_with_color(ipc6,2,false);
 	struct ipv6_txoptions *opt = ipc6->opt;
+	HAKC_INFO("ip6_setup_cork: opt = ipc6->opt\n");
 
 	/*
 	 * setup for corking
 	 */
+	//opt = hakc_sign_pointer_with_color(opt,2,false);
 	if (opt) {
 		if (WARN_ON(v6_cork->opt))
 			return -EINVAL;
-
+		
 		v6_cork->opt = kzalloc(sizeof(*opt), sk->sk_allocation);
 		if (unlikely(!v6_cork->opt))
 			return -ENOBUFS;
@@ -1444,10 +1452,18 @@ static int ip6_setup_cork(struct sock *sk, struct inet_cork_full *cork,
 
 		/* need source address above miyazawa*/
 	}
+	HAKC_INFO("ip6_setup_cork: dst_hold before\n");
 	dst_hold(&rt->dst);
+	HAKC_INFO("ip6_setup_cork: dst_hold after\n");
+	HAKC_INFO("ip6_setup_cork: cork->base.dst = &rt->dst before\n");
 	cork->base.dst = &rt->dst;
+	HAKC_INFO("ip6_setup_cork: cork->base.dst = &rt->dst after\n");
+	HAKC_INFO("ip6_setup_cork: cork->fl.u.ip6 = *fl6 before\n");
 	cork->fl.u.ip6 = *fl6;
+	HAKC_INFO("ip6_setup_cork: cork->fl.u.ip6 = *fl6 after\n");
+	HAKC_INFO("ip6_setup_cork: v6_cork->hop_limit = ipc6->hlimit before\n");
 	v6_cork->hop_limit = ipc6->hlimit;
+	HAKC_INFO("ip6_setup_cork: v6_cork->hop_limit = ipc6->hlimit after\n");
 	v6_cork->tclass = ipc6->tclass;
 	if (rt->dst.flags & DST_XFRM_TUNNEL)
 		mtu = np->pmtudisc >= IPV6_PMTUDISC_PROBE ?
