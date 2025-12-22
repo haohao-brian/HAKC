@@ -113,11 +113,7 @@
  * 			options set. This moves	slab handling out of
  * 			the fast path and disables lockless freelists.
  */
-#define HAKC_DEBUG IS_ENABLED(CONFIG_PAC_MTE_COMPART_DEBUG_PRINT)
-#define HAKC_INFO(fmt, ...)                                                    \
-	if (HAKC_DEBUG) {                                                      \
-		pr_err(fmt, ##__VA_ARGS__);                                   \
-	}
+
 #ifdef CONFIG_SLUB_DEBUG
 #ifdef CONFIG_SLUB_DEBUG_ON
 DEFINE_STATIC_KEY_TRUE(slub_debug_enabled);
@@ -3175,8 +3171,6 @@ void kmem_cache_free(struct kmem_cache *s, void *x)
 	s = cache_from_obj(s, x);
 	if (!s)
 		return;
-	//HAKC_INFO("HAKC FREE: kmem_cache_free ptr=%px caller=%pS\n", x, \
-            __builtin_return_address(0));
 	slab_free(s, virt_to_head_page(x), x, NULL, 1, _RET_IP_);
 	trace_kmem_cache_free(_RET_IP_, x);
 }
@@ -4151,8 +4145,6 @@ void kfree(const void *x)
 		__free_pages(page, order);
 		return;
 	}
-	//HAKC_INFO("HAKC FREE: kfree ptr=%px caller=%pS\n", x, \
-            __builtin_return_address(0));
 	slab_free(page->slab_cache, page, object, NULL, 1, _RET_IP_);
 }
 EXPORT_SYMBOL(kfree);

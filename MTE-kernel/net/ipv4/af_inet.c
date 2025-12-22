@@ -1666,7 +1666,7 @@ int inet_ctl_sock_create(struct sock **sk, unsigned short family,
 EXPORT_SYMBOL_GPL(inet_ctl_sock_create);
 
 
-noinline u64 snmp_get_cpu_field(void __percpu *mib, int cpu, int offt)
+u64 snmp_get_cpu_field(void __percpu *mib, int cpu, int offt)
 {
     void *raw = mib;
     void *safe;

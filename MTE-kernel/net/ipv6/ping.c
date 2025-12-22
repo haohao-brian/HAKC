@@ -23,12 +23,6 @@
 #include <net/ping.h>
 
 #include <linux/hakc.h>
-#define HAKC_DEBUG IS_ENABLED(CONFIG_PAC_MTE_COMPART_DEBUG_PRINT)
-#define HAKC_INFO(fmt, ...)                                                    \
-	if (HAKC_DEBUG) {                                                      \
-		pr_err(fmt, ##__VA_ARGS__);                                   \
-	}
-
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
 #endif
@@ -57,8 +51,6 @@ static int dummy_ipv6_chk_addr(struct net *net, const struct in6_addr *addr,
 
 static int ping_v6_sendmsg(struct sock *sk, struct msghdr *msg, size_t len)
 {
-	//HAKC_INFO("ENTER %s: current_clique=%d color=%d\n",\
-              __func__, __claque_id, __color);
 	struct inet_sock *inet = inet_sk(sk);
 	struct ipv6_pinfo *np = inet6_sk(sk);
 	struct icmp6hdr user_icmph;
