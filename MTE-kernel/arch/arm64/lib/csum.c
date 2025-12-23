@@ -136,8 +136,12 @@ __sum16 csum_ipv6_magic(const struct in6_addr *saddr,
 	__uint128_t src, dst;
 	u64 sum = (__force u64)csum;
 
-	src = *(const __uint128_t *)saddr->s6_addr;
-	dst = *(const __uint128_t *)daddr->s6_addr;
+	const void *sa, *da;
+
+    sa = check_hakc_data_access((void *)saddr->s6_addr, 0x20007);
+    da = check_hakc_data_access((void *)daddr->s6_addr, 0x20007);
+	src = *(const __uint128_t *)sa;
+	dst = *(const __uint128_t *)da;
 
 	sum += (__force u32)htonl(len);
 #ifdef __LITTLE_ENDIAN

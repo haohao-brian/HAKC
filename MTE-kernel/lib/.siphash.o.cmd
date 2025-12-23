@@ -183,16 +183,6 @@ deps_lib/siphash.o := \
   include/linux/rwlock_types.h \
   arch/arm64/include/generated/asm/div64.h \
   include/asm-generic/div64.h \
-  arch/arm64/include/generated/asm/unaligned.h \
-  include/asm-generic/unaligned.h \
-  include/linux/unaligned/access_ok.h \
-  include/linux/unaligned/generic.h \
-  include/linux/dcache.h \
-  include/linux/list.h \
-    $(wildcard include/config/debug/list.h) \
-  include/linux/poison.h \
-    $(wildcard include/config/illegal/pointer/value.h) \
-    $(wildcard include/config/page/poisoning/zero.h) \
   include/linux/hakc.h \
     $(wildcard include/config/pac/mte/compart.h) \
     $(wildcard include/config/pac/mte/eval/codegen.h) \
@@ -227,6 +217,16 @@ deps_lib/siphash.o := \
     $(wildcard include/config/discontigmem.h) \
     $(wildcard include/config/sparsemem.h) \
   include/linux/pfn.h \
+  arch/arm64/include/generated/asm/unaligned.h \
+  include/asm-generic/unaligned.h \
+  include/linux/unaligned/access_ok.h \
+  include/linux/unaligned/generic.h \
+  include/linux/dcache.h \
+  include/linux/list.h \
+    $(wildcard include/config/debug/list.h) \
+  include/linux/poison.h \
+    $(wildcard include/config/illegal/pointer/value.h) \
+    $(wildcard include/config/page/poisoning/zero.h) \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
   include/linux/rcupdate.h \

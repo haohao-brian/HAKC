@@ -190,19 +190,6 @@ deps_drivers/net/ethernet/mellanox/mlx5/core/en_tc.o := \
   include/linux/rwlock_types.h \
   arch/arm64/include/generated/asm/div64.h \
   include/asm-generic/div64.h \
-  include/linux/string.h \
-    $(wildcard include/config/binary/printf.h) \
-    $(wildcard include/config/fortify/source.h) \
-  include/uapi/linux/string.h \
-  arch/arm64/include/asm/string.h \
-    $(wildcard include/config/arch/has/uaccess/flushcache.h) \
-  include/uapi/linux/if_ether.h \
-  include/net/flow_offload.h \
-  include/linux/list.h \
-    $(wildcard include/config/debug/list.h) \
-  include/linux/poison.h \
-    $(wildcard include/config/illegal/pointer/value.h) \
-    $(wildcard include/config/page/poisoning/zero.h) \
   include/linux/hakc.h \
     $(wildcard include/config/pac/mte/compart.h) \
     $(wildcard include/config/pac/mte/eval/codegen.h) \
@@ -237,6 +224,19 @@ deps_drivers/net/ethernet/mellanox/mlx5/core/en_tc.o := \
     $(wildcard include/config/discontigmem.h) \
     $(wildcard include/config/sparsemem.h) \
   include/linux/pfn.h \
+  include/linux/string.h \
+    $(wildcard include/config/binary/printf.h) \
+    $(wildcard include/config/fortify/source.h) \
+  include/uapi/linux/string.h \
+  arch/arm64/include/asm/string.h \
+    $(wildcard include/config/arch/has/uaccess/flushcache.h) \
+  include/uapi/linux/if_ether.h \
+  include/net/flow_offload.h \
+  include/linux/list.h \
+    $(wildcard include/config/debug/list.h) \
+  include/linux/poison.h \
+    $(wildcard include/config/illegal/pointer/value.h) \
+    $(wildcard include/config/page/poisoning/zero.h) \
   include/linux/netlink.h \
   include/linux/capability.h \
     $(wildcard include/config/multiuser.h) \

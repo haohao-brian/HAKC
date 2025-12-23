@@ -4,6 +4,7 @@ source_net/ipv6/ip6_output.o := net/ipv6/ip6_output.c
 
 deps_net/ipv6/ip6_output.o := \
     $(wildcard include/config/pac/mte/compart/ipv6.h) \
+    $(wildcard include/config/pac/mte/compart/debug/print.h) \
     $(wildcard include/config/netfilter.h) \
     $(wildcard include/config/xfrm.h) \
     $(wildcard include/config/net/switchdev.h) \

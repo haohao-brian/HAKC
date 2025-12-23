@@ -243,8 +243,9 @@ void ip6_sk_dst_store_flow(struct sock *sk, struct dst_entry *dst,
 
 static inline bool ipv6_unicast_destination(const struct sk_buff *skb)
 {
+	//pr_info("enter ipv6_unicast_destination\n");
 	struct rt6_info *rt = (struct rt6_info *) skb_dst(skb);
-
+	//pr_info("before struct rt6_info *rt = (struct rt6_info *) skb_dst(skb);\n");
 	return rt->rt6i_flags & RTF_LOCAL;
 }
 
@@ -261,14 +262,36 @@ static inline bool ipv6_anycast_destination(const struct dst_entry *dst,
 
 int ip6_fragment(struct net *net, struct sock *sk, struct sk_buff *skb,
 		 int (*output)(struct net *, struct sock *, struct sk_buff *));
-
+/*
 static inline int ip6_skb_dst_mtu(struct sk_buff *skb)
 {
+	pr_info("enter ip6_skb_dst_mtu\n");
 	struct ipv6_pinfo *np = skb->sk && !dev_recursion_level() ?
 				inet6_sk(skb->sk) : NULL;
 
 	return (np && np->pmtudisc >= IPV6_PMTUDISC_PROBE) ?
 	       skb_dst(skb)->dev->mtu : dst_mtu(skb_dst(skb));
+}
+*/
+static inline int ip6_skb_dst_mtu(struct sk_buff *skb)
+{
+    pr_info("enter ip6_skb_dst_mtu\n");
+
+    pr_info("DBG ip6_skb_dst_mtu: skb=%px sk=%px\n", skb, skb ? skb->sk : NULL);
+
+    struct ipv6_pinfo *np = skb->sk && !dev_recursion_level() ?
+                inet6_sk(skb->sk) : NULL;
+
+    pr_info("DBG ip6_skb_dst_mtu: np=%px\n", np);
+
+    struct dst_entry *dst = skb_dst(skb);
+    struct net_device *dev = dst ? dst->dev : NULL;
+
+    pr_info("DBG ip6_skb_dst_mtu: dst=%px dev=%px &dev->ip6_ptr=%px\n",
+              dst, dev, dev ? &dev->ip6_ptr : NULL);
+
+    return (np && np->pmtudisc >= IPV6_PMTUDISC_PROBE) ?
+           (dev ? dev->mtu : 1500) : dst_mtu(dst);
 }
 
 static inline bool ip6_sk_accept_pmtu(const struct sock *sk)

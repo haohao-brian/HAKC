@@ -37,5 +37,5 @@ clang-11 \
   -Wno-tautological-constant-out-of-range-compare \
   -Xclang -load -Xclang /home/user/HAKC/PMC-Pass/build/lib/libPMCPass.so \
   -emit-llvm -S \
-  net/ipv6/ipv6_sockglue.c \
-  -o ipv6_sockglue.ir.ll
+  net/ipv6/ip6_input.c \
+  -o ip6_input.ir.ll

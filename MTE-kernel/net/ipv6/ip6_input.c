@@ -306,6 +306,9 @@ drop:
 
 int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, struct net_device *orig_dev)
 {
+	pr_err("ipv6_rcv\n");
+	//struct inet6_skb_parm *opt = IP6CB(skb);
+	skb = hakc_transfer_to_clique(skb, 216, 2, 0xf2, false);
 	struct net *net = dev_net(skb->dev);
 
 	skb = ip6_rcv_core(skb, dev, net);

@@ -3687,7 +3687,9 @@ void kmem_cache_free(struct kmem_cache *cachep, void *objp)
 	cachep = cache_from_obj(cachep, objp);
 	if (!cachep)
 		return;
-
+	
+	//HAKC_INFO("HAKC FREE: kmem_cache_free ptr=%px caller=%pS\n", objp, \
+            __builtin_return_address(0));
 	local_irq_save(flags);
 	debug_check_no_locks_freed(objp, cachep->object_size);
 	if (!(cachep->flags & SLAB_DEBUG_OBJECTS))
@@ -3757,6 +3759,8 @@ void kfree(const void *objp)
 		local_irq_restore(flags);
 		return;
 	}
+	//HAKC_INFO("HAKC FREE: kfree ptr=%px caller=%pS\n", objp, \
+            __builtin_return_address(0));
 	debug_check_no_locks_freed(objp, c->object_size);
 
 	debug_check_no_obj_freed(objp, c->object_size);

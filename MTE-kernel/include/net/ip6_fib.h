@@ -236,10 +236,63 @@ struct fib6_result {
 	for (rt = (w)->leaf; rt;					\
 	     rt = rcu_dereference_protected(rt->fib6_next, 1))
 
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/*
+ * rt: 一定是 RED_CLIQUE 的 route
+ * slot: 指向 RED 裡面的 rt->rt6i_idev 欄位
+ * 內容: 指向 GREEN_CLIQUE 的 struct inet6_dev
+ */
+static inline struct inet6_dev *
+hakc_ip6_load_idev_from_rt(struct rt6_info *rt)
+{
+    struct inet6_dev **slot = &rt->rt6i_idev;
+    struct inet6_dev *idev;
+
+    /*
+     * 1) 先對 slot 本身做一次「在當前 clique 內的」存取驗證，
+     *    確認 &rt->rt6i_idev 這個 pointer 自己沒有壞掉。
+     *    （如果你們的 check_hakc_data_access 是 macro，
+     *     可以改成呼叫它，或直接呼叫 hakc_auth_data_ptr。）
+     */
+    slot = check_hakc_data_access(slot,0x20005);   // 或 check_hakc_data_access(slot, HAKC_TOK_RED_DATA)
+
+    /*
+     * 2) 再讀出值。這一個 load 建議不要再被 PMCPass 自動插 CHK，
+     *    讓整個「slot + value 的驗證」都集中在這個 helper 塊裡。
+     */
+    idev = READ_ONCE(*slot);
+    if (!idev)
+        return NULL;
+
+    /*
+     * 3) 告訴 HAKC：這個 pointer 指向的是 GREEN_CLIQUE 的 data。
+     *    你可以選擇：
+     *      (a) 直接重新 sign 成 GREEN data pointer
+     *      (b) 或是如果你想保持 cross-clique 標記，做一個特殊 token
+     *
+     *    下面是 (a) 的「最簡單版本」：直接用已經有的 API 重簽。
+     */
+    idev = hakc_sign_pointer_with_color(idev, 2, false);
+
+    return idev;
+}
+static inline struct inet6_dev *ip6_dst_idev(struct dst_entry *dst)
+{
+    //struct rt6_info *rt = (struct rt6_info *)dst;
+    //return hakc_ip6_load_idev_from_rt(rt);
+	//struct inet6_dev *rt6i_idev = hakc_sign_pointer_with_color(((struct rt6_info *)dst)->rt6i_idev, 2, false);
+	//return rt6i_idev;
+	return ((struct rt6_info *)dst)->rt6i_idev;
+}
+
+#else  /* !CONFIG_PAC_MTE_COMPART_IPV6 */
 static inline struct inet6_dev *ip6_dst_idev(struct dst_entry *dst)
 {
 	return ((struct rt6_info *)dst)->rt6i_idev;
 }
+
+#endif
 
 static inline bool fib6_requires_src(const struct fib6_info *rt)
 {

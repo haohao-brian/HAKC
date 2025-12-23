@@ -350,7 +350,18 @@ static inline pac_salt_t obtain_modifier_cert(clique_color_t address_color,
 	result = create_pac_context(claque_id, HAKC_MASK_COLOR(address_color));
 	return result;
 }
+static __always_inline void *hakc_untag(const void *p)
+{
+    /* clear top byte tag */
+    return (void *)((u64)p & ~((u64)0xFF << 56));
+}
+static inline void hakc_mte_debug_index(void *addr, u64 *ctx_addr, u64 *idx)
+{
+	u64 a = (u64)addr;
 
+	*ctx_addr = a & ~0xFFFFULL;
+	*idx      = (a - *ctx_addr) >> MTE_GRANULE_SIZE;
+}
 static __always_inline void *hakc_auth_data_ptr(const void *address,
 						pac_salt_t modifier)
 {
@@ -360,6 +371,16 @@ static __always_inline void *hakc_auth_data_ptr(const void *address,
 #ifndef CONFIG_ARM64_PTR_AUTH
 	return res;
 #else
+
+    // 做和 auth 一樣的 canonical / ctx / idx 計算
+    void *safe = hakc_untag(res);    // 或 mte_untag_kernel(), 看你實作
+    u64 ctx;
+    u64 idx;
+    hakc_mte_debug_index(safe, &ctx, &idx);
+
+    HAKC_INFO("HAKC_SIGN: safe=%px addr=%px ctx=%#llx idx=%llu mod=%#llx caller=%pS\n",
+            safe, res, ctx, idx, (u64)modifier, __builtin_return_address(0));
+
 	/*
 	 * 固定使用 x19 / x20 做 data PAC，避免编译器随便选成 x30(LR)。
 	 * x19/x20 是 AAPCS64 里的 callee-saved GPR，内核 ABI 里也允许。
@@ -694,6 +715,10 @@ EXPORT_SYMBOL(hakc_sign_pointer);
 void *hakc_sign_pointer_with_color(void *addr, claque_id_t claque_id,
 				   bool is_code)
 {
+	void *caller = __builtin_return_address(0);
+
+    HAKC_INFO("HAKC_SIGN: p=%px is_code=%d caller=%pS\n",
+            addr, is_code, caller);
 	struct percpu_info pcpu_info;
 
 	if (!addr) {
@@ -732,9 +757,10 @@ void *hakc_sign_pointer_with_color(void *addr, claque_id_t claque_id,
 					      (u64)pcpu_info.percpu_addr);
 				HAKC_INFO("\toffset = %lx\n", offset);
 				result = (void *)((u64)signed_ptr - offset);
+				HAKC_INFO("\tresult = %lx\n", result);
 			}
 		}
-		return result;
+		return addr;//result;
 	}
 
 	return hakc_sign_pointer(addr, claque_id, get_hakc_address_color(addr),
@@ -746,11 +772,25 @@ static void *color_and_sign(void *data_to_transfer, size_t size,
 			    claque_id_t claque_id, clique_color_t color,
 			    bool is_code)
 {
+	
 	if (!is_userspace_addr(data_to_transfer) && size > 0) {
+		void *base = data_to_transfer;
+		clique_color_t old_color;
+
+		/* 讀目前這塊記憶體的顏色（從 MTE tag） */
+		old_color = get_hakc_address_color(base);
+
+		HAKC_INFO("TRANSFER: caller=%pS addr=%px size=%zu from_color=%s to_color=%s is_code=%d\n",
+			/*__builtin_return_address(0)*/(void *)_RET_IP_,
+			base, size,
+			get_hakc_color_name(old_color),
+			get_hakc_color_name(color),
+			is_code);
 		unsigned long addr = (unsigned long)data_to_transfer;
 		HAKC_INFO("Transferring %lu bytes at %lx to claque %d (%s)\n",
 			  size, data_to_transfer, claque_id,
 			  get_hakc_color_name(color));
+		
 		HAKC_INFO("Returning to %lx\n", _RET_IP_);
 
 		//        if(pte_none(*virt_to_kpte(addr))) {
@@ -852,7 +892,10 @@ void *hakc_transfer_to_clique(void *data_to_transfer, size_t size,
 		return mte_transfer_percpu(&pcpu_info, size, claque_id, color,
 					   is_code);
 	}
-
+	HAKC_INFO("hakc_transfer_to_clique: caller=%pS addr=%px size=%zu is_code=%d\n",
+			/*__builtin_return_address(0)*/(void *)_RET_IP_,
+			data_to_transfer, size,
+			is_code);
 	return color_and_sign(data_to_transfer, size, claque_id, color,
 			      is_code);
 }

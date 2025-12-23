@@ -19,9 +19,32 @@
 #include <asm/mte.h>
 #include <asm/ptrace.h>
 #include <asm/sysreg.h>
+#include <linux/printk.h>
+#define HAKC_DEBUG IS_ENABLED(CONFIG_PAC_MTE_COMPART_DEBUG_PRINT)
+#define HAKC_INFO(fmt, ...)                                                    \
+	if (HAKC_DEBUG) {                                                      \
+		pr_err(fmt, ##__VA_ARGS__);                                   \
+	}
 
 u64 gcr_kernel_excl __ro_after_init;
+static inline void hakc_mte_debug_index(void *addr, u64 *ctx_addr, u64 *idx)
+{
+	u64 a = (u64)addr;
 
+	/*
+	 * 這裡先假設：
+	 *   - ctx = 64KB 對齊 (把低 16 bits 清掉)
+	 *   - idx = 以 MTE_GRANULE_SIZE (16 bytes) 做 index
+	 *
+	 * 如果你 HAKC 那邊的 ctx 定義不是 64K 一塊，
+	 * 只要把 0xFFFF 這個 mask 換成你實際用的就好。
+	 * 例如：
+	 *   ctx = a & ~0xFFFFULL;
+	 *   idx = (a - ctx) >> MTE_GRANULE_SHIFT;
+	 */
+	*ctx_addr = a & ~0xFFFFULL;
+	*idx      = (a - *ctx_addr) >> MTE_GRANULE_SIZE;
+}
 static void mte_sync_page_tags(struct page *page, pte_t *ptep, bool check_swap)
 {
 	pte_t old_pte = READ_ONCE(*ptep);
@@ -80,21 +103,39 @@ u8 mte_get_mem_tag(void *addr)
 	return 0;
 #else
 	if (system_supports_mte()) {
+		u64 ctx, idx;
+		u8 tag;
+
+		hakc_mte_debug_index(addr, &ctx, &idx);
+
 #if IS_ENABLED(CONFIG_PAC_MTE_EVAL_CODEGEN)
+
+		/* 你現在 kernel 不會走這邊，先保留原樣即可 */
 		asm volatile(
-			 /* NB: This assembly is from mte.S, so keep it
-			  * synced */
 			 "ldr x16, [%0]\n"
 			 "mov x17, #0xF0\n"
 			 "lsl x17, x17, #49\n"
 			 "orr %0, x17, x17"
-#else
+			     : "+r"(addr));
+
+#else  /* !CONFIG_PAC_MTE_EVAL_CODEGEN */
+
 		asm volatile(ALTERNATIVE("ldr %0, [%0]",
 			 __MTE_PREAMBLE "ldg %0, [%0]", ARM64_MTE)
-#endif
 			     : "+r"(addr));
+
+#endif
+
+		tag = 0xF0 | mte_get_ptr_tag(addr);
+
+		HAKC_INFO("MTE_TAG_GET: ctx=%px idx=%llu addr=%px tag=0x%02x caller=%pS\n",
+			(void *)ctx, idx, addr, tag,
+			__builtin_return_address(0));
+
+		return tag;
 	}
-	return 0xF0 | mte_get_ptr_tag(addr);
+
+	return 0;
 #endif
 }
 
@@ -137,8 +178,18 @@ void *mte_set_mem_tag_range(void *addr, size_t size, u8 tag)
 	#if IS_ENABLED(CONFIG_PAC_MTE_EVAL_CODEGEN)
 	ptr = HAKC_GET_SAFE_PTR(ptr);
 	#else
+	u64 ctx, idx;
+
+	hakc_mte_debug_index(addr, &ctx, &idx);
+
+	HAKC_INFO("MTE_TAG_SET: ctx=%px idx=%llu addr=%px size=%zu tag_in=0x%02x caller=%pS\n",
+		(void *)ctx, idx, addr, size, tag,
+		__builtin_return_address(0));
+
 	tag = 0xF0 | (tag & 0xF);
 	ptr = (void *)__tag_set(ptr, tag);
+	HAKC_INFO("MTE_TAG_SET_DONE: ctx=%px idx=%llu ptr=%px tag_out=0x%02x\n",
+		(void *)ctx, idx, ptr, (unsigned)((u64)ptr >> 56) & 0xFF);
 	#endif
 	mte_assign_mem_tag_range(ptr, size);
 

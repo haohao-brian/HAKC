@@ -328,7 +328,20 @@ static int icmpv6_getfrag(void *from, char *to, int offset, int len, int odd, st
 	struct icmpv6_msg *msg = (struct icmpv6_msg *) from;
 	struct sk_buff *org_skb = msg->skb;
 	__wsum csum;
+#ifdef CONFIG_PAC_MTE_COMPART_IPV6
+    {
+        void *orig_to = to;
+        to = check_hakc_data_access(to, 0x20007);
+        if (orig_to != to) {
+            pr_info("icmpv6_getfrag: fixed HAKC-encoded to %px -> %px\n",
+                    orig_to, to);
+        }
 
+        /* 如果你擔心 msg 本身可能是 HAKC pointer，也可以順手 canonical 一下： */
+        // msg = check_hakc_data_access(msg, HAKC_TOK);
+        // org_skb = check_hakc_data_access(org_skb, HAKC_TOK);
+    }
+#endif
 	csum = skb_copy_and_csum_bits(org_skb, msg->offset + offset,
 				      to, len);
 	skb->csum = csum_block_add(skb->csum, csum, odd);

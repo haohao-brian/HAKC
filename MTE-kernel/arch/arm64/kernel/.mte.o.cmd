@@ -3,6 +3,7 @@ cmd_arch/arm64/kernel/mte.o := clang-11 -Wp,-MMD,arch/arm64/kernel/.mte.o.d -nos
 source_arch/arm64/kernel/mte.o := arch/arm64/kernel/mte.c
 
 deps_arch/arm64/kernel/mte.o := \
+    $(wildcard include/config/pac/mte/compart/debug/print.h) \
     $(wildcard include/config/pac/mte/eval/codegen.h) \
   include/linux/kconfig.h \
     $(wildcard include/config/cc/version/text.h) \
