@@ -308,14 +308,15 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 {
 	pr_err("ipv6_rcv\n");
 	//struct inet6_skb_parm *opt = IP6CB(skb);
-	skb = hakc_transfer_to_clique(skb, 216, 2, 0xf2, false);
-	struct net *net = dev_net(skb->dev);
+	struct sk_buff *skb_tmp = skb;
+	skb_tmp = hakc_transfer_to_clique(skb_tmp, 216, 2, 0xf2, false);
+	struct net *net = dev_net(skb_tmp->dev);
 
-	skb = ip6_rcv_core(skb, dev, net);
-	if (skb == NULL)
+	skb_tmp = ip6_rcv_core(skb_tmp, dev, net);
+	if (skb_tmp == NULL)
 		return NET_RX_DROP;
 	return NF_HOOK(NFPROTO_IPV6, NF_INET_PRE_ROUTING,
-		       net, NULL, skb, dev, NULL,
+		       net, NULL, skb_tmp, dev, NULL,
 		       ip6_rcv_finish);
 }
 

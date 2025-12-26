@@ -3906,12 +3906,30 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(addrconf_notify, static int,
 	claque_id_t dev_claque;
 	struct netdev_queue *orig_tx;
 
+	/* NEW: 針對 struct net 的保存與 RED 副本 */
+    struct net *orig_net;
+    struct net *net_red;
+
 	struct netdev_notifier_info *info = (struct netdev_notifier_info*)ptr;
 
 	dev_color = get_hakc_address_color(info->dev);
 	dev_claque = get_hakc_address_claque(info->dev);
 	this = hakc_transfer_to_clique(this, sizeof(*this), __claque_id,
 					 __color, false);
+
+	/* NEW: 把 dev 裡面的 struct net * 先抓出來，做一份 RED 副本 */
+    orig_net = HAKC_GET_SAFE_PTR(info->dev)->nd_net.net;
+    if (orig_net) {
+        net_red = hakc_transfer_to_clique(orig_net,
+                                          sizeof(*orig_net),
+                                          __claque_id,
+                                          __color,
+                                          false);
+        HAKC_GET_SAFE_PTR(info->dev)->nd_net.net = net_red;
+    } else {
+        net_red = NULL;
+    }
+
 	orig_pcpu_refcnt = HAKC_GET_SAFE_PTR(info->dev)->pcpu_refcnt;
 	HAKC_GET_SAFE_PTR(info->dev)->pcpu_refcnt = hakc_transfer_percpu_to_clique(
 		HAKC_GET_SAFE_PTR(info->dev)->pcpu_refcnt, sizeof(int),
@@ -3937,6 +3955,10 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(addrconf_notify, static int,
 	info->dev = hakc_transfer_to_clique(info->dev,
 					   sizeof(struct net_device),
 					   dev_claque, dev_color, false);
+	/* NEW: 還原 dev->nd_net.net = 原來那顆 GREEN struct net */
+    if (orig_net) {
+        HAKC_GET_SAFE_PTR(info->dev)->nd_net.net = orig_net;
+    }
 	HAKC_GET_SAFE_PTR(info->dev)->_tx = orig_tx;
 	HAKC_GET_SAFE_PTR(info->dev)->pcpu_refcnt = orig_pcpu_refcnt;
 	return result;

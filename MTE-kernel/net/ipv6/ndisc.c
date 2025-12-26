@@ -1858,10 +1858,27 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(ndisc_netdev_event, int,
 	info->dev = hakc_transfer_to_clique(info->dev, sizeof(struct
 							     net_device),
 					   __claque_id, __color, false);
+
+	struct net *orig_net = dev_net(HAKC_GET_SAFE_PTR(info->dev));
+	clique_color_t net_color  = get_hakc_address_color(orig_net);
+	claque_id_t    net_claque = get_hakc_address_claque(orig_net);
+
+	struct net *red_net =
+            hakc_transfer_to_clique(orig_net, sizeof(*orig_net),
+                                    __claque_id, __color, false);
+
+	/* 記住舊的值，等等要還原 */
+	struct net *orig_net_saved = orig_net;
+
+	HAKC_GET_SAFE_PTR(info->dev)->nd_net.net = red_net;
+
 	prot_v = hakc_transfer_to_clique(info, sizeof(struct netdev_notifier_info),
 					__claque_id, __color, false);
 
 	result = ndisc_netdev_event(this, event, prot_v);
+
+	/* 還原 dev->nd_net.net */
+	HAKC_GET_SAFE_PTR(info->dev)->nd_net.net = orig_net_saved;
 
 	info->dev = hakc_transfer_to_clique(info->dev,
 					   sizeof(struct net_device),

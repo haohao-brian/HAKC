@@ -2294,6 +2294,8 @@ static void __fib6_clean_all(struct net *net,
 			     int (*func)(struct fib6_info *, void *),
 			     int sernum, void *arg, bool skip_notify)
 {
+	pr_err("fib6_clean_all: net=%px func=%px arg=%px table_hlist=%px\n",
+        net, func, arg, net->ipv6.fib6_main_tbl);
 	struct fib6_table *table;
 	struct hlist_head *head;
 	unsigned int h;

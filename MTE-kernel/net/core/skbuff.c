@@ -668,6 +668,7 @@ void skb_release_head_state(struct sk_buff *skb)
 /* Free everything but the sk_buff shell. */
 static void skb_release_all(struct sk_buff *skb)
 {
+	//pr_err("skb_release_all: skb=%px\n", skb);
 	skb_release_head_state(skb);
 	if (likely(skb->head))
 		skb_release_data(skb);
@@ -684,6 +685,7 @@ static void skb_release_all(struct sk_buff *skb)
 
 void __kfree_skb(struct sk_buff *skb)
 {
+	//pr_err("__KFREE_SKB: skb=%px\n", skb);
 	skb_release_all(skb);
 	kfree_skbmem(skb);
 }
@@ -863,9 +865,20 @@ void __consume_stateless_skb(struct sk_buff *skb)
 void __kfree_skb_flush(void)
 {
 	struct napi_alloc_cache *nc = this_cpu_ptr(&napi_alloc_cache);
+	int i;
 
 	/* flush skb_cache if containing objects */
 	if (nc->skb_count) {
+		for (i = 0; i < nc->skb_count; i++) {
+			struct sk_buff *skb = nc->skb_cache[i];
+
+			if (!skb)
+				continue;
+
+			skb = check_hakc_data_access(skb, 0x20007);
+			nc->skb_cache[i] = skb;
+		}
+
 		kmem_cache_free_bulk(skbuff_head_cache, nc->skb_count,
 				     nc->skb_cache);
 		nc->skb_count = 0;

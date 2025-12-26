@@ -366,7 +366,6 @@ static inline void memcg_slab_free_hook(struct kmem_cache *s_orig,
 	for (i = 0; i < objects; i++) {
 		if (unlikely(!p[i]))
 			continue;
-
 		page = virt_to_head_page(p[i]);
 		if (!page_has_obj_cgroups(page))
 			continue;

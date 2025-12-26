@@ -7562,30 +7562,30 @@ define internal fastcc i32 @__ip6_append_data(%struct.sock* %0, %struct.flowi6* 
   %362 = phi %struct.sk_buff* [ %32, %344 ], [ %562, %749 ], [ %32, %340 ]
   %363 = phi i32 [ %9, %344 ], [ 0, %749 ], [ %9, %340 ]
   %364 = phi i32 [ %8, %344 ], [ %671, %749 ], [ %8, %340 ]
-  %365 = bitcast %struct.sk_buff* %362 to i8*
+  %365 = bitcast %struct.ubuf_info* %351 to i8*
   %366 = call i8* @check_hakc_data_access(i8* %365, i64 131079) #10
-  %367 = bitcast %struct.ubuf_info* %351 to i8*
+  %367 = bitcast %struct.sk_buff* %362 to i8*
   %368 = call i8* @check_hakc_data_access(i8* %367, i64 131079) #10
   %369 = icmp sgt i32 %364, 0
   br i1 %369, label %370, label %987
 
 370:                                              ; preds = %350
   %371 = getelementptr inbounds %struct.inet_cork, %struct.inet_cork* %3, i64 0, i32 0
-  %372 = getelementptr inbounds i8, i8* %366, i64 112
+  %372 = getelementptr inbounds i8, i8* %368, i64 112
   %373 = bitcast i8* %372 to i32*
-  %374 = getelementptr inbounds i8, i8* %366, i64 116
+  %374 = getelementptr inbounds i8, i8* %368, i64 116
   %375 = bitcast i8* %374 to i32*
-  %376 = getelementptr inbounds i8, i8* %366, i64 184
+  %376 = getelementptr inbounds i8, i8* %368, i64 184
   %377 = bitcast i8* %376 to i32*
-  %378 = getelementptr inbounds i8, i8* %366, i64 180
+  %378 = getelementptr inbounds i8, i8* %368, i64 180
   %379 = bitcast i8* %378 to i32*
   %380 = icmp eq %struct.ubuf_info* %351, null
-  %381 = getelementptr inbounds i8, i8* %368, i64 14
+  %381 = getelementptr inbounds i8, i8* %366, i64 14
   %382 = bitcast i8* %7 to %struct.msghdr*
-  %383 = getelementptr inbounds i8, i8* %366, i64 192
+  %383 = getelementptr inbounds i8, i8* %368, i64 192
   %384 = bitcast i8* %383 to i8**
-  %385 = getelementptr inbounds i8, i8* %366, i64 126
-  %386 = getelementptr inbounds i8, i8* %366, i64 208
+  %385 = getelementptr inbounds i8, i8* %368, i64 126
+  %386 = getelementptr inbounds i8, i8* %368, i64 208
   %387 = bitcast i8* %386 to i32*
   %388 = bitcast i8* %18 to i8**
   %389 = bitcast %struct.sk_buff* %362 to i8*
@@ -7642,15 +7642,15 @@ define internal fastcc i32 @__ip6_append_data(%struct.sock* %0, %struct.flowi6* 
   %430 = phi %struct.sk_buff* [ null, %344 ], [ %362, %409 ]
   %431 = phi i32 [ %9, %344 ], [ %363, %409 ]
   %432 = phi i32 [ %8, %344 ], [ %399, %409 ]
-  %433 = bitcast %struct.ubuf_info* %418 to i8*
+  %433 = bitcast %struct.sk_buff* %430 to i8*
   %434 = call i8* @check_hakc_data_access(i8* %433, i64 131079) #10
-  %435 = bitcast %struct.sk_buff* %430 to i8*
+  %435 = bitcast %struct.ubuf_info* %418 to i8*
   %436 = call i8* @check_hakc_data_access(i8* %435, i64 131079) #10
   %437 = icmp ne %struct.sk_buff* %430, null
   br i1 %437, label %438, label %450
 
 438:                                              ; preds = %417
-  %439 = getelementptr inbounds i8, i8* %436, i64 112
+  %439 = getelementptr inbounds i8, i8* %434, i64 112
   %440 = bitcast i8* %439 to i32*
   %441 = load i32, i32* %440, align 8, !tbaa !132
   %442 = sub i32 %441, %421
@@ -7876,7 +7876,7 @@ define internal fastcc i32 @__ip6_append_data(%struct.sock* %0, %struct.flowi6* 
   %609 = getelementptr inbounds i8, i8* %601, i64 %608
   %610 = call i32 @skb_copy_and_csum_bits(%struct.sk_buff* %430, i32 %471, i8* %609, i32 %470) #12
   store i32 %610, i32* %573, align 8, !tbaa !3
-  %611 = getelementptr inbounds i8, i8* %436, i64 136
+  %611 = getelementptr inbounds i8, i8* %434, i64 136
   %612 = bitcast i8* %611 to i32*
   %613 = load i32, i32* %612, align 8, !tbaa !3
   %614 = xor i32 %610, -1
@@ -7887,14 +7887,14 @@ define internal fastcc i32 @__ip6_append_data(%struct.sock* %0, %struct.flowi6* 
   store i32 %618, i32* %612, align 8, !tbaa !3
   %619 = zext i32 %470 to i64
   %620 = getelementptr inbounds i8, i8* %601, i64 %619
-  %621 = getelementptr inbounds i8, i8* %436, i64 112
+  %621 = getelementptr inbounds i8, i8* %434, i64 112
   %622 = bitcast i8* %621 to i32*
   %623 = load i32, i32* %622, align 8, !tbaa !132
   %624 = icmp ugt i32 %623, %471
   br i1 %624, label %625, label %646
 
 625:                                              ; preds = %607
-  %626 = getelementptr inbounds i8, i8* %436, i64 116
+  %626 = getelementptr inbounds i8, i8* %434, i64 116
   %627 = bitcast i8* %626 to i32*
   %628 = load i32, i32* %627, align 4, !tbaa !201
   %629 = icmp eq i32 %628, 0
@@ -7902,15 +7902,15 @@ define internal fastcc i32 @__ip6_append_data(%struct.sock* %0, %struct.flowi6* 
 
 630:                                              ; preds = %625
   store i32 %471, i32* %622, align 8, !tbaa !132
-  %631 = getelementptr inbounds i8, i8* %436, i64 200
+  %631 = getelementptr inbounds i8, i8* %434, i64 200
   %632 = bitcast i8* %631 to i64*
   %633 = load i64, i64* %632, align 8, !tbaa !154
-  %634 = getelementptr inbounds i8, i8* %436, i64 192
+  %634 = getelementptr inbounds i8, i8* %434, i64 192
   %635 = bitcast i8* %634 to i64*
   %636 = load i64, i64* %635, align 8, !tbaa !155
   %637 = sub i64 %633, %636
   %638 = trunc i64 %637 to i32
-  %639 = getelementptr inbounds i8, i8* %436, i64 180
+  %639 = getelementptr inbounds i8, i8* %434, i64 180
   %640 = bitcast i8* %639 to i32*
   %641 = add i32 %471, %638
   store i32 %641, i32* %640, align 4, !tbaa !267
@@ -7993,7 +7993,7 @@ define internal fastcc i32 @__ip6_append_data(%struct.sock* %0, %struct.flowi6* 
   br i1 %693, label %694, label %715, !prof !34, !misexpect !35
 
 694:                                              ; preds = %692
-  %695 = getelementptr inbounds i8, i8* %434, i64 24
+  %695 = getelementptr inbounds i8, i8* %436, i64 24
   %696 = getelementptr inbounds %struct.ubuf_info, %struct.ubuf_info* %418, i64 0, i32 2
   %697 = bitcast i8* %695 to %struct.atomic_t*
   callbr void asm sideeffect "1:\09b\09\09${1:l}\09\09\0A\09\09.pushsection\09__jump_table, \22aw\22\09\0A\09\09.align\09\093\09\09\09\0A\09\09.long\09\091b - ., ${1:l} - .\09\0A\09\09.quad\09\09${0:c} - .\09\09\09\0A\09\09.popsection\09\09\09\09\0A\09", "i,X"(i8* nonnull getelementptr (i8, i8* bitcast (%struct.static_key_false* @arm64_const_caps_ready to i8*), i64 1), i8* blockaddress(@__ip6_append_data, %702)) #10
@@ -8156,7 +8156,7 @@ define internal fastcc i32 @__ip6_append_data(%struct.sock* %0, %struct.flowi6* 
 
 799:                                              ; preds = %795
   store i32 %411, i32* %373, align 8, !tbaa !132
-  %800 = getelementptr inbounds i8, i8* %366, i64 200
+  %800 = getelementptr inbounds i8, i8* %368, i64 200
   %801 = bitcast i8* %800 to i64*
   %802 = load i64, i64* %801, align 8, !tbaa !154
   %803 = bitcast i8* %383 to i64*
@@ -8195,16 +8195,16 @@ define internal fastcc i32 @__ip6_append_data(%struct.sock* %0, %struct.flowi6* 
 
 824:                                              ; preds = %814
   %825 = call i8* @check_hakc_data_access(i8* %392, i64 131079) #10
-  %826 = getelementptr inbounds i8, i8* %825, i64 12
-  %827 = bitcast i8* %826 to i32*
-  %828 = getelementptr inbounds i8, i8* %825, i64 8
-  %829 = bitcast i8* %828 to i32*
-  %830 = bitcast i8* %825 to %struct.page**
-  %831 = bitcast i8* %825 to i64*
-  %832 = load %struct.page*, %struct.page** %830, align 8, !tbaa !393
+  %826 = bitcast i8* %825 to i64*
+  %827 = getelementptr inbounds i8, i8* %825, i64 12
+  %828 = bitcast i8* %827 to i32*
+  %829 = bitcast i8* %825 to %struct.page**
+  %830 = getelementptr inbounds i8, i8* %825, i64 8
+  %831 = bitcast i8* %830 to i32*
+  %832 = load %struct.page*, %struct.page** %829, align 8, !tbaa !393
   %833 = bitcast %struct.page* %832 to i8*
   %834 = call i8* @check_hakc_data_access(i8* %833, i64 131079) #10
-  %835 = load i32, i32* %829, align 8, !tbaa !394
+  %835 = load i32, i32* %831, align 8, !tbaa !394
   %836 = load i8*, i8** %384, align 8, !tbaa !155
   %837 = call i8* @check_hakc_data_access(i8* %836, i64 131079) #10
   %838 = load i32, i32* %377, align 8, !tbaa !182
@@ -8286,7 +8286,7 @@ define internal fastcc i32 @__ip6_append_data(%struct.sock* %0, %struct.flowi6* 
   %896 = load i8, i8* %385, align 2
   %897 = or i8 %896, 64
   store i8 %897, i8* %385, align 2
-  %898 = load %struct.page*, %struct.page** %830, align 8, !tbaa !393
+  %898 = load %struct.page*, %struct.page** %829, align 8, !tbaa !393
   br label %899
 
 899:                                              ; preds = %874, %895
@@ -8336,12 +8336,12 @@ define internal fastcc i32 @__ip6_append_data(%struct.sock* %0, %struct.flowi6* 
 
 927:                                              ; preds = %926, %925, %865
   %928 = phi i32 [ %822, %865 ], [ %903, %925 ], [ %903, %926 ]
-  %929 = load i32, i32* %827, align 4, !tbaa !397
-  %930 = load i32, i32* %829, align 8, !tbaa !394
+  %929 = load i32, i32* %828, align 4, !tbaa !397
+  %930 = load i32, i32* %831, align 8, !tbaa !394
   %931 = sub i32 %929, %930
   %932 = icmp slt i32 %763, %931
   %933 = select i1 %932, i32 %763, i32 %931
-  %934 = load i64, i64* %831, align 8, !tbaa !393
+  %934 = load i64, i64* %826, align 8, !tbaa !393
   %935 = add i64 %934, 2199025352704
   %936 = lshr i64 %935, 6
   %937 = shl i64 %936, 12
@@ -8366,9 +8366,9 @@ define internal fastcc i32 @__ip6_append_data(%struct.sock* %0, %struct.flowi6* 
   br i1 %955, label %1011, label %956
 
 956:                                              ; preds = %927
-  %957 = load i32, i32* %829, align 8, !tbaa !394
+  %957 = load i32, i32* %831, align 8, !tbaa !394
   %958 = add i32 %957, %933
-  store i32 %958, i32* %829, align 8, !tbaa !394
+  store i32 %958, i32* %831, align 8, !tbaa !394
   %959 = load i8*, i8** %384, align 8, !tbaa !155
   %960 = call i8* @check_hakc_data_access(i8* %959, i64 131079) #10
   %961 = load i32, i32* %377, align 8, !tbaa !182

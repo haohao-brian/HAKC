@@ -4724,6 +4724,11 @@ static int fib6_ifup(struct fib6_info *rt, void *p_arg)
 	const struct arg_netdev_event *arg = p_arg;
 	struct net *net = dev_net(arg->dev);
 
+	struct net_device *nh_dev = rt->fib6_nh->fib_nh_dev;
+	nh_dev = hakc_transfer_to_clique(nh_dev, sizeof(*nh_dev), \
+                                 __claque_id, 0xf2 /*RED_CLIQUE*/, false);
+	rt->fib6_nh->fib_nh_dev = nh_dev;
+
 	if (rt != net->ipv6.fib6_null_entry && !rt->nh &&
 	    rt->fib6_nh->fib_nh_dev == arg->dev) {
 		rt->fib6_nh->fib_nh_flags &= ~arg->nh_flags;

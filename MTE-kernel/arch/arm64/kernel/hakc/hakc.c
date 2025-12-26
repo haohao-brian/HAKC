@@ -549,8 +549,6 @@ static void *check_hakc_access(const void *address,
 	  (void *)_RET_IP_, address, safe_addr, access_tok);
 	addr_claque = get_hakc_address_claque(address);
 
-	
-
 	addr_color = _get_mte_tag(safe_addr);
 	HAKC_INFO("hakc_access: addr=%px color=%s claque=%lu\n", \
 		  address, get_hakc_color_name(addr_color), addr_claque);
@@ -560,9 +558,17 @@ static void *check_hakc_access(const void *address,
 	HAKC_INFO("obtain_modifier_cert(addr_color, addr_claque)=0x%lx\n",m);
 	salt = m & access_tok;
 
-	HAKC_INFO("hakc_access: ctx_addr=%px salt=%lx\n", ctx_addr, salt);
+	void *addre = (0xFFull<<48) | (u64)ctx_addr;
+	void *r;
+	asm(
+		"pacia %[addre], %[mod]"
+		: "=r"(r)
+		: [addre] "0"(addre), [mod] "r"(salt)
+	:);
 
-	result = (unsigned long)auth_func(ctx_addr, salt); //autia
+	HAKC_INFO("hakc_access correct one: ctx_addr=%px salt=%lx r=%px\n", ctx_addr, salt, r);
+
+	result = (unsigned long)auth_func(r, salt); //ctx_addr <---> r
 	result |= HAKC_CLAQUE_ADDR(address);
 
 	if (HAKC_ALLOW) {
@@ -715,6 +721,10 @@ EXPORT_SYMBOL(hakc_sign_pointer);
 void *hakc_sign_pointer_with_color(void *addr, claque_id_t claque_id,
 				   bool is_code)
 {
+	unsigned long v = (unsigned long)addr;
+	if ((v & 0xffff000000000000UL) == 0xdead000000000000UL)
+        return addr;
+
 	void *caller = __builtin_return_address(0);
 
     HAKC_INFO("HAKC_SIGN: p=%px is_code=%d caller=%pS\n",
