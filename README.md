@@ -35,12 +35,17 @@ echo 2 > /proc/sys/kernel/printk
 echo 4 > /proc/sys/kernel/printk
 ```
 ## step 5: Start 
-After installing Ipv6, using following command
+After installing Ipv6, feel free to use following command.
 ```
 ip addr show
 ping -6 ::1
+ip set enp0s3 up
+ip -6 route
+...
+...(to be continue)
 ```
 ## result
-<img width="1280" height="340" alt="image" src="https://github.com/user-attachments/assets/ac36be88-c956-4928-a1a2-4cb1da848069" />
+<img width="1280" height="698" alt="image" src="https://github.com/user-attachments/assets/cf0ef3b2-0728-417e-a2f3-299f6512a81c" />
+
 
 
