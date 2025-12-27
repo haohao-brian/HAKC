@@ -97,8 +97,8 @@ qemu-system-aarch64 -nographic -machine virt,mte=on,gic-version=3,virtualization
         -display none \
         -serial $CONSOLE \
         -append "console=ttyAMA0 root=/dev/vda rw $CMDLINE" \
-        -netdev user,id=net0,ipv6=on,ipv6-net=fdf2:5e8e:743d::0/43 \
-        -device virtio-net-pci,netdev=net0 \
+        -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+        -device virtio-net-pci,netdev=net0,mac=de:ad:be:ef:41:49 \
         -netdev user,id=net1,hostfwd=tcp::2332-:22 \
         -device virtio-net-pci,netdev=net1,mac=de:ad:be:ef:41:49 \
 	-virtfs local,path=$SHARED_DIR,mount_tag=shared,security_model=mapped \
