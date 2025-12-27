@@ -1,7 +1,14 @@
 # IPv6 module test
 
-ps. This repo is ready-to-go and contains run-kvm.sh, make-image.sh, etc.
+ps. This repo is ready-to-go.
+pps. Simply just use run-kvm.sh and make-image.sh should start just fine.
 
+## step 0: prepare
+```
+cd MTE-kernel
+wget https://cloud-images.ubuntu.com/releases/jammy/release/ubuntu-22.04-server-cloudimg-arm64-root.tar.xz
+./make-image.sh ubuntu-22.04-server-cloudimg-arm64-root.tar.xz
+```
 ## step 1: compile kernel and get vmlinux:
 ```
 cd MTE-kernel
