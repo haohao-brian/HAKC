@@ -3,8 +3,11 @@
 ps. This repo is ready-to-go.
 pps. Simply just use run-kvm.sh and make-image.sh should start just fine.
 
-## step 0: prepare
-```
+## step 0: one-time prepare
+```python
+#environment setup
+sudo apt update && sudo apt install git build-essential flex bison libglib2.0-dev libfdt-dev libpixman-1-dev libslirp-dev libssl-dev zlib1g-dev ninja-build
+which llvm-ar llvm-nm llvm-objdump
 cd MTE-kernel
 wget https://cloud-images.ubuntu.com/releases/jammy/release/ubuntu-22.04-server-cloudimg-arm64-root.tar.xz
 ./make-image.sh ubuntu-22.04-server-cloudimg-arm64-root.tar.xz
@@ -35,7 +38,7 @@ insmod ipv6.ko
 # Start IPv6 module testing
 
 (optional) if you feel too noisy and wanna hide printk:
-```
+```python
 # hide printk
 echo 2 > /proc/sys/kernel/printk
 # restore showing printk
