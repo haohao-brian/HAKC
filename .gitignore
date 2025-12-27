@@ -1,6 +1,8 @@
 
 MTE-kernel/make-image-output.img
 MTE-kernel/vmlinux
+MTE-kernel/vmlinux.o
 MTE-kernel/Module.symvers
 MTE-kernel/drivers/gpu/drm/nouveau/nouveau.ko
 MTE-kernel/drivers/gpu/drm/nouveau/nouveau.o
+MTE-kernel/ubuntu-22.04-server-cloudimg-arm64-root.tar.xz
