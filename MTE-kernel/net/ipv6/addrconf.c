@@ -6307,7 +6307,7 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_fill_link_af, static int,
 	typeof(skb->sk) orig_sk = orig_skb->sk;
 	struct net *orig_net = NULL;
 	size_t head_offset = orig_skb->data - orig_skb->head;
-
+/*
 	if(orig_skb->sk) {
 		orig_net = HAKC_OUTSIDE_TRANSFER_FUNC(sock_net)(orig_skb->sk);
 		HAKC_OUTSIDE_TRANSFER_FUNC(sock_net_set)
@@ -6327,6 +6327,7 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_fill_link_af, static int,
 			sizeof(struct skb_shared_info)),
 		__claque_id, __color,
 		false);
+		*/
 	/*
 	if(prot_dev->ip6_ptr) {
 		HAKC_GET_SAFE_PTR(prot_dev->ip6_ptr)->dev =
@@ -6339,11 +6340,12 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_fill_link_af, static int,
 					       sizeof(struct inet6_dev),
 					       __claque_id, __color, false);
 	}
-	*/
+	
 	prot_dev = hakc_transfer_to_clique(prot_dev, sizeof(*dev), __claque_id, __color,
 				     false);
-
+	*/
 	result = inet6_fill_link_af(skb, prot_dev, ext_filter_mask);
+	/*
 	if(orig_skb->head)
 		orig_skb->head = orig_head;
 	if(orig_skb->data)
@@ -6354,6 +6356,7 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_fill_link_af, static int,
 			HAKC_OUTSIDE_TRANSFER_FUNC(sock_net_set)
 			(orig_skb->sk, orig_net);
 	}
+			*/
 	return result;
 }
 #endif
