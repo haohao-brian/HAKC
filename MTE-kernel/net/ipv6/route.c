@@ -383,7 +383,21 @@ static void ip6_dst_destroy(struct dst_entry *dst)
 	struct inet6_dev *idev;
 
 	ip_dst_metrics_put(dst);
-	rt6_uncached_list_del(rt);
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+    /* HAKC workaround:
+     * 不碰 rt6_uncached_list，避免因為 rt6i_uncached_list 被 HAKC 搞壞
+     * 去對 NULL / 壞掉的 lock spin_lock 而炸。
+     * 這會 leak uncached routes，但先換成「不 panic」。
+     */
+    if (!list_empty(&rt->rt6i_uncached)) {
+        pr_warn("HAKC: skip rt6_uncached_list_del for rt=%px ul=%px\n",
+                rt, rt->rt6i_uncached_list);
+        INIT_LIST_HEAD(&rt->rt6i_uncached);
+    }
+#else
+    rt6_uncached_list_del(rt);
+#endif
 
 	idev = rt->rt6i_idev;
 	if (idev) {
