@@ -46,6 +46,16 @@ extern int inet6_unregister_icmp_sender(ip6_icmp_send_t *fn);
 
 static inline void icmpv6_send(struct sk_buff *skb, u8 type, u8 code, __u32 info)
 {
+	    if (type == ICMPV6_DEST_UNREACH && code == ICMPV6_ADDR_UNREACH) {
+        const struct ipv6hdr *ip6h = ipv6_hdr(skb);
+
+        pr_err("HAKC_DEBUG icmpv6_send ADDR_UNREACH: "
+                "saddr=%pI6c daddr=%pI6c dev=%s skb=%px\n",
+                &ip6h->saddr, &ip6h->daddr,
+                skb->dev ? skb->dev->name : "NULL", skb);
+
+        dump_stack();
+    }
 	__icmpv6_send(skb, type, code, info, IP6CB(skb));
 }
 
