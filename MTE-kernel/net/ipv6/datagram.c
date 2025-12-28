@@ -535,7 +535,7 @@ int ipv6_recv_error(struct sock *sk, struct msghdr *msg, int len, int *addr_len)
 		}
 	}
 
-	put_cmsg(msg, SOL_IPV6, IPV6_RECVERR, sizeof(errhdr), &errhdr);
+	put_cmsg(msg, SOL_IPV6, IPV6_RECVERR, sizeof(errhdr), check_hakc_data_access(&errhdr, 0x20007));
 
 	/* Now we could try to dump offended packet options */
 
