@@ -947,17 +947,8 @@ EXPORT_SYMBOL_GPL(ping_queue_rcv_skb);
 /*
  *	All we need to do is get the socket.
  */
-
 bool ping_rcv(struct sk_buff *skb)
 {
-	struct sock *sk1 = skb->sk;
-    const struct ipv6hdr *ip6h = ipv6_hdr(skb);
-    const struct icmp6hdr *icmph = icmp6_hdr(skb);
-
-    pr_err("HAKC_DEBUG ping_rcv: skb=%px sk=%px type=%u dst=%pI6c src=%pI6c\n",
-            skb, sk1, icmph->icmp6_type,
-            &ip6h->daddr, &ip6h->saddr);
-
 	struct sock *sk;
 	struct net *net = dev_net(skb->dev);
 	struct icmphdr *icmph = icmp_hdr(skb);
@@ -966,6 +957,15 @@ bool ping_rcv(struct sk_buff *skb)
 
 	pr_debug("ping_rcv(skb=%p,id=%04x,seq=%04x)\n",
 		 skb, ntohs(icmph->un.echo.id), ntohs(icmph->un.echo.sequence));
+
+
+	struct sock *sk1 = skb->sk;
+    const struct ipv6hdr *ip6h = ipv6_hdr(skb);
+    const struct icmp6hdr *icmph = icmp6_hdr(skb);
+
+    pr_err("HAKC_DEBUG ping_rcv: skb=%px sk=%px type=%u dst=%pI6c src=%pI6c\n",
+            skb, sk1, icmph->icmp6_type,
+            &ip6h->daddr, &ip6h->saddr);
 
 	/* Push ICMP header back */
 	skb_push(skb, skb->data - (u8 *)icmph);
