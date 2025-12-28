@@ -950,6 +950,14 @@ EXPORT_SYMBOL_GPL(ping_queue_rcv_skb);
 
 bool ping_rcv(struct sk_buff *skb)
 {
+	struct sock *sk1 = skb->sk;
+    const struct ipv6hdr *ip6h = ipv6_hdr(skb);
+    const struct icmp6hdr *icmph = icmp6_hdr(skb);
+
+    pr_err("HAKC_DEBUG ping_rcv: skb=%px sk=%px type=%u dst=%pI6c src=%pI6c\n",
+            skb, sk1, icmph->icmp6_type,
+            &ip6h->daddr, &ip6h->saddr);
+
 	struct sock *sk;
 	struct net *net = dev_net(skb->dev);
 	struct icmphdr *icmph = icmp_hdr(skb);

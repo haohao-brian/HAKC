@@ -878,6 +878,13 @@ out:
 
 static int icmpv6_rcv(struct sk_buff *skb)
 {
+	const struct ipv6hdr *ip6h = ipv6_hdr(skb);
+    const struct icmp6hdr *icmph = icmp6_hdr(skb);
+
+    pr_err("HAKC_DEBUG icmpv6_rcv: type=%u code=%u dst=%pI6c src=%pI6c skb->sk=%px\n",
+            icmph->icmp6_type, icmph->icmp6_code,
+            &ip6h->daddr, &ip6h->saddr, skb->sk);
+
 	struct net *net = dev_net(skb->dev);
 	struct net_device *dev = icmp6_dev(skb);
 	struct inet6_dev *idev = __in6_dev_get(dev);

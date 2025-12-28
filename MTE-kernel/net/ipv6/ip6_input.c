@@ -491,6 +491,10 @@ static int ip6_input_finish(struct net *net, struct sock *sk, struct sk_buff *sk
 
 int ip6_input(struct sk_buff *skb)
 {
+	const struct ipv6hdr *hdr = ipv6_hdr(skb);
+
+    pr_err("HAKC_DEBUG ip6_input: nexthdr=%u dst=%pI6c src=%pI6c\n",
+            hdr->nexthdr, &hdr->daddr, &hdr->saddr);
 	return NF_HOOK(NFPROTO_IPV6, NF_INET_LOCAL_IN,
 		       dev_net(skb->dev), NULL, skb, skb->dev, NULL,
 		       ip6_input_finish);
