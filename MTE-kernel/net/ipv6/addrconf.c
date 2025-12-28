@@ -5239,18 +5239,18 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_rtm_newaddr, static int,
 //			dev->pcpu_refcnt = hakc_transfer_data_to_target
 //				(link->doit, hakc_transfer_data_to_target,
 //				 sizeof(int), false);
-	HAKC_GET_SAFE_PTR(dev->ip6_ptr)->dev = hakc_transfer_to_clique(
-		HAKC_GET_SAFE_PTR(dev->ip6_ptr)->dev,
-		sizeof(*dev->ip6_ptr->dev),
+	//HAKC_GET_SAFE_PTR(dev->ip6_ptr)->dev = hakc_transfer_to_clique( \
+		HAKC_GET_SAFE_PTR(dev->ip6_ptr)->dev, \
+		sizeof(*dev->ip6_ptr->dev), \
 		__claque_id, __color, false);
 
-	dev->ip6_ptr = hakc_transfer_to_clique(
-		dev->ip6_ptr, sizeof(struct inet6_dev),
+	//dev->ip6_ptr = hakc_transfer_to_clique( \
+		dev->ip6_ptr, sizeof(struct inet6_dev), \
 		__claque_id, __color,false);
 //	orig_net->dev_index_head[1].first = &dev->index_hlist;
 	head = orig_net->dev_index_head;
-	orig_net->dev_index_head = hakc_transfer_to_clique(
-		head, sizeof(*head), __claque_id, __color, false
+	//orig_net->dev_index_head = hakc_transfer_to_clique( \
+		head, sizeof(*head), __claque_id, __color, false \
 	);
 
 	dev = hakc_transfer_to_clique(dev, sizeof(*dev), __claque_id, __color,
