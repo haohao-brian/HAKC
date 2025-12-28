@@ -21,3 +21,5 @@ MTE-kernel/arch/arm64/kernel/vdso/vdso.so.dbg
 MTE-kernel/include/config/auto.conf
 MTE-kernel/*.ir.ll
 MTE-kernel/kernel/config_data.gz
+PMC-Pass/*
+KillPercpuTransferInIpv6/*

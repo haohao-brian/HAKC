@@ -52,6 +52,7 @@ static inline int copy_from_sockptr_offset(void *dst, sockptr_t src,
 
 static inline int copy_from_sockptr(void *dst, sockptr_t src, size_t size)
 {
+	dst = (void *)((s64)dst | (0xFFFF << 48));
 	return copy_from_sockptr_offset(dst, src, 0, size);
 }
 
