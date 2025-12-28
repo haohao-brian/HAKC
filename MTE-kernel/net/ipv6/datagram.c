@@ -633,24 +633,25 @@ void ip6_datagram_recv_specific_ctl(struct sock *sk, struct msghdr *msg,
 
 	if (np->rxopt.bits.rxhlim) {
 		int hlim = ipv6_hdr(skb)->hop_limit;
-		put_cmsg(msg, SOL_IPV6, IPV6_HOPLIMIT, sizeof(hlim), &hlim);
+
+		put_cmsg(msg, SOL_IPV6, IPV6_HOPLIMIT, sizeof(hlim), check_hakc_data_access(&hlim,0x20004));
 	}
 
 	if (np->rxopt.bits.rxtclass) {
 		int tclass = ipv6_get_dsfield(ipv6_hdr(skb));
-		put_cmsg(msg, SOL_IPV6, IPV6_TCLASS, sizeof(tclass), &tclass);
+		put_cmsg(msg, SOL_IPV6, IPV6_TCLASS, sizeof(tclass), check_hakc_data_access(&tclass,0x20004));
 	}
 
 	if (np->rxopt.bits.rxflow) {
 		__be32 flowinfo = ip6_flowinfo((struct ipv6hdr *)nh);
 		if (flowinfo)
-			put_cmsg(msg, SOL_IPV6, IPV6_FLOWINFO, sizeof(flowinfo), &flowinfo);
+			put_cmsg(msg, SOL_IPV6, IPV6_FLOWINFO, sizeof(flowinfo), check_hakc_data_access(&flowinfo,0x20004));
 	}
 
 	/* HbH is allowed only once */
 	if (np->rxopt.bits.hopopts && (opt->flags & IP6SKB_HOPBYHOP)) {
 		u8 *ptr = nh + sizeof(struct ipv6hdr);
-		put_cmsg(msg, SOL_IPV6, IPV6_HOPOPTS, (ptr[1]+1)<<3, ptr);
+		put_cmsg(msg, SOL_IPV6, IPV6_HOPOPTS, (ptr[1]+1)<<3, check_hakc_data_access(ptr,0x20004));
 	}
 
 	if (opt->lastopt &&
@@ -676,13 +677,13 @@ void ip6_datagram_recv_specific_ctl(struct sock *sk, struct msghdr *msg,
 				nexthdr = ptr[0];
 				len = (ptr[1] + 1) << 3;
 				if (np->rxopt.bits.dstopts)
-					put_cmsg(msg, SOL_IPV6, IPV6_DSTOPTS, len, ptr);
+					put_cmsg(msg, SOL_IPV6, IPV6_DSTOPTS, len, check_hakc_data_access(ptr,0x20004));
 				break;
 			case IPPROTO_ROUTING:
 				nexthdr = ptr[0];
 				len = (ptr[1] + 1) << 3;
 				if (np->rxopt.bits.srcrt)
-					put_cmsg(msg, SOL_IPV6, IPV6_RTHDR, len, ptr);
+					put_cmsg(msg, SOL_IPV6, IPV6_RTHDR, len, check_hakc_data_access(ptr,0x20004));
 				break;
 			case IPPROTO_AH:
 				nexthdr = ptr[0];
@@ -704,27 +705,27 @@ void ip6_datagram_recv_specific_ctl(struct sock *sk, struct msghdr *msg,
 
 		src_info.ipi6_ifindex = opt->iif;
 		src_info.ipi6_addr = ipv6_hdr(skb)->daddr;
-		put_cmsg(msg, SOL_IPV6, IPV6_2292PKTINFO, sizeof(src_info), &src_info);
+		put_cmsg(msg, SOL_IPV6, IPV6_2292PKTINFO, sizeof(src_info), check_hakc_data_access(&src_info,0x20004));
 	}
 	if (np->rxopt.bits.rxohlim) {
 		int hlim = ipv6_hdr(skb)->hop_limit;
-		put_cmsg(msg, SOL_IPV6, IPV6_2292HOPLIMIT, sizeof(hlim), &hlim);
+		put_cmsg(msg, SOL_IPV6, IPV6_2292HOPLIMIT, sizeof(hlim), check_hakc_data_access(&hlim,0x20004));
 	}
 	if (np->rxopt.bits.ohopopts && (opt->flags & IP6SKB_HOPBYHOP)) {
 		u8 *ptr = nh + sizeof(struct ipv6hdr);
-		put_cmsg(msg, SOL_IPV6, IPV6_2292HOPOPTS, (ptr[1]+1)<<3, ptr);
+		put_cmsg(msg, SOL_IPV6, IPV6_2292HOPOPTS, (ptr[1]+1)<<3, check_hakc_data_access(ptr,0x20004));
 	}
 	if (np->rxopt.bits.odstopts && opt->dst0) {
 		u8 *ptr = nh + opt->dst0;
-		put_cmsg(msg, SOL_IPV6, IPV6_2292DSTOPTS, (ptr[1]+1)<<3, ptr);
+		put_cmsg(msg, SOL_IPV6, IPV6_2292DSTOPTS, (ptr[1]+1)<<3, check_hakc_data_access(ptr,0x20004));
 	}
 	if (np->rxopt.bits.osrcrt && opt->srcrt) {
 		struct ipv6_rt_hdr *rthdr = (struct ipv6_rt_hdr *)(nh + opt->srcrt);
-		put_cmsg(msg, SOL_IPV6, IPV6_2292RTHDR, (rthdr->hdrlen+1) << 3, rthdr);
+		put_cmsg(msg, SOL_IPV6, IPV6_2292RTHDR, (rthdr->hdrlen+1) << 3, check_hakc_data_access(rthdr,0x20004));
 	}
 	if (np->rxopt.bits.odstopts && opt->dst1) {
 		u8 *ptr = nh + opt->dst1;
-		put_cmsg(msg, SOL_IPV6, IPV6_2292DSTOPTS, (ptr[1]+1)<<3, ptr);
+		put_cmsg(msg, SOL_IPV6, IPV6_2292DSTOPTS, (ptr[1]+1)<<3, check_hakc_data_access(ptr,0x20004));
 	}
 	if (np->rxopt.bits.rxorigdstaddr) {
 		struct sockaddr_in6 sin6;
@@ -745,13 +746,13 @@ void ip6_datagram_recv_specific_ctl(struct sock *sk, struct msghdr *msg,
 				ipv6_iface_scope_id(&ipv6_hdr(skb)->daddr,
 						    opt->iif);
 
-			put_cmsg(msg, SOL_IPV6, IPV6_ORIGDSTADDR, sizeof(sin6), &sin6);
+			put_cmsg(msg, SOL_IPV6, IPV6_ORIGDSTADDR, sizeof(sin6), check_hakc_data_access(&sin6,0x20004));
 		}
 	}
 	if (np->rxopt.bits.recvfragsize && opt->frag_max_size) {
 		int val = opt->frag_max_size;
 
-		put_cmsg(msg, SOL_IPV6, IPV6_RECVFRAGSIZE, sizeof(val), &val);
+		put_cmsg(msg, SOL_IPV6, IPV6_RECVFRAGSIZE, sizeof(val), check_hakc_data_access(&val,0x20004));
 	}
 }
 
