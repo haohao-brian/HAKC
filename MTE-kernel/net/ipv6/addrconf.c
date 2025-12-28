@@ -6327,6 +6327,7 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_fill_link_af, static int,
 			sizeof(struct skb_shared_info)),
 		__claque_id, __color,
 		false);
+	/*
 	if(prot_dev->ip6_ptr) {
 		HAKC_GET_SAFE_PTR(prot_dev->ip6_ptr)->dev =
 			hakc_transfer_to_clique(HAKC_GET_SAFE_PTR(prot_dev->ip6_ptr)->dev,
@@ -6338,7 +6339,7 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_fill_link_af, static int,
 					       sizeof(struct inet6_dev),
 					       __claque_id, __color, false);
 	}
-
+	*/
 	prot_dev = hakc_transfer_to_clique(prot_dev, sizeof(*dev), __claque_id, __color,
 				     false);
 
