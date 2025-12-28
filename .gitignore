@@ -1,3 +1,9 @@
+MTE-kernel/**/*.o
+MTE-kernel/**/*.ko
+MTE-kernel/**/*.cmd
+MTE-kernel/.tmp_*
+MTE-kernel/System.map
+MTE-kernel/include/config/**
 
 MTE-kernel/make-image-output.img
 MTE-kernel/vmlinux
