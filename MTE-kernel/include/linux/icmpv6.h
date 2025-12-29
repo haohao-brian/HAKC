@@ -50,9 +50,9 @@ static inline void icmpv6_send(struct sk_buff *skb, u8 type, u8 code, __u32 info
         const struct ipv6hdr *ip6h = ipv6_hdr(skb);
 
         pr_err("HAKC_DEBUG icmpv6_send ADDR_UNREACH: "
-                "saddr=%pI6c daddr=%pI6c dev=%s skb=%px\n",
+                "saddr=%pI6c daddr=%pI6c dev=%s skb=%px caller=%ps\n",
                 &ip6h->saddr, &ip6h->daddr,
-                skb->dev ? skb->dev->name : "NULL", skb);
+                skb->dev ? skb->dev->name : "NULL", skb, __builtin_return_address(0));
 
         dump_stack();
     }

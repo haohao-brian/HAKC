@@ -14,7 +14,6 @@
  *	Mitsuru KANDA @USAGI and
  *	YOSHIFUJI Hideaki @USAGI: Remove ipv6_parse_exthdrs().
  */
-
 #include <linux/errno.h>
 #include <linux/types.h>
 #include <linux/socket.h>
@@ -43,7 +42,6 @@
 #include <net/xfrm.h>
 #include <net/inet_ecn.h>
 #include <net/dst_metadata.h>
-
 #include <linux/hakc.h>
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
@@ -306,7 +304,12 @@ drop:
 
 int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, struct net_device *orig_dev)
 {
-	pr_err("ipv6_rcv\n");
+const struct ipv6hdr *ip6h = ipv6_hdr(skb);
+
+pr_err("HAKC_DEBUG ipv6_rcv: dev=%s nexthdr=%u src=%pI6c dst=%pI6c len=%u\n",
+       skb->dev ? skb->dev->name : "NULL",
+       ip6h->nexthdr, &ip6h->saddr, &ip6h->daddr, skb->len);
+
 	//struct inet6_skb_parm *opt = IP6CB(skb);
 	struct sk_buff *skb_tmp = skb;
 	//skb_tmp = hakc_transfer_to_clique(skb_tmp, 216, 2, 0xf2, false);
@@ -372,6 +375,8 @@ INDIRECT_CALLABLE_DECLARE(int tcp_v6_rcv(struct sk_buff *));
 void ip6_protocol_deliver_rcu(struct net *net, struct sk_buff *skb, int nexthdr,
 			      bool have_final)
 {
+pr_err("HAKC_DEBUG ip6_protocol_deliver_rcu: dev=%s nexthdr=%d\n",
+       skb->dev ? skb->dev->name : "NULL", nexthdr);
 	const struct inet6_protocol *ipprot;
 	struct inet6_dev *idev;
 	unsigned int nhoff;
@@ -393,6 +398,8 @@ resubmit:
 resubmit_final:
 	raw = raw6_local_deliver(skb, nexthdr);
 	ipprot = rcu_dereference(inet6_protos[nexthdr]);
+	pr_err("HAKC_DEBUG ip6_protocol_deliver_rcu: handler for proto=%d is %px\n", \
+        nexthdr, ipprot);
 	if (ipprot) {
 		int ret;
 
@@ -478,14 +485,40 @@ discard:
 	__IP6_INC_STATS(net, idev, IPSTATS_MIB_INDISCARDS);
 	kfree_skb(skb);
 }
-
+/*
 static int ip6_input_finish(struct net *net, struct sock *sk, struct sk_buff *skb)
 {
 	rcu_read_lock();
 	ip6_protocol_deliver_rcu(net, skb, 0, false);
 	rcu_read_unlock();
-
 	return 0;
+}
+*/
+
+
+static int ip6_input_finish(struct net *net, struct sock *sk, struct sk_buff *skb)
+{
+    const struct ipv6hdr *hdr;
+const struct ipv6hdr *ip6h = ipv6_hdr(skb);
+
+pr_err("HAKC_DEBUG ip6_input_finish: dev=%s nexthdr=%u src=%pI6c dst=%pI6c\n",
+       skb->dev ? skb->dev->name : "NULL",
+       ip6h->nexthdr, &ip6h->saddr, &ip6h->daddr);
+    /* 保險一點，確定 IPv6 header 在 head 裡 */
+    if (!pskb_may_pull(skb, sizeof(struct ipv6hdr)))
+        goto drop;
+
+    hdr = ipv6_hdr(skb);
+
+    /* ★關鍵：用真正的 nexthdr，而不是 0 ★ */
+    rcu_read_lock();
+    ip6_protocol_deliver_rcu(net, skb, hdr->nexthdr, 0);
+    rcu_read_unlock();
+    return 0;
+
+drop:
+    kfree_skb(skb);
+    return 0;
 }
 
 
@@ -503,6 +536,11 @@ EXPORT_SYMBOL_GPL(ip6_input);
 
 int ip6_mc_input(struct sk_buff *skb)
 {
+const struct ipv6hdr *ip6h = ipv6_hdr(skb);
+pr_err("HAKC_DEBUG ip6_mc_input: dev=%s nexthdr=%u src=%pI6c dst=%pI6c\n",
+       skb->dev ? skb->dev->name : "NULL",
+       ip6h->nexthdr, &ip6h->saddr, &ip6h->daddr);
+
 	int sdif = inet6_sdif(skb);
 	const struct ipv6hdr *hdr;
 	struct net_device *dev;

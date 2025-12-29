@@ -226,6 +226,12 @@ static int ip6_finish_output(struct net *net, struct sock *sk, struct sk_buff *s
 
 int ip6_output(struct net *net, struct sock *sk, struct sk_buff *skb)
 {
+    if (WARN_ON_ONCE(!net)) {
+        pr_err("HAKC_DEBUG ip6_output: net=NULL sk=%px skb=%px dev=%s\n",
+               sk, skb, skb && skb->dev ? skb->dev->name : "NULL");
+        kfree_skb(skb);
+        return -EINVAL;
+    }
 	struct net_device *dev = skb_dst(skb)->dev, *indev = skb->dev;
 	struct inet6_dev *idev = ip6_dst_idev(skb_dst(skb));
 

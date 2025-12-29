@@ -5207,6 +5207,39 @@ static int __netif_receive_skb_core(struct sk_buff **pskb, bool pfmemalloc,
 		skb_reset_transport_header(skb);
 	skb_reset_mac_len(skb);
 
+
+    /* HAKC_DEBUG: log ALL frames on enp0s2, to see if NA ever enters core */
+    if (skb->dev && strcmp(skb->dev->name, "enp0s2") == 0) {
+        __be16 proto = skb->protocol;
+
+        pr_err("HAKC_DEBUG dev.c RX: dev=%s pkt_type=%u proto=0x%04x len=%u\n",
+               skb->dev->name,
+               skb->pkt_type,
+               ntohs(proto),
+               skb->len);
+
+        /* 如果是 IPv6，再多看一下 header/nexthdr */
+        if (proto == htons(ETH_P_IPV6)) {
+                const struct ipv6hdr *ip6h = ipv6_hdr(skb);
+
+            if (skb_network_header(skb)) {
+                pr_err("HAKC_DEBUG dev.c RX IPv6: src=%pI6c dst=%pI6c nexthdr=%u\n",
+                       &ip6h->saddr, &ip6h->daddr, ip6h->nexthdr);
+            }
+            if (skb->pkt_type == PACKET_OTHERHOST &&
+                ip6h->nexthdr == IPPROTO_ICMPV6) {
+                pr_err("HAKC_DEBUG dev.c FORCE_HOST: dev=%s "
+                       "pkt_type=%u->HOST dst=%pI6c nexthdr=%u\n",
+                       skb->dev->name,
+                       PACKET_OTHERHOST,
+                       &ip6h->daddr, ip6h->nexthdr);
+
+                skb->pkt_type = PACKET_HOST;
+            }
+        }
+    }
+
+
 	pt_prev = NULL;
 
 another_round:
@@ -5343,7 +5376,22 @@ check_vlan_id:
 		 */
 		__vlan_hwaccel_clear_tag(skb);
 	}
+/*
+    if (skb->pkt_type == PACKET_OTHERHOST && !deliver_exact) {
+        const struct ethhdr *eth = eth_hdr(skb);
 
+        pr_err("HAKC_DEBUG dev.c: drop OTHERHOST skb=%px dev=%s "
+               "dmac=%pM smac=%pM proto=0x%04x len=%u\n",
+               skb,
+               skb->dev ? skb->dev->name : "NULL",
+               eth ? eth->h_dest : (unsigned char *)"NULL",
+               eth ? eth->h_source : (unsigned char *)"NULL",
+               ntohs(skb->protocol),
+               skb->len);
+
+        goto drop;
+    }
+*/
 	type = skb->protocol;
 
 	/* deliver only exact match when indicated */

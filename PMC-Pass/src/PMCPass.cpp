@@ -343,10 +343,6 @@ namespace {
         }
 
         for (auto &F : M.getFunctionList()) {
-            if (F.getName() == "ip6_protocol_deliver_rcu") {
-                errs() << "HAKC: skipping analysis for " << F.getName() << "\n";
-                continue;
-            }
             debug_output = (F.getName() == debugName);
             if (functionNeedsAnalysis(&F)) {
                 if (debug_output) {

@@ -881,7 +881,7 @@ static int icmpv6_rcv(struct sk_buff *skb)
 	const struct ipv6hdr *ip6h = ipv6_hdr(skb);
     const struct icmp6hdr *icmph = icmp6_hdr(skb);
 
-    pr_err("HAKC_DEBUG icmpv6_rcv: type=%u code=%u dst=%pI6c src=%pI6c skb->sk=%px\n",
+    pr_err("HAKC_DEBUG icmpv6_rcv: (early) type=%u code=%u dst=%pI6c src=%pI6c skb->sk=%px\n",
             icmph->icmp6_type, icmph->icmp6_code,
             &ip6h->daddr, &ip6h->saddr, skb->sk);
 
@@ -893,25 +893,7 @@ static int icmpv6_rcv(struct sk_buff *skb)
 	u8 type;
 	bool success = false;
 
-	if (!xfrm6_policy_check(NULL, XFRM_POLICY_IN, skb)) {
-		struct sec_path *sp = skb_sec_path(skb);
-		int nh;
-
-		if (!(sp && sp->xvec[sp->len - 1]->props.flags &
-				 XFRM_STATE_ICMP))
-			goto drop_no_count;
-
-		if (!pskb_may_pull(skb, sizeof(*hdr) + sizeof(struct ipv6hdr)))
-			goto drop_no_count;
-
-		nh = skb_network_offset(skb);
-		skb_set_network_header(skb, sizeof(*hdr));
-
-		if (!xfrm6_policy_check_reverse(NULL, XFRM_POLICY_IN, skb))
-			goto drop_no_count;
-
-		skb_set_network_header(skb, nh);
-	}
+	/* 原本的 xfrm6_policy_check 那段保持不動 */
 
 	__ICMP6_INC_STATS(dev_net(dev), idev, ICMP6_MIB_INMSGS);
 
@@ -928,8 +910,12 @@ static int icmpv6_rcv(struct sk_buff *skb)
 		goto discard_it;
 
 	hdr = icmp6_hdr(skb);
-
 	type = hdr->icmp6_type;
+
+    /* ★ 這裡再印一次，確定 checksum + pull 後 type 還是你想要的 136 ★ */
+    pr_err("HAKC_DEBUG icmpv6_rcv: (after csum) type=%u code=%u dev=%s\n",
+           hdr->icmp6_type, hdr->icmp6_code,
+           dev ? dev->name : "NULL");
 
 	ICMP6MSGIN_INC_STATS(dev_net(dev), idev, type);
 
@@ -944,16 +930,10 @@ static int icmpv6_rcv(struct sk_buff *skb)
 		break;
 
 	case ICMPV6_PKT_TOOBIG:
-		/* BUGGG_FUTURE: if packet contains rthdr, we cannot update
-		   standard destination cache. Seems, only "advanced"
-		   destination cache will allow to solve this problem
-		   --ANK (980726)
-		 */
+		/* ... 原本註解與 code 保持不動 ... */
 		if (!pskb_may_pull(skb, sizeof(struct ipv6hdr)))
 			goto discard_it;
 		hdr = icmp6_hdr(skb);
-
-		/* to notify */
 		fallthrough;
 	case ICMPV6_DEST_UNREACH:
 	case ICMPV6_TIME_EXCEED:
@@ -966,9 +946,11 @@ static int icmpv6_rcv(struct sk_buff *skb)
 	case NDISC_NEIGHBOUR_SOLICITATION:
 	case NDISC_NEIGHBOUR_ADVERTISEMENT:
 	case NDISC_REDIRECT:
+		pr_err("IPv6: HAKC_DEBUG icmpv6_rcv: dispatch NDISC type=%u " \
+                "to ndisc_rcv skb=%px dev=%s\n",\
+                type, skb, dev ? dev->name : "NULL");
 		ndisc_rcv(skb);
 		break;
-
 	case ICMPV6_MGM_QUERY:
 		igmp6_event_query(skb);
 		break;

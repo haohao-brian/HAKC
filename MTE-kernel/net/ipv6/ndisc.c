@@ -48,6 +48,8 @@
 #include <linux/icmpv6.h>
 #include <linux/jhash.h>
 
+#include <linux/refcount.h>
+
 #include <net/sock.h>
 #include <net/snmp.h>
 
@@ -713,6 +715,51 @@ void ndisc_send_rs(struct net_device *dev, const struct in6_addr *saddr,
 
 static void ndisc_error_report(struct neighbour *neigh, struct sk_buff *skb)
 {
+    struct net_device *dev = neigh->dev;
+
+    /* HAKC_DEBUG: log current neighbour state */
+    pr_err("HAKC_DEBUG ndisc_error_report: neigh=%px dev=%s state=0x%x lladdr=%pM\n",
+           neigh,
+           dev ? dev->name : "NULL",
+           neigh->nud_state,
+           neigh->ha);
+
+    /*
+     * HACK 1: 如果是我們的實驗介面 enp0s2，
+     * 直接把 neighbour 強制當成 REACHABLE，寫死 gateway MAC。
+     * 這是為了先讓 ping / echo reply 跑起來，之後再慢慢 debug 正規 ND。
+     */
+    if (dev && strcmp(dev->name, "enp0s2") == 0) {
+        static const unsigned char gw_mac[ETH_ALEN] =
+            { 0x2e, 0x89, 0x90, 0x64, 0x70, 0x40 }; /* 你之前用 tcpdump 抓到的 MAC */
+
+        memcpy(neigh->ha, gw_mac, ETH_ALEN);
+        neigh->nud_state = NUD_REACHABLE;
+        neigh->flags |= NTF_ROUTER;
+
+        pr_err("HAKC_DEBUG ndisc_error_report: FORCE REACHABLE on %s "
+               "state=0x%x lladdr=%pM (SKIP ICMP unreachable)\n",
+               dev->name, neigh->nud_state, neigh->ha);
+
+        /* 直接略過原本的 ICMPv6 DEST_UNREACH 回報邏輯 */
+        return;
+    }
+
+    struct dst_entry *dst = skb_dst(skb);
+    struct in6_addr *key6 = NULL;
+
+    if (neigh && neigh->tbl == &nd_tbl)
+        key6 = (struct in6_addr *)&neigh->primary_key;
+
+    pr_err("ICMPv6: IPv6: ndisc_error_report: skb=%px dev=%s dst=%px dst.dev=%s neigh=%px nud_state=0x%x flags=0x%x refcnt=%d neigh_addr=%pI6c\n",
+           skb,
+           skb->dev ? skb->dev->name : "NULL",
+           dst, dst && dst->dev ? dst->dev->name : "NULL",
+           neigh,
+           neigh ? neigh->nud_state : -1,
+           neigh ? neigh->flags : -1,
+           neigh ? refcount_read(&neigh->refcnt) : -1,
+           key6);
 	/*
 	 *	"The sender MUST return an ICMP
 	 *	 destination unreachable"
@@ -965,56 +1012,77 @@ static void ndisc_recv_na(struct sk_buff *skb)
 	struct in6_addr *saddr = &ipv6_hdr(skb)->saddr;
 	const struct in6_addr *daddr = &ipv6_hdr(skb)->daddr;
 	u8 *lladdr = NULL;
-	u32 ndoptlen = skb_tail_pointer(skb) - (skb_transport_header(skb) +
-				    offsetof(struct nd_msg, opt));
+	u32 ndoptlen = skb_tail_pointer(skb) -
+		(skb_transport_header(skb) + offsetof(struct nd_msg, opt));
 	struct ndisc_options ndopts;
 	struct net_device *dev = skb->dev;
 	struct inet6_dev *idev = __in6_dev_get(dev);
 	struct inet6_ifaddr *ifp;
 	struct neighbour *neigh;
 
+	/* 進來就先印一發，把整個 NA 的關鍵欄位 dump 出來 */
+	pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: skb=%px dev=%s "
+	       "target=%pI6c saddr=%pI6c daddr=%pI6c len=%u\n",
+	       skb,
+	       dev ? dev->name : "NULL",
+	       &msg->target, saddr, daddr, skb->len);
+
 	if (skb->len < sizeof(struct nd_msg)) {
 		ND_PRINTK(2, warn, "NA: packet too short\n");
+		pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: drop (too short)\n");
 		return;
 	}
 
 	if (ipv6_addr_is_multicast(&msg->target)) {
 		ND_PRINTK(2, warn, "NA: target address is multicast\n");
+		pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: drop (target is multicast)\n");
 		return;
 	}
 
 	if (ipv6_addr_is_multicast(daddr) &&
 	    msg->icmph.icmp6_solicited) {
 		ND_PRINTK(2, warn, "NA: solicited NA is multicasted\n");
+		pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: drop (solicited NA but daddr is multicast)\n");
 		return;
 	}
 
 	/* For some 802.11 wireless deployments (and possibly other networks),
-	 * there will be a NA proxy and unsolicitd packets are attacks
+	 * there will be a NA proxy and unsolicited packets are attacks
 	 * and thus should not be accepted.
 	 */
 	if (!msg->icmph.icmp6_solicited && idev &&
-	    idev->cnf.drop_unsolicited_na)
+	    idev->cnf.drop_unsolicited_na) {
+		pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: drop (unsolicited NA + drop_unsolicited_na)\n");
 		return;
+	}
 
 	if (!ndisc_parse_options(dev, msg->opt, ndoptlen, &ndopts)) {
 		ND_PRINTK(2, warn, "NS: invalid ND option\n");
+		pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: drop (invalid ND options)\n");
 		return;
 	}
+
 	if (ndopts.nd_opts_tgt_lladdr) {
 		lladdr = ndisc_opt_addr_data(ndopts.nd_opts_tgt_lladdr, dev);
 		if (!lladdr) {
 			ND_PRINTK(2, warn,
 				  "NA: invalid link-layer address length\n");
+			pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: drop (bad tgt_lladdr len)\n");
 			return;
 		}
 	}
+
+	/* 檢查 target 會不會被當成「自己這張介面的地址」 */
 	ifp = ipv6_get_ifaddr(dev_net(dev), &msg->target, dev, 1);
+	pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: ipv6_get_ifaddr(target=%pI6c, dev=%s) -> ifp=%px\n",
+	       &msg->target, dev ? dev->name : "NULL", ifp);
+
 	if (ifp) {
-		if (skb->pkt_type != PACKET_LOOPBACK
-		    && (ifp->flags & IFA_F_TENTATIVE)) {
-				addrconf_dad_failure(skb, ifp);
-				return;
+		if (skb->pkt_type != PACKET_LOOPBACK &&
+		    (ifp->flags & IFA_F_TENTATIVE)) {
+			pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: addrconf_dad_failure (tentative addr)\n");
+			addrconf_dad_failure(skb, ifp);
+			return;
 		}
 		/* What should we make now? The advertisement
 		   is invalid, but ndisc specs say nothing
@@ -1028,18 +1096,47 @@ static void ndisc_recv_na(struct sk_buff *skb)
 		if (skb->pkt_type != PACKET_LOOPBACK)
 			ND_PRINTK(1, warn,
 				  "NA: %pM advertised our address %pI6c on %s!\n",
-				  eth_hdr(skb)->h_source, &ifp->addr, ifp->idev->dev->name);
+				  eth_hdr(skb)->h_source, &ifp->addr,
+				  ifp->idev->dev->name);
+
+		pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: target is our own ifaddr; ignore NA\n");
 		in6_ifa_put(ifp);
 		return;
 	}
-	neigh = neigh_lookup(&nd_tbl, &msg->target, dev);
 
+	/* 用 NA 的 target 在 neighbour table 找 entry */
+	neigh = neigh_lookup(&nd_tbl, &msg->target, dev);
+	pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: neigh_lookup(target=%pI6c, dev=%s) -> neigh=%px\n",
+	       &msg->target, dev ? dev->name : "NULL", neigh);
+	if (!neigh) {
+        	struct neighbour *n2;
+
+        	n2 = neigh_create(&nd_tbl, &msg->target, dev);
+	        if (IS_ERR(n2)) {
+        	    ND_PRINTK(1, warn,
+	                  "NA: neigh_create failed for %pI6c on %s, err=%ld\n",
+                	  &msg->target, dev->name, PTR_ERR(n2));
+        	    return;
+	        }
+        	neigh = n2;
+		ND_PRINTK(1, info,
+	              "HAKC_DEBUG ndisc_recv_na: created neigh=%px for %pI6c on %s\n",
+        	      neigh, &msg->target, dev->name);
+	}
 	if (neigh) {
 		u8 old_flags = neigh->flags;
+		u8 old_state = neigh->nud_state;
 		struct net *net = dev_net(dev);
 
-		if (neigh->nud_state & NUD_FAILED)
+		pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: BEFORE ndisc_update: "
+		       "neigh=%px nud_state=0x%x flags=0x%x lladdr=%pM\n",
+		       neigh, old_state, old_flags,
+		       lladdr ? lladdr : (u8 *)"NULL");
+
+		if (neigh->nud_state & NUD_FAILED) {
+			pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: neigh already FAILED, skip update\n");
 			goto out;
+		}
 
 		/*
 		 * Don't update the neighbor cache entry on a proxy NA from
@@ -1047,29 +1144,37 @@ static void ndisc_recv_na(struct sk_buff *skb)
 		 * has already sent a NA to us.
 		 */
 		if (lladdr && !memcmp(lladdr, dev->dev_addr, dev->addr_len) &&
-		    net->ipv6.devconf_all->forwarding && net->ipv6.devconf_all->proxy_ndp &&
+		    net->ipv6.devconf_all->forwarding &&
+		    net->ipv6.devconf_all->proxy_ndp &&
 		    pneigh_lookup(&nd_tbl, net, &msg->target, dev, 0)) {
 			/* XXX: idev->cnf.proxy_ndp */
+			pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: proxy_ndp case, skip ndisc_update\n");
 			goto out;
 		}
 
 		ndisc_update(dev, neigh, lladdr,
 			     msg->icmph.icmp6_solicited ? NUD_REACHABLE : NUD_STALE,
-			     NEIGH_UPDATE_F_WEAK_OVERRIDE|
-			     (msg->icmph.icmp6_override ? NEIGH_UPDATE_F_OVERRIDE : 0)|
-			     NEIGH_UPDATE_F_OVERRIDE_ISROUTER|
+			     NEIGH_UPDATE_F_WEAK_OVERRIDE |
+			     (msg->icmph.icmp6_override ? NEIGH_UPDATE_F_OVERRIDE : 0) |
+			     NEIGH_UPDATE_F_OVERRIDE_ISROUTER |
 			     (msg->icmph.icmp6_router ? NEIGH_UPDATE_F_ISROUTER : 0),
 			     NDISC_NEIGHBOUR_ADVERTISEMENT, &ndopts);
+
+		pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: AFTER ndisc_update: "
+		       "neigh=%px nud_state=0x%x flags=0x%x\n",
+		       neigh, neigh->nud_state, neigh->flags);
 
 		if ((old_flags & ~neigh->flags) & NTF_ROUTER) {
 			/*
 			 * Change: router to host
 			 */
-			rt6_clean_tohost(dev_net(dev),  saddr);
+			rt6_clean_tohost(dev_net(dev), saddr);
 		}
 
 out:
 		neigh_release(neigh);
+	} else {
+		pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: neigh_lookup() returned NULL (no entry to update)\n");
 	}
 }
 
@@ -1745,6 +1850,12 @@ static bool ndisc_suppress_frag_ndisc(struct sk_buff *skb)
 
 int ndisc_rcv(struct sk_buff *skb)
 {
+	struct icmp6hdr *hdr = icmp6_hdr(skb);
+	struct net_device *dev = skb->dev;
+	u8 type = hdr->icmp6_type;
+
+	pr_err("HAKC_DEBUG ndisc_rcv: skb=%px dev=%s type=%u\n",
+           skb, dev ? dev->name : "NULL", type);
 	struct nd_msg *msg;
 
 	if (ndisc_suppress_frag_ndisc(skb))

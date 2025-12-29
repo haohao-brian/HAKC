@@ -21,6 +21,7 @@
 #include <linux/socket.h>
 #include <linux/netdevice.h>
 #include <linux/proc_fs.h>
+#include <linux/in6.h>
 #ifdef CONFIG_SYSCTL
 #include <linux/sysctl.h>
 #endif
@@ -978,6 +979,28 @@ static void neigh_invalidate(struct neighbour *neigh)
 	__releases(neigh->lock)
 	__acquires(neigh->lock)
 {
+    u8 old = neigh->nud_state;
+
+    if (neigh->ops && neigh->ops->family == AF_INET6 &&
+        neigh->tbl && neigh->tbl->key_len == sizeof(struct in6_addr)) {
+
+        const struct in6_addr *addr =
+            (const struct in6_addr *)neigh->primary_key;
+
+        pr_info("neighbour: ICMPv6: neigh_invalidate: neigh=%px dev=%s addr=%pI6c old_state=%x -> FAILED flags=%x\n",
+                neigh,
+                neigh->dev ? neigh->dev->name : "NULL",
+                addr,
+                old, neigh->flags);
+    } else {
+        pr_info("neighbour: neigh_invalidate: neigh=%px dev=%s old_state=%x -> FAILED flags=%x family=%d key_len=%u\n",
+                neigh,
+                neigh->dev ? neigh->dev->name : "NULL",
+                old, neigh->flags,
+                neigh->ops ? neigh->ops->family : -1,
+                neigh->tbl ? neigh->tbl->key_len : 0);
+    }
+
 	struct sk_buff *skb;
 
 	NEIGH_CACHE_STAT_INC(neigh->tbl, res_failed);
@@ -1230,8 +1253,16 @@ static int __neigh_update(struct neighbour *neigh, const u8 *lladdr,
 			  u8 new, u32 flags, u32 nlmsg_pid,
 			  struct netlink_ext_ack *extack)
 {
+    u8 old = neigh->nud_state;
+
+    pr_info("neighbour: __neigh_update enter: neigh=%px dev=%s old=%x new=%x flags=%x family=%d key_len=%u\n",
+            neigh,
+            neigh->dev ? neigh->dev->name : "NULL",
+            old, new, flags,
+            neigh->ops ? neigh->ops->family : -1,
+            neigh->tbl ? neigh->tbl->key_len : 0);
+
 	bool ext_learn_change = false;
-	u8 old;
 	int err;
 	int notify = 0;
 	struct net_device *dev;
@@ -1341,6 +1372,29 @@ static int __neigh_update(struct neighbour *neigh, const u8 *lladdr,
 						 0)));
 		neigh->nud_state = new;
 		notify = 1;
+	        /* Debug 版──不要再碰 nd_tbl，改用 family + key_len 判斷 */
+		    if (neigh->ops &&
+		        neigh->ops->family == AF_INET6 &&
+		        neigh->tbl &&
+		    neigh->tbl->key_len == sizeof(struct in6_addr)) {
+
+		        const struct in6_addr *addr =
+        		    (const struct in6_addr *)neigh->primary_key;
+
+	        	pr_info("neighbour: ICMPv6: neigh_update: neigh=%px dev=%s addr=%pI6c nud_state %x -> %x flags=%x\n",
+        	        	neigh,
+		                neigh->dev ? neigh->dev->name : "NULL",
+		                addr,
+               		old, new, flags);
+		    } else {
+		        /* 其他 family / table 就印少一點，避免亂 cast */
+		        pr_info("neighbour: neigh_update: neigh=%px dev=%s key_len=%u nud_state %x -> %x flags=%x\n",
+                		neigh,
+		                neigh->dev ? neigh->dev->name : "NULL",
+                		neigh->tbl ? neigh->tbl->key_len : 0,
+	                old, new, flags);
+		    }
+
 	}
 
 	if (lladdr != neigh->ha) {
@@ -1471,7 +1525,19 @@ static void neigh_hh_init(struct neighbour *n)
 
 int neigh_resolve_output(struct neighbour *neigh, struct sk_buff *skb)
 {
+	struct dst_entry *dst = skb_dst(skb);
+
 	int rc = 0;
+
+	pr_err("HAKC_DEBUG neigh_resolve_output: neigh=%px state=0x%x flags=0x%x refcnt=%d dst=%px dst.dev=%s skb.dev=%s daddr=%pI6c\n",
+           neigh,
+           neigh ? neigh->nud_state : -1,
+           neigh ? neigh->flags : -1,
+           neigh ? refcount_read(&neigh->refcnt) : -1,
+           dst,
+           dst && dst->dev ? dst->dev->name : "NULL",
+           skb->dev ? skb->dev->name : "NULL",
+           (void *)ipv6_hdr(skb) ? &ipv6_hdr(skb)->daddr : NULL);
 
 	if (!neigh_event_send(neigh, skb)) {
 		int err;
