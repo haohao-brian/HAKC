@@ -20,10 +20,9 @@ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 CC=clang-11 HOSTCC=clang
 ## step 2: compile and get ipv6.ko and kernel will insmod automatically
 ```
 cd MTE-kernel
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 CC=clang-11 \
-     M=net/ipv6 \
-     INSTALL_MOD_PATH=/mnt/vmroot \
-     modules_install
+
+sudo make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 \
+     modules_install INSTALL_MOD_PATH=/mnt/vmroot
 ```
 ## step 3: start kvm
 ```
