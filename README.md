@@ -17,26 +17,21 @@ wget https://cloud-images.ubuntu.com/releases/jammy/release/ubuntu-22.04-server-
 cd MTE-kernel
 make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 CC=clang-11 HOSTCC=clang-11 -j$(nproc)
 ```
-## step 2: compile and get ipv6.ko and cp into /shared
+## step 2: compile and get ipv6.ko and kernel will insmod automatically
 ```
 cd MTE-kernel
-make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 CC=clang-11 HOSTCC=clang-11 M=net/ipv6 modules
-cp net/ipv6/ipv6.ko shared/ipv6.ko
+make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- LLVM=1 CC=clang-11 \
+     M=net/ipv6 \
+     INSTALL_MOD_PATH=/mnt/vmroot \
+     modules_install
 ```
 ## step 3: start kvm
 ```
 cd MTE-kernel
 ./run-kvm.sh
-```
-## step 4: login root and insmod ipv6.ko
-```
-mkdir -p /mnt/shared
-mount -t 9p -o trans=virtio shared /mnt/shared
-cd /mnt/shared
-insmod ipv6.ko
+# you will now be able to use ipv6 function
 ```
 # Start IPv6 module testing
-
 (optional) if you feel too noisy and wanna hide printk:
 ```python
 # hide printk
@@ -44,7 +39,7 @@ echo 2 > /proc/sys/kernel/printk
 # restore showing printk
 echo 4 > /proc/sys/kernel/printk
 ```
-## step 5: Start 
+## step 4: Start 
 After installing Ipv6, feel free to use following command.
 ```
 ip addr show
