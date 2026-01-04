@@ -90,18 +90,18 @@ fi
 
 
 
-qemu-system-aarch64 -nographic -machine virt,mte=on,gic-version=3,virtualization=on -m ${MEMSIZE} -cpu cortex-a710,pauth=on -smp ${SMP} \
-        -kernel ${KERNEL} ${DTB} \
-        -drive if=none,file=$FS,id=vda,cache=none,format=raw \
-        -device virtio-blk-pci,drive=vda \
-        -display none \
-        -serial $CONSOLE \
-        -append "console=ttyAMA0 root=/dev/vda rw $CMDLINE" \
-        -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
-        -device virtio-net-pci,netdev=net0,mac=de:ad:be:ef:41:49 \
-	-virtfs local,path=$SHARED_DIR,mount_tag=shared,security_model=mapped \
-	-append "console=ttyAMA0 root=/dev/vda rw earlycon=pl011,0x09000000 initcall_debug rcupdate.rcu_cpu_stall_timeout=20 \
-                    log_buf_len=16M"
-#	  -s -S \
-#        -netdev user,id=net1,hostfwd=tcp::2332-:22 \
-#        -device virtio-net-pci,netdev=net1,mac=de:ad:be:ef:41:49 \
+qemu-system-aarch64 \
+  -nographic \
+  -machine virt,mte=on,gic-version=3,virtualization=on \
+  -m ${MEMSIZE} -cpu cortex-a710,pauth=on -smp ${SMP} \
+  -kernel ${KERNEL} ${DTB} \
+  -drive if=none,file=$FS,id=vda,cache=none,format=raw \
+  -device virtio-blk-pci,drive=vda \
+  -display none \
+  -serial mon:stdio \
+  -serial file:/root/test/linux-compartment-hakc/MTE-kernel/shared/oopslog/serial.log \
+  -append "console=ttyAMA0,115200 root=/dev/vda rw earlycon=pl011,0x09000000 \
+           initcall_debug rcupdate.rcu_cpu_stall_timeout=20 loglevel=1 log_buf_len=16M cgroup_disable=memory" \
+  -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+  -device virtio-net-pci,netdev=net0,mac=de:ad:be:ef:41:49 \
+  -virtfs local,path=$SHARED_DIR,mount_tag=shared,security_model=mapped

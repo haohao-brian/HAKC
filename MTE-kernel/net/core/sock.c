@@ -1761,10 +1761,10 @@ static __always_inline void *make_canonical48(const void *p)
 static void __sk_destruct(struct rcu_head *head)
 {
 	head = make_canonical48(head);
-	pr_info("RCU head raw=%px\n", head);
+	//pr_info("RCU head raw=%px\n", head);
 	struct sock *sk = container_of(head, struct sock, sk_rcu);
 	sk = make_canonical48(sk);
-	pr_info("RCU sk raw=%px\n", sk);
+	//pr_info("RCU sk raw=%px\n", sk);
 
 	struct sk_filter *filter;
 

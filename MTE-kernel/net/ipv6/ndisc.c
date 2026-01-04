@@ -731,7 +731,7 @@ static void ndisc_error_report(struct neighbour *neigh, struct sk_buff *skb)
      */
     if (dev && strcmp(dev->name, "enp0s2") == 0) {
         static const unsigned char gw_mac[ETH_ALEN] =
-            { 0x2e, 0x89, 0x90, 0x64, 0x70, 0x40 }; /* 你之前用 tcpdump 抓到的 MAC */
+            { 0x2e, 0x89, 0x90, 0x64, 0x70, 0x40 }; // 你之前用 tcpdump 抓到的 MAC 
 
         memcpy(neigh->ha, gw_mac, ETH_ALEN);
         neigh->nud_state = NUD_REACHABLE;

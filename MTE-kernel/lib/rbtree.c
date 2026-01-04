@@ -465,13 +465,15 @@ EXPORT_SYMBOL(__rb_insert_augmented);
  */
 struct rb_node *rb_first(const struct rb_root *root)
 {
+	struct rb_root *root1 = check_hakc_data_access(root,0x20001);
 	struct rb_node	*n;
-
-	n = root->rb_node;
+	root1->rb_node = check_hakc_data_access(root1->rb_node,0x20001);
+	n = root1->rb_node;
 	if (!n)
 		return NULL;
-	while (n->rb_left)
-		n = n->rb_left;
+	while (check_hakc_data_access(n->rb_left,0x20001)){
+		n = check_hakc_data_access(n->rb_left,0x20001);
+	}
 	return n;
 }
 EXPORT_SYMBOL(rb_first);

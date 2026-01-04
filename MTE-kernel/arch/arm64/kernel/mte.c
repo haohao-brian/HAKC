@@ -22,9 +22,9 @@
 #include <linux/printk.h>
 #define HAKC_DEBUG IS_ENABLED(CONFIG_PAC_MTE_COMPART_DEBUG_PRINT)
 #define HAKC_INFO(fmt, ...)                                                    \
-	if (HAKC_DEBUG) {                                                      \
-		pr_err(fmt, ##__VA_ARGS__);                                   \
-	}
+	if (HAKC_DEBUG) {}//                                                      \
+//		pr_err(fmt, ##__VA_ARGS__);                                   \
+//	}
 
 u64 gcr_kernel_excl __ro_after_init;
 static inline void hakc_mte_debug_index(void *addr, u64 *ctx_addr, u64 *idx)

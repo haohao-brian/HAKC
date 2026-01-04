@@ -5218,7 +5218,7 @@ static int __netif_receive_skb_core(struct sk_buff **pskb, bool pfmemalloc,
                ntohs(proto),
                skb->len);
 
-        /* 如果是 IPv6，再多看一下 header/nexthdr */
+        // 如果是 IPv6，再多看一下 header/nexthdr 
         if (proto == htons(ETH_P_IPV6)) {
                 const struct ipv6hdr *ip6h = ipv6_hdr(skb);
 

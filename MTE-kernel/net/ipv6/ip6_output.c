@@ -226,28 +226,45 @@ static int ip6_finish_output(struct net *net, struct sock *sk, struct sk_buff *s
 
 int ip6_output(struct net *net, struct sock *sk, struct sk_buff *skb)
 {
+    struct dst_entry *dst;
+    struct net_device *dev, *indev;
+    struct inet6_dev *idev;
+
     if (WARN_ON_ONCE(!net)) {
         pr_err("HAKC_DEBUG ip6_output: net=NULL sk=%px skb=%px dev=%s\n",
                sk, skb, skb && skb->dev ? skb->dev->name : "NULL");
         kfree_skb(skb);
         return -EINVAL;
     }
-	struct net_device *dev = skb_dst(skb)->dev, *indev = skb->dev;
-	struct inet6_dev *idev = ip6_dst_idev(skb_dst(skb));
 
-	skb->protocol = htons(ETH_P_IPV6);
-	skb->dev = dev;
+    dst = skb_dst(skb);
+    if (unlikely(!dst || !dst->dev)) {   // <-- guard 1：dst/dev 本來就可能不存在
+        kfree_skb(skb);
+        return -EINVAL;
+    }
 
-	if (unlikely(idev->cnf.disable_ipv6)) {
-		IP6_INC_STATS(net, idev, IPSTATS_MIB_OUTDISCARDS);
-		kfree_skb(skb);
-		return 0;
-	}
+    dev   = dst->dev;
+    indev = skb->dev;
 
-	return NF_HOOK_COND(NFPROTO_IPV6, NF_INET_POST_ROUTING,
-			    net, sk, skb, indev, dev,
-			    ip6_finish_output,
-			    !(IP6CB(skb)->flags & IP6SKB_REROUTED));
+    idev = ip6_dst_idev(dst);
+    if (unlikely(!idev)) {              // <-- guard 2：idev 可能 NULL / 或 check 後變 NULL
+        kfree_skb(skb);
+        return 0; // 或 return -EINVAL；看你想怎麼處理
+    }
+
+    skb->protocol = htons(ETH_P_IPV6);
+    skb->dev = dev;
+
+    if (unlikely(idev->cnf.disable_ipv6)) {
+        IP6_INC_STATS(net, idev, IPSTATS_MIB_OUTDISCARDS);
+        kfree_skb(skb);
+        return 0;
+    }
+
+        return NF_HOOK_COND(NFPROTO_IPV6, NF_INET_POST_ROUTING,
+                            net, sk, skb, indev, dev,
+                            ip6_finish_output,
+                            !(IP6CB(skb)->flags & IP6SKB_REROUTED));
 }
 
 bool ip6_autoflowlabel(struct net *net, const struct ipv6_pinfo *np)

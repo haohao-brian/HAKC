@@ -7056,9 +7056,9 @@ out:
 
 noinline void mem_cgroup_sk_free(struct sock *sk)
 {
-	pr_info("mem_cgroup_sk_free: sk=%px sk_memcg=%px\n", sk, sk->sk_memcg);
-	if (sk->sk_memcg)
-		css_put(&sk->sk_memcg->css);
+//	pr_info("mem_cgroup_sk_free: sk=%px sk_memcg=%px\n", sk, sk->sk_memcg);
+//	if (sk->sk_memcg)
+//		css_put(&sk->sk_memcg->css);
 }
 
 /**

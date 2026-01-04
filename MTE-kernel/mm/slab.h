@@ -354,6 +354,7 @@ static inline void memcg_slab_post_alloc_hook(struct kmem_cache *s,
 static inline void memcg_slab_free_hook(struct kmem_cache *s_orig,
 					void **p, int objects)
 {
+	return;
 	struct kmem_cache *s;
 	struct obj_cgroup *objcg;
 	struct page *page;

@@ -118,7 +118,7 @@ static inline void __reqsk_free(struct request_sock *req)
 	if (req->rsk_listener)
 		sock_put(req->rsk_listener);
 	kfree(req->saved_syn);
-	kmem_cache_free(req->rsk_ops->slab, req);
+	kmem_cache_free(check_hakc_data_access(req->rsk_ops->slab,0x20001), req);
 }
 
 static inline void reqsk_free(struct request_sock *req)
@@ -129,6 +129,7 @@ static inline void reqsk_free(struct request_sock *req)
 
 static inline void reqsk_put(struct request_sock *req)
 {
+	req = check_hakc_data_access(req, 0x20004);
 	if (refcount_dec_and_test(&req->rsk_refcnt))
 		reqsk_free(req);
 }

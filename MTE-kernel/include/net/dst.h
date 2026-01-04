@@ -195,7 +195,7 @@ dst_feature(const struct dst_entry *dst, u32 feature)
 
 static inline u32 dst_mtu(const struct dst_entry *dst)
 {
-	pr_info("dst_mtu: \n");
+	//pr_info("dst_mtu: \n");
 	return READ_ONCE(dst->dev->mtu);//dst->ops->mtu(dst);
 }
 

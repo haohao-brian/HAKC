@@ -15,9 +15,9 @@
 #define HAKC_INVALID_PTR (void *)0xDEADBEEF
 
 #define HAKC_INFO(fmt, ...)                                                    \
-	if (HAKC_DEBUG) {                                                      \
-		pr_err(fmt, ##__VA_ARGS__);                                   \
-	}
+	if (HAKC_DEBUG) {}                                                     // \
+		//pr_err(fmt, ##__VA_ARGS__);                                   \
+//	}
 #define HAKC_ERR(fmt, ...)                                                     \
 	if (HAKC_DEBUG) {                                                      \
 		pr_err(fmt, ##__VA_ARGS__);                                    \

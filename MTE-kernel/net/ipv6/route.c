@@ -2933,6 +2933,7 @@ EXPORT_SYMBOL_GPL(ip6_sk_update_pmtu);
 void ip6_sk_dst_store_flow(struct sock *sk, struct dst_entry *dst,
 			   const struct flowi6 *fl6)
 {
+	return;
 #ifdef CONFIG_IPV6_SUBTREES
 	struct ipv6_pinfo *np = inet6_sk(sk);
 #endif
