@@ -306,8 +306,8 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 {
 const struct ipv6hdr *ip6h = ipv6_hdr(skb);
 
-pr_err("HAKC_DEBUG ipv6_rcv: dev=%s nexthdr=%u src=%pI6c dst=%pI6c len=%u\n",
-       skb->dev ? skb->dev->name : "NULL",
+//pr_err("HAKC_DEBUG ipv6_rcv: dev=%s nexthdr=%u src=%pI6c dst=%pI6c len=%u\n", \
+       skb->dev ? skb->dev->name : "NULL", \
        ip6h->nexthdr, &ip6h->saddr, &ip6h->daddr, skb->len);
 
 	//struct inet6_skb_parm *opt = IP6CB(skb);
@@ -375,7 +375,7 @@ INDIRECT_CALLABLE_DECLARE(int tcp_v6_rcv(struct sk_buff *));
 void ip6_protocol_deliver_rcu(struct net *net, struct sk_buff *skb, int nexthdr,
 			      bool have_final)
 {
-pr_err("HAKC_DEBUG ip6_protocol_deliver_rcu: dev=%s nexthdr=%d\n",
+//pr_err("HAKC_DEBUG ip6_protocol_deliver_rcu: dev=%s nexthdr=%d\n",\
        skb->dev ? skb->dev->name : "NULL", nexthdr);
 	const struct inet6_protocol *ipprot;
 	struct inet6_dev *idev;
@@ -398,7 +398,7 @@ resubmit:
 resubmit_final:
 	raw = raw6_local_deliver(skb, nexthdr);
 	ipprot = rcu_dereference(inet6_protos[nexthdr]);
-	pr_err("HAKC_DEBUG ip6_protocol_deliver_rcu: handler for proto=%d is %px\n", \
+	//pr_err("HAKC_DEBUG ip6_protocol_deliver_rcu: handler for proto=%d is %px\n", \
         nexthdr, ipprot);
 	if (ipprot) {
 		int ret;
@@ -501,8 +501,8 @@ static int ip6_input_finish(struct net *net, struct sock *sk, struct sk_buff *sk
     const struct ipv6hdr *hdr;
 const struct ipv6hdr *ip6h = ipv6_hdr(skb);
 
-pr_err("HAKC_DEBUG ip6_input_finish: dev=%s nexthdr=%u src=%pI6c dst=%pI6c\n",
-       skb->dev ? skb->dev->name : "NULL",
+//pr_err("HAKC_DEBUG ip6_input_finish: dev=%s nexthdr=%u src=%pI6c dst=%pI6c\n", \
+       skb->dev ? skb->dev->name : "NULL", \
        ip6h->nexthdr, &ip6h->saddr, &ip6h->daddr);
     /* 保險一點，確定 IPv6 header 在 head 裡 */
     if (!pskb_may_pull(skb, sizeof(struct ipv6hdr)))
@@ -526,7 +526,7 @@ int ip6_input(struct sk_buff *skb)
 {
 	const struct ipv6hdr *hdr = ipv6_hdr(skb);
 
-    pr_err("HAKC_DEBUG ip6_input: nexthdr=%u dst=%pI6c src=%pI6c\n",
+    //pr_err("HAKC_DEBUG ip6_input: nexthdr=%u dst=%pI6c src=%pI6c\n", \
             hdr->nexthdr, &hdr->daddr, &hdr->saddr);
 	return NF_HOOK(NFPROTO_IPV6, NF_INET_LOCAL_IN,
 		       dev_net(skb->dev), NULL, skb, skb->dev, NULL,
@@ -537,8 +537,8 @@ EXPORT_SYMBOL_GPL(ip6_input);
 int ip6_mc_input(struct sk_buff *skb)
 {
 const struct ipv6hdr *ip6h = ipv6_hdr(skb);
-pr_err("HAKC_DEBUG ip6_mc_input: dev=%s nexthdr=%u src=%pI6c dst=%pI6c\n",
-       skb->dev ? skb->dev->name : "NULL",
+//pr_err("HAKC_DEBUG ip6_mc_input: dev=%s nexthdr=%u src=%pI6c dst=%pI6c\n", \
+       skb->dev ? skb->dev->name : "NULL", \
        ip6h->nexthdr, &ip6h->saddr, &ip6h->daddr);
 
 	int sdif = inet6_sdif(skb);
