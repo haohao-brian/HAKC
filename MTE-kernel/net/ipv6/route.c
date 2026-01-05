@@ -1067,7 +1067,7 @@ static struct net_device *ip6_rt_get_dev_rcu(const struct fib6_result *res)
 {
 	struct net_device *dev = res->nh->fib_nh_dev;
 
-	HAKC_INFO("ip6_rt_get_dev_rcu start\n");
+	//HAKC_INFO("ip6_rt_get_dev_rcu start\n");
 	if (res->fib6_flags & (RTF_LOCAL | RTF_ANYCAST)) {
 		/* for copies of local routes, dst->dev needs to be the
 		 * device if it is a master device, the master device if
@@ -1088,7 +1088,7 @@ static struct net_device *ip6_rt_get_dev_rcu(const struct fib6_result *res)
 		 */
 	}
 	
-	HAKC_INFO("ip6_rt_get_dev_rcu end\n");
+	//HAKC_INFO("ip6_rt_get_dev_rcu end\n");
 	return dev;
 }
 

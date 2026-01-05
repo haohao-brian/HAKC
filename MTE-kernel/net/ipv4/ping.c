@@ -963,8 +963,8 @@ bool ping_rcv(struct sk_buff *skb)
     const struct ipv6hdr *ip6h = ipv6_hdr(skb);
     const struct icmp6hdr *icmph6 = icmp6_hdr(skb);
 
-    pr_err("HAKC_DEBUG ping_rcv: skb=%px sk=%px type=%u dst=%pI6c src=%pI6c\n",
-            skb, sk1, icmph6->icmp6_type,
+    //pr_err("HAKC_DEBUG ping_rcv: skb=%px sk=%px type=%u dst=%pI6c src=%pI6c\n", \
+            skb, sk1, icmph6->icmp6_type, \
             &ip6h->daddr, &ip6h->saddr);
 
 	/* Push ICMP header back */

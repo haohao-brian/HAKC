@@ -1370,7 +1370,7 @@ rollback:
 			old_assign_type = NET_NAME_RENAMED;
 			goto rollback;
 		} else {
-			pr_err("%s: name change rollback failed: %d\n",
+			//pr_err("%s: name change rollback failed: %d\n", \
 			       dev->name, ret);
 		}
 	}
@@ -3492,7 +3492,7 @@ EXPORT_SYMBOL(__skb_gso_segment);
 void netdev_rx_csum_fault(struct net_device *dev, struct sk_buff *skb)
 {
 	if (net_ratelimit()) {
-		pr_err("%s: hw csum failure\n", dev ? dev->name : "<unknown>");
+		//pr_err("%s: hw csum failure\n", dev ? dev->name : "<unknown>");
 		skb_dump(KERN_ERR, skb, true);
 		dump_stack();
 	}
@@ -5212,10 +5212,10 @@ static int __netif_receive_skb_core(struct sk_buff **pskb, bool pfmemalloc,
     if (skb->dev && strcmp(skb->dev->name, "enp0s2") == 0) {
         __be16 proto = skb->protocol;
 
-        pr_err("HAKC_DEBUG dev.c RX: dev=%s pkt_type=%u proto=0x%04x len=%u\n",
-               skb->dev->name,
-               skb->pkt_type,
-               ntohs(proto),
+        //pr_err("HAKC_DEBUG dev.c RX: dev=%s pkt_type=%u proto=0x%04x len=%u\n", \
+               skb->dev->name, \
+               skb->pkt_type, \
+               ntohs(proto), \
                skb->len);
 
         // 如果是 IPv6，再多看一下 header/nexthdr 
@@ -5223,15 +5223,15 @@ static int __netif_receive_skb_core(struct sk_buff **pskb, bool pfmemalloc,
                 const struct ipv6hdr *ip6h = ipv6_hdr(skb);
 
             if (skb_network_header(skb)) {
-                pr_err("HAKC_DEBUG dev.c RX IPv6: src=%pI6c dst=%pI6c nexthdr=%u\n",
+                //pr_err("HAKC_DEBUG dev.c RX IPv6: src=%pI6c dst=%pI6c nexthdr=%u\n", \
                        &ip6h->saddr, &ip6h->daddr, ip6h->nexthdr);
             }
             if (skb->pkt_type == PACKET_OTHERHOST &&
                 ip6h->nexthdr == IPPROTO_ICMPV6) {
-                pr_err("HAKC_DEBUG dev.c FORCE_HOST: dev=%s "
-                       "pkt_type=%u->HOST dst=%pI6c nexthdr=%u\n",
-                       skb->dev->name,
-                       PACKET_OTHERHOST,
+                //pr_err("HAKC_DEBUG dev.c FORCE_HOST: dev=%s " \
+                       "pkt_type=%u->HOST dst=%pI6c nexthdr=%u\n", \
+                       skb->dev->name, \
+                       PACKET_OTHERHOST, \
                        &ip6h->daddr, ip6h->nexthdr);
 
                 skb->pkt_type = PACKET_HOST;
@@ -6899,7 +6899,7 @@ static int napi_poll(struct napi_struct *n, struct list_head *repoll)
 	}
 
 	if (unlikely(work > weight))
-		pr_err_once("NAPI poll function %pS returned %d, exceeding its budget of %d.\n",
+		pr_err_once("NAPI poll function %pS returned %d, exceeding its budget of %d.\n", \
 			    n->poll, work, weight);
 
 	if (likely(work < weight))
@@ -7804,7 +7804,7 @@ static void __netdev_adjacent_dev_remove(struct net_device *dev,
 	adj = __netdev_find_adj(adj_dev, dev_list);
 
 	if (!adj) {
-		pr_err("Adjacency does not exist for device %s from %s\n",
+		//pr_err("Adjacency does not exist for device %s from %s\n", \
 		       dev->name, adj_dev->name);
 		WARN_ON(1);
 		return;
@@ -10438,7 +10438,7 @@ void netdev_run_todo(void)
 		list_del(&dev->todo_list);
 
 		if (unlikely(dev->reg_state != NETREG_UNREGISTERING)) {
-			pr_err("network todo '%s' but state %d\n",
+			//pr_err("network todo '%s' but state %d\n", \
 			       dev->name, dev->reg_state);
 			dump_stack();
 			continue;
@@ -10626,12 +10626,12 @@ struct net_device *alloc_netdev_mqs(int sizeof_priv, const char *name,
 	BUG_ON(strlen(name) >= sizeof(dev->name));
 
 	if (txqs < 1) {
-		pr_err("alloc_netdev: Unable to allocate device with zero queues\n");
+		//pr_err("alloc_netdev: Unable to allocate device with zero queues\n");
 		return NULL;
 	}
 
 	if (rxqs < 1) {
-		pr_err("alloc_netdev: Unable to allocate device with zero RX queues\n");
+		//pr_err("alloc_netdev: Unable to allocate device with zero RX queues\n");
 		return NULL;
 	}
 
