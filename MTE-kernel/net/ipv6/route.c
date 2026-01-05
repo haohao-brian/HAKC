@@ -1439,23 +1439,23 @@ static struct rt6_info *ip6_rt_pcpu_alloc(const struct fib6_result *res)
 
 	if (!fib6_info_hold_safe(f6i))
 		return NULL;
-	HAKC_INFO("ip6_rt_pcpu_alloc1: res=%px f6i=%px dev=%px pcpu_rt=%px\n", \
+	//HAKC_INFO("ip6_rt_pcpu_alloc1: res=%px f6i=%px dev=%px pcpu_rt=%px\n", \
         res, f6i, dev, pcpu_rt);
 	rcu_read_lock();
 	dev = ip6_rt_get_dev_rcu(res);
 	dev = hakc_sign_pointer_with_color(dev,2,false);
-	HAKC_INFO("ip6_rt_pcpu_alloc2\n");
+	//HAKC_INFO("ip6_rt_pcpu_alloc2\n");
 	struct net *net = dev_net(dev);
-	HAKC_INFO("ip6_rt_pcpu_alloc2.5\n");
+	//HAKC_INFO("ip6_rt_pcpu_alloc2.5\n");
 	pcpu_rt = ip6_dst_alloc(net, dev, flags | DST_NOCOUNT);
 	rcu_read_unlock();
-	HAKC_INFO("ip6_rt_pcpu_alloc3: res=%px f6i=%px dev=%px pcpu_rt=%px\n", \
+	//HAKC_INFO("ip6_rt_pcpu_alloc3: res=%px f6i=%px dev=%px pcpu_rt=%px\n", \
         res, f6i, dev, pcpu_rt);
 	if (!pcpu_rt) {
 		fib6_info_release(f6i);
 		return NULL;
 	}
-	HAKC_INFO("ip6_rt_pcpu_alloc4: res=%px f6i=%px dev=%px pcpu_rt=%px\n", \
+	//HAKC_INFO("ip6_rt_pcpu_alloc4: res=%px f6i=%px dev=%px pcpu_rt=%px\n", \
         res, f6i, dev, pcpu_rt);
 	ip6_rt_copy_init(pcpu_rt, res);
 	pcpu_rt->rt6i_flags |= RTF_PCPU;
