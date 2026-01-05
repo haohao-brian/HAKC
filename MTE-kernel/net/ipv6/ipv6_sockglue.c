@@ -1484,7 +1484,7 @@ static int do_ipv6_getsockopt(struct sock *sk, int level, int optname,
 	len = min_t(unsigned int, sizeof(int), len);
 	if (put_user(len, optlen))
 		return -EFAULT;
-	HAKC_INFO("do_ipv6_getsockopt:val = %d\n",val);
+	//HAKC_INFO("do_ipv6_getsockopt:val = %d\n",val);
 	if (copy_to_user(optval, &val, len))
 		return -EFAULT;
 	return 0;
