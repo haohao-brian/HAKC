@@ -128,8 +128,8 @@ u8 mte_get_mem_tag(void *addr)
 
 		tag = 0xF0 | mte_get_ptr_tag(addr);
 
-		HAKC_INFO("MTE_TAG_GET: ctx=%px idx=%llu addr=%px tag=0x%02x caller=%pS\n",
-			(void *)ctx, idx, addr, tag,
+		//HAKC_INFO("MTE_TAG_GET: ctx=%px idx=%llu addr=%px tag=0x%02x caller=%pS\n",\
+			(void *)ctx, idx, addr, tag,\
 			__builtin_return_address(0));
 
 		return tag;
@@ -182,13 +182,13 @@ void *mte_set_mem_tag_range(void *addr, size_t size, u8 tag)
 
 	hakc_mte_debug_index(addr, &ctx, &idx);
 
-	HAKC_INFO("MTE_TAG_SET: ctx=%px idx=%llu addr=%px size=%zu tag_in=0x%02x caller=%pS\n",
-		(void *)ctx, idx, addr, size, tag,
+	//HAKC_INFO("MTE_TAG_SET: ctx=%px idx=%llu addr=%px size=%zu tag_in=0x%02x caller=%pS\n", \
+		(void *)ctx, idx, addr, size, tag, \
 		__builtin_return_address(0));
 
 	tag = 0xF0 | (tag & 0xF);
 	ptr = (void *)__tag_set(ptr, tag);
-	HAKC_INFO("MTE_TAG_SET_DONE: ctx=%px idx=%llu ptr=%px tag_out=0x%02x\n",
+	//HAKC_INFO("MTE_TAG_SET_DONE: ctx=%px idx=%llu ptr=%px tag_out=0x%02x\n", \
 		(void *)ctx, idx, ptr, (unsigned)((u64)ptr >> 56) & 0xFF);
 	#endif
 	mte_assign_mem_tag_range(ptr, size);
