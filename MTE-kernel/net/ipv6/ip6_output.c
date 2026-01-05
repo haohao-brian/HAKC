@@ -94,10 +94,10 @@ static int ip6_finish_output2(struct net *net, struct sock *sk, struct sk_buff *
 					dev_loopback_xmit);
 
 			if (ipv6_hdr(skb)->hop_limit == 0) {
-				HAKC_INFO("before IP6_INC_STATS(net, idev, IPSTATS_MIB_OUTNOROUTES);\n");
+				//HAKC_INFO("before IP6_INC_STATS(net, idev, IPSTATS_MIB_OUTNOROUTES);\n");
 				IP6_INC_STATS(net, idev,
 					      IPSTATS_MIB_OUTDISCARDS);
-				HAKC_INFO("after IP6_INC_STATS(net, idev, IPSTATS_MIB_OUTNOROUTES);\n");
+				//HAKC_INFO("after IP6_INC_STATS(net, idev, IPSTATS_MIB_OUTNOROUTES);\n");
 				kfree_skb(skb);
 				return 0;
 			}
@@ -133,9 +133,9 @@ static int ip6_finish_output2(struct net *net, struct sock *sk, struct sk_buff *
 	}
 	rcu_read_unlock_bh();
 
-	HAKC_INFO("before IP6_INC_STATS(net, ip6_dst_idev(dst), IPSTATS_MIB_OUTNOROUTES);\n");
+	//HAKC_INFO("before IP6_INC_STATS(net, ip6_dst_idev(dst), IPSTATS_MIB_OUTNOROUTES);\n");
 	IP6_INC_STATS(net, ip6_dst_idev(dst), IPSTATS_MIB_OUTNOROUTES);
-	HAKC_INFO("after IP6_INC_STATS(net, ip6_dst_idev(dst), IPSTATS_MIB_OUTNOROUTES);\n");
+	//HAKC_INFO("after IP6_INC_STATS(net, ip6_dst_idev(dst), IPSTATS_MIB_OUTNOROUTES);\n");
 	kfree_skb(skb);
 	return -EINVAL;
 }
@@ -176,7 +176,7 @@ ip6_finish_output_gso_slowpath_drop(struct net *net, struct sock *sk,
 static noinline int __ip6_finish_output(struct net *net, struct sock *sk, struct sk_buff *skb)
 {
 	unsigned int mtu;
-	HAKC_INFO("enter __ip6_finish_output\n");
+	//HAKC_INFO("enter __ip6_finish_output\n");
 #if defined(CONFIG_NETFILTER) && defined(CONFIG_XFRM)
 	/* Policy lookup after SNAT yielded a new policy */
 	if (skb_dst(skb)->xfrm) {
@@ -184,20 +184,20 @@ static noinline int __ip6_finish_output(struct net *net, struct sock *sk, struct
 		return dst_output(net, sk, skb);
 	}
 #endif
-	HAKC_INFO("enter ip6_skb_dst_mtu\n");
+	//HAKC_INFO("enter ip6_skb_dst_mtu\n");
 	mtu = ip6_skb_dst_mtu(skb);
-	HAKC_INFO("enter skb_is_gso, skb_gso_validate_network_len \n");
+	//HAKC_INFO("enter skb_is_gso, skb_gso_validate_network_len \n");
 	if (skb_is_gso(skb) && !skb_gso_validate_network_len(skb, mtu)){
 		return ip6_finish_output_gso_slowpath_drop(net, sk, skb, mtu);
 	}
-	HAKC_INFO("enter skb_is_gso dst_allfrag\n");
+	//HAKC_INFO("enter skb_is_gso dst_allfrag\n");
 	if ((skb->len > mtu && !skb_is_gso(skb)) ||
 	    dst_allfrag(skb_dst(skb)) ||
 	    (IP6CB(skb)->frag_max_size && skb->len > IP6CB(skb)->frag_max_size)){
-			HAKC_INFO("enter ip6_fragment\n");
+			//HAKC_INFO("enter ip6_fragment\n");
 		return ip6_fragment(net, sk, skb, ip6_finish_output2);
 	}else{
-		HAKC_INFO("enter ip6_finish_output2\n");
+		//HAKC_INFO("enter ip6_finish_output2\n");
 		return ip6_finish_output2(net, sk, skb);
 	}
 }
@@ -207,7 +207,7 @@ static int ip6_finish_output(struct net *net, struct sock *sk, struct sk_buff *s
 	struct dst_entry *dst = skb_dst(skb);
 	struct net_device *dev = skb->dev;
 
-	pr_info("HAKC ip6_finish_output(): net=%px sk=%px skb=%px dst=%px dev=%px\n", \
+	//pr_info("HAKC ip6_finish_output(): net=%px sk=%px skb=%px dst=%px dev=%px\n", \
 		net, sk, skb, dst, dev);
 
 	int ret;
@@ -226,45 +226,22 @@ static int ip6_finish_output(struct net *net, struct sock *sk, struct sk_buff *s
 
 int ip6_output(struct net *net, struct sock *sk, struct sk_buff *skb)
 {
-    struct dst_entry *dst;
-    struct net_device *dev, *indev;
-    struct inet6_dev *idev;
+	struct net_device *dev = skb_dst(skb)->dev, *indev = skb->dev;
+	struct inet6_dev *idev = ip6_dst_idev(skb_dst(skb));
 
-    if (WARN_ON_ONCE(!net)) {
-        pr_err("HAKC_DEBUG ip6_output: net=NULL sk=%px skb=%px dev=%s\n",
-               sk, skb, skb && skb->dev ? skb->dev->name : "NULL");
-        kfree_skb(skb);
-        return -EINVAL;
-    }
+	skb->protocol = htons(ETH_P_IPV6);
+	skb->dev = dev;
 
-    dst = skb_dst(skb);
-    if (unlikely(!dst || !dst->dev)) {   // <-- guard 1：dst/dev 本來就可能不存在
-        kfree_skb(skb);
-        return -EINVAL;
-    }
+	if (unlikely(idev->cnf.disable_ipv6)) {
+		IP6_INC_STATS(net, idev, IPSTATS_MIB_OUTDISCARDS);
+		kfree_skb(skb);
+		return 0;
+	}
 
-    dev   = dst->dev;
-    indev = skb->dev;
-
-    idev = ip6_dst_idev(dst);
-    if (unlikely(!idev)) {              // <-- guard 2：idev 可能 NULL / 或 check 後變 NULL
-        kfree_skb(skb);
-        return 0; // 或 return -EINVAL；看你想怎麼處理
-    }
-
-    skb->protocol = htons(ETH_P_IPV6);
-    skb->dev = dev;
-
-    if (unlikely(idev->cnf.disable_ipv6)) {
-        IP6_INC_STATS(net, idev, IPSTATS_MIB_OUTDISCARDS);
-        kfree_skb(skb);
-        return 0;
-    }
-
-        return NF_HOOK_COND(NFPROTO_IPV6, NF_INET_POST_ROUTING,
-                            net, sk, skb, indev, dev,
-                            ip6_finish_output,
-                            !(IP6CB(skb)->flags & IP6SKB_REROUTED));
+	return NF_HOOK_COND(NFPROTO_IPV6, NF_INET_POST_ROUTING,
+			    net, sk, skb, indev, dev,
+			    ip6_finish_output,
+			    !(IP6CB(skb)->flags & IP6SKB_REROUTED));
 }
 
 bool ip6_autoflowlabel(struct net *net, const struct ipv6_pinfo *np)
@@ -1425,15 +1402,15 @@ static int ip6_setup_cork(struct sock *sk, struct inet_cork_full *cork,
     if (dev)
         idev = __in6_dev_get(dev);  /* 這行如果原本就有，重用原本的變數 */
 
-    HAKC_INFO("ip6_setup_cork: sk=%px cork=%px v6_cork=%px ipc6=%px fl6=%px dst=%px dev=%px idev=%px\n",
+    //HAKC_INFO("ip6_setup_cork: sk=%px cork=%px v6_cork=%px ipc6=%px fl6=%px dst=%px dev=%px idev=%px\n",\
             sk, cork, v6_cork, ipc6, fl6, dst, dev, idev);
 			
 	struct ipv6_pinfo *np = inet6_sk(sk);
-	HAKC_INFO("ip6_setup_cork\n");
+	//HAKC_INFO("ip6_setup_cork\n");
 	unsigned int mtu;
 	//ipc6 = hakc_sign_pointer_with_color(ipc6,2,false);
 	struct ipv6_txoptions *opt = ipc6->opt;
-	HAKC_INFO("ip6_setup_cork: opt = ipc6->opt\n");
+	//HAKC_INFO("ip6_setup_cork: opt = ipc6->opt\n");
 
 	/*
 	 * setup for corking
@@ -1447,7 +1424,7 @@ static int ip6_setup_cork(struct sock *sk, struct inet_cork_full *cork,
 		if (unlikely(!v6_cork->opt))
 			return -ENOBUFS;
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-		pr_info("hakc_transfer_to_clique(v6_cork->opt, sizeof(*v6_cork->opt), __claque_id, __color,\
+		//pr_info("hakc_transfer_to_clique(v6_cork->opt, sizeof(*v6_cork->opt), __claque_id, __color,\
                                  false)\n");
         v6_cork->opt = hakc_transfer_to_clique(v6_cork->opt, sizeof(*v6_cork->opt), __claque_id, __color,\
                                  false);
@@ -1479,50 +1456,50 @@ static int ip6_setup_cork(struct sock *sk, struct inet_cork_full *cork,
 
 		/* need source address above miyazawa*/
 	}
-	HAKC_INFO("ip6_setup_cork: dst_hold before\n");
+	//HAKC_INFO("ip6_setup_cork: dst_hold before\n");
 	dst_hold(&rt->dst);
-	HAKC_INFO("ip6_setup_cork: dst_hold after\n");
-	HAKC_INFO("ip6_setup_cork: cork->base.dst = &rt->dst before\n");
+	//HAKC_INFO("ip6_setup_cork: dst_hold after\n");
+	//HAKC_INFO("ip6_setup_cork: cork->base.dst = &rt->dst before\n");
 	cork->base.dst = &rt->dst;
-	HAKC_INFO("ip6_setup_cork: cork->base.dst = &rt->dst after\n");
-	HAKC_INFO("ip6_setup_cork: cork->fl.u.ip6 = *fl6 before\n");
+	//HAKC_INFO("ip6_setup_cork: cork->base.dst = &rt->dst after\n");
+	//HAKC_INFO("ip6_setup_cork: cork->fl.u.ip6 = *fl6 before\n");
 	cork->fl.u.ip6 = *fl6;
-	HAKC_INFO("ip6_setup_cork: cork->fl.u.ip6 = *fl6 after\n");
-	HAKC_INFO("ip6_setup_cork: v6_cork->hop_limit = ipc6->hlimit before\n");
+	//HAKC_INFO("ip6_setup_cork: cork->fl.u.ip6 = *fl6 after\n");
+	//HAKC_INFO("ip6_setup_cork: v6_cork->hop_limit = ipc6->hlimit before\n");
 	v6_cork->hop_limit = ipc6->hlimit;
-	HAKC_INFO("ip6_setup_cork: v6_cork->hop_limit = ipc6->hlimit after\n");
+	//HAKC_INFO("ip6_setup_cork: v6_cork->hop_limit = ipc6->hlimit after\n");
 	v6_cork->tclass = ipc6->tclass;
-	HAKC_INFO("ip6_setup_cork: one\n");
+	//HAKC_INFO("ip6_setup_cork: one\n");
 	if (rt->dst.flags & DST_XFRM_TUNNEL){
-		HAKC_INFO("ip6_setup_cork: one-1\n");
+		//HAKC_INFO("ip6_setup_cork: one-1\n");
 		mtu = np->pmtudisc >= IPV6_PMTUDISC_PROBE ?
 		      READ_ONCE(rt->dst.dev->mtu) : dst_mtu(&rt->dst);
-		HAKC_INFO("ip6_setup_cork: one-2\n");
+		//HAKC_INFO("ip6_setup_cork: one-2\n");
 	}else{
-		HAKC_INFO("ip6_setup_cork: one-3\n");
+		//HAKC_INFO("ip6_setup_cork: one-3\n");
 		mtu = np->pmtudisc >= IPV6_PMTUDISC_PROBE ?
 			READ_ONCE(rt->dst.dev->mtu) : dst_mtu(xfrm_dst_path(&rt->dst));
-		HAKC_INFO("ip6_setup_cork: one-4\n");
+		//HAKC_INFO("ip6_setup_cork: one-4\n");
 	}
-	HAKC_INFO("ip6_setup_cork: two\n");
+	//HAKC_INFO("ip6_setup_cork: two\n");
 	if (np->frag_size < mtu) {
 		if (np->frag_size)
 			mtu = np->frag_size;
 	}
-	HAKC_INFO("ip6_setup_cork: three\n");
+	//HAKC_INFO("ip6_setup_cork: three\n");
 	if (mtu < IPV6_MIN_MTU)
 		return -EINVAL;
 	cork->base.fragsize = mtu;
 	cork->base.gso_size = ipc6->gso_size;
 	cork->base.tx_flags = 0;
 	cork->base.mark = ipc6->sockc.mark;
-	HAKC_INFO("ip6_setup_cork: sock_tx_timestamp(sk, ipc6->sockc.tsflags, &cork->base.tx_flags); before\n");
+	//HAKC_INFO("ip6_setup_cork: sock_tx_timestamp(sk, ipc6->sockc.tsflags, &cork->base.tx_flags); before\n");
 	sock_tx_timestamp(sk, ipc6->sockc.tsflags, &cork->base.tx_flags);
-	HAKC_INFO("ip6_setup_cork: sock_tx_timestamp(sk, ipc6->sockc.tsflags, &cork->base.tx_flags); after\n");
-	HAKC_INFO("ip6_setup_cork: dst_allfrag(xfrm_dst_path(&rt->dst)) before\n");
+	//HAKC_INFO("ip6_setup_cork: sock_tx_timestamp(sk, ipc6->sockc.tsflags, &cork->base.tx_flags); after\n");
+	//HAKC_INFO("ip6_setup_cork: dst_allfrag(xfrm_dst_path(&rt->dst)) before\n");
 	if (dst_allfrag(xfrm_dst_path(&rt->dst)))
 		cork->base.flags |= IPCORK_ALLFRAG;
-	HAKC_INFO("ip6_setup_cork: dst_allfrag(xfrm_dst_path(&rt->dst)) after\n");
+	//HAKC_INFO("ip6_setup_cork: dst_allfrag(xfrm_dst_path(&rt->dst)) after\n");
 	cork->base.length = 0;
 
 	cork->base.transmit_time = ipc6->sockc.transmit_time;
