@@ -156,7 +156,7 @@ lookup_protocol:
 				break;
 		}
 		err = -EPROTONOSUPPORT;
-		pr_info("&inetsw6[sock->type]=%p\n",&inetsw6[sock->type]);
+		//pr_info("&inetsw6[sock->type]=%p\n",&inetsw6[sock->type]);
 	}
 
 	if (err) {
@@ -307,7 +307,7 @@ static void dump_inetsw6(void)
         struct inet_protosw *a;
         list_for_each_entry_rcu(a, &inetsw6[t], list)
             n++;
-        pr_info("inetsw6[%d] entries=%d\n", t, n);
+        //pr_info("inetsw6[%d] entries=%d\n", t, n);
     }
     rcu_read_unlock();
 }
@@ -507,9 +507,9 @@ EXPORT_SYMBOL(inet6_bind);
 
 noinline int inet6_release(struct socket *sock)
 {
-	HAKC_INFO("inet6_release: struct sock *sk = sock->sk; before\n");
+	//HAKC_INFO("inet6_release: struct sock *sk = sock->sk; before\n");
 	struct sock *sk = sock->sk;
-	HAKC_INFO("inet6_release: struct sock *sk = sock->sk; after \n");
+	//HAKC_INFO("inet6_release: struct sock *sk = sock->sk; after \n");
 
 	if (!sk)
 		return -EINVAL;
@@ -531,9 +531,9 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_release, int, struct socket *sock) {
 	sock = hakc_transfer_to_clique(sock, sizeof(*sock), __claque_id,
 				       __color, false);
 	//sock = check_hakc_data_access(sock,0x20004);
-	HAKC_INFO("inet6_release(sock) before \n");
+	//HAKC_INFO("inet6_release(sock) before \n");
 	ret = inet6_release(sock);
-	HAKC_INFO("inet6_release(sock) after \n");
+	//HAKC_INFO("inet6_release(sock) after \n");
 
 	return ret;
 }
@@ -804,14 +804,14 @@ static const struct net_proto_family inet6_family_ops = {
 
 int inet6_register_protosw(struct inet_protosw *p)
 {
-	pr_info("first");
+	//pr_info("first");
 	struct list_head *lh;
 	struct inet_protosw *answer;
 	struct list_head *last_perm;
 	int protocol;
 	int ret;
 
-	pr_info("inet6_register_protosw: p=%px type=%d proto=%d\n",
+	//pr_info("inet6_register_protosw: p=%px type=%d proto=%d\n",\
 		p, p->type, p->protocol);
 
     /* Print where we *think* the list & lock are */
@@ -829,9 +829,9 @@ int inet6_register_protosw(struct inet_protosw *p)
 	last_perm = &inetsw6[p->type];
 	//list_for_each(lh, &inetsw6[p->type]) {
 	struct list_head *head = &inetsw6[p->type];
-	pr_info("inet6_register_protosw: head=%px head->next=%px head->prev=%px\n",
+	//pr_info("inet6_register_protosw: head=%px head->next=%px head->prev=%px\n",\
 			head, head->next, head->prev);
-	pr_info("inet6_register_protosw: safe(next)=%px safe(prev)=%px\n",
+	//pr_info("inet6_register_protosw: safe(next)=%px safe(prev)=%px\n",\
 			HAKC_GET_SAFE_PTR(head->next), HAKC_GET_SAFE_PTR(head->prev));
 	for (lh = (&inetsw6[p->type])->next; lh != (&inetsw6[p->type]); lh = lh->next){
 		//ssleep(5);
@@ -1198,7 +1198,7 @@ static int __init inet6_init(void)
 	}
 
 	if (disable_ipv6_mod) {
-		pr_info("Loaded, but administratively disabled, reboot required to enable\n");
+		//pr_info("Loaded, but administratively disabled, reboot required to enable\n");
 		goto out;
 	}
 

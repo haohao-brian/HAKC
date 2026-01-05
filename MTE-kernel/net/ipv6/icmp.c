@@ -881,8 +881,8 @@ static int icmpv6_rcv(struct sk_buff *skb)
 	const struct ipv6hdr *ip6h = ipv6_hdr(skb);
     const struct icmp6hdr *icmph = icmp6_hdr(skb);
 
-    pr_err("HAKC_DEBUG icmpv6_rcv: (early) type=%u code=%u dst=%pI6c src=%pI6c skb->sk=%px\n",
-            icmph->icmp6_type, icmph->icmp6_code,
+    //pr_err("HAKC_DEBUG icmpv6_rcv: (early) type=%u code=%u dst=%pI6c src=%pI6c skb->sk=%px\n", \
+            icmph->icmp6_type, icmph->icmp6_code, \
             &ip6h->daddr, &ip6h->saddr, skb->sk);
 
 	struct net *net = dev_net(skb->dev);
@@ -913,8 +913,8 @@ static int icmpv6_rcv(struct sk_buff *skb)
 	type = hdr->icmp6_type;
 
     /* ★ 這裡再印一次，確定 checksum + pull 後 type 還是你想要的 136 ★ */
-    pr_err("HAKC_DEBUG icmpv6_rcv: (after csum) type=%u code=%u dev=%s\n",
-           hdr->icmp6_type, hdr->icmp6_code,
+    //pr_err("HAKC_DEBUG icmpv6_rcv: (after csum) type=%u code=%u dev=%s\n", \
+           hdr->icmp6_type, hdr->icmp6_code, \
            dev ? dev->name : "NULL");
 
 	ICMP6MSGIN_INC_STATS(dev_net(dev), idev, type);
@@ -946,7 +946,7 @@ static int icmpv6_rcv(struct sk_buff *skb)
 	case NDISC_NEIGHBOUR_SOLICITATION:
 	case NDISC_NEIGHBOUR_ADVERTISEMENT:
 	case NDISC_REDIRECT:
-		pr_err("IPv6: HAKC_DEBUG icmpv6_rcv: dispatch NDISC type=%u " \
+		//pr_err("IPv6: HAKC_DEBUG icmpv6_rcv: dispatch NDISC type=%u " \
                 "to ndisc_rcv skb=%px dev=%s\n",\
                 type, skb, dev ? dev->name : "NULL");
 		ndisc_rcv(skb);

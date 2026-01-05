@@ -1037,7 +1037,7 @@ static void ndisc_recv_na(struct sk_buff *skb)
 
 	if (ipv6_addr_is_multicast(&msg->target)) {
 		ND_PRINTK(2, warn, "NA: target address is multicast\n");
-		pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: drop (target is multicast)\n");
+		//pr_err("ICMPv6: HAKC_DEBUG ndisc_recv_na: drop (target is multicast)\n");
 		return;
 	}
 
