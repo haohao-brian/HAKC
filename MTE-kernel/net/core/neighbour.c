@@ -987,17 +987,17 @@ static void neigh_invalidate(struct neighbour *neigh)
         const struct in6_addr *addr =
             (const struct in6_addr *)neigh->primary_key;
 
-        pr_info("neighbour: ICMPv6: neigh_invalidate: neigh=%px dev=%s addr=%pI6c old_state=%x -> FAILED flags=%x\n",
-                neigh,
-                neigh->dev ? neigh->dev->name : "NULL",
-                addr,
+        //pr_info("neighbour: ICMPv6: neigh_invalidate: neigh=%px dev=%s addr=%pI6c old_state=%x -> FAILED flags=%x\n", \
+                neigh, \
+                neigh->dev ? neigh->dev->name : "NULL", \
+                addr, \
                 old, neigh->flags);
     } else {
-        pr_info("neighbour: neigh_invalidate: neigh=%px dev=%s old_state=%x -> FAILED flags=%x family=%d key_len=%u\n",
-                neigh,
-                neigh->dev ? neigh->dev->name : "NULL",
-                old, neigh->flags,
-                neigh->ops ? neigh->ops->family : -1,
+        //pr_info("neighbour: neigh_invalidate: neigh=%px dev=%s old_state=%x -> FAILED flags=%x family=%d key_len=%u\n", \
+                neigh, \
+                neigh->dev ? neigh->dev->name : "NULL", \
+                old, neigh->flags, \
+                neigh->ops ? neigh->ops->family : -1, \
                 neigh->tbl ? neigh->tbl->key_len : 0);
     }
 
@@ -1255,11 +1255,11 @@ static int __neigh_update(struct neighbour *neigh, const u8 *lladdr,
 {
     u8 old = neigh->nud_state;
 
-    pr_info("neighbour: __neigh_update enter: neigh=%px dev=%s old=%x new=%x flags=%x family=%d key_len=%u\n",
-            neigh,
-            neigh->dev ? neigh->dev->name : "NULL",
-            old, new, flags,
-            neigh->ops ? neigh->ops->family : -1,
+    //pr_info("neighbour: __neigh_update enter: neigh=%px dev=%s old=%x new=%x flags=%x family=%d key_len=%u\n", \
+            neigh, \
+            neigh->dev ? neigh->dev->name : "NULL", \
+            old, new, flags, \
+            neigh->ops ? neigh->ops->family : -1, \
             neigh->tbl ? neigh->tbl->key_len : 0);
 
 	bool ext_learn_change = false;
@@ -1381,17 +1381,17 @@ static int __neigh_update(struct neighbour *neigh, const u8 *lladdr,
 		        const struct in6_addr *addr =
         		    (const struct in6_addr *)neigh->primary_key;
 
-	        	pr_info("neighbour: ICMPv6: neigh_update: neigh=%px dev=%s addr=%pI6c nud_state %x -> %x flags=%x\n",
-        	        	neigh,
-		                neigh->dev ? neigh->dev->name : "NULL",
-		                addr,
+	        	//pr_info("neighbour: ICMPv6: neigh_update: neigh=%px dev=%s addr=%pI6c nud_state %x -> %x flags=%x\n", \
+        	        	neigh, \
+		                neigh->dev ? neigh->dev->name : "NULL", \
+		                addr, \
                		old, new, flags);
 		    } else {
 		        /* 其他 family / table 就印少一點，避免亂 cast */
-		        pr_info("neighbour: neigh_update: neigh=%px dev=%s key_len=%u nud_state %x -> %x flags=%x\n",
-                		neigh,
-		                neigh->dev ? neigh->dev->name : "NULL",
-                		neigh->tbl ? neigh->tbl->key_len : 0,
+		        //pr_info("neighbour: neigh_update: neigh=%px dev=%s key_len=%u nud_state %x -> %x flags=%x\n", \
+                		neigh, \
+		                neigh->dev ? neigh->dev->name : "NULL", \
+                		neigh->tbl ? neigh->tbl->key_len : 0, \
 	                old, new, flags);
 		    }
 
@@ -1529,14 +1529,14 @@ int neigh_resolve_output(struct neighbour *neigh, struct sk_buff *skb)
 
 	int rc = 0;
 
-	pr_err("HAKC_DEBUG neigh_resolve_output: neigh=%px state=0x%x flags=0x%x refcnt=%d dst=%px dst.dev=%s skb.dev=%s daddr=%pI6c\n",
-           neigh,
-           neigh ? neigh->nud_state : -1,
-           neigh ? neigh->flags : -1,
-           neigh ? refcount_read(&neigh->refcnt) : -1,
-           dst,
-           dst && dst->dev ? dst->dev->name : "NULL",
-           skb->dev ? skb->dev->name : "NULL",
+	//pr_err("HAKC_DEBUG neigh_resolve_output: neigh=%px state=0x%x flags=0x%x refcnt=%d dst=%px dst.dev=%s skb.dev=%s daddr=%pI6c\n", \
+           neigh, \
+           neigh ? neigh->nud_state : -1, \
+           neigh ? neigh->flags : -1, \
+           neigh ? refcount_read(&neigh->refcnt) : -1, \
+           dst, \
+           dst && dst->dev ? dst->dev->name : "NULL", \
+           skb->dev ? skb->dev->name : "NULL", \
            (void *)ipv6_hdr(skb) ? &ipv6_hdr(skb)->daddr : NULL);
 
 	if (!neigh_event_send(neigh, skb)) {
