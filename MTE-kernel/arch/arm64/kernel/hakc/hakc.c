@@ -186,11 +186,11 @@ void hakc_color_address(const void *addr_to_color, clique_color_t color,
 	} else {
 		size = COLOR_GRANULARITY;
 	}
-	HAKC_INFO("Coloring %u bytes at 0x%lx %s (%d)\n", size, ptr,
+	//HAKC_INFO("Coloring %u bytes at 0x%lx %s (%d)\n", size, ptr,\
 		  get_hakc_color_name(color), color);
 	mte_set_mem_tag_range(ptr, size, (u8)color);
-	HAKC_INFO("%lx is colored %s (%s)\n", addr_to_color,
-		  get_hakc_color_name(get_hakc_address_color(addr_to_color)),
+	//HAKC_INFO("%lx is colored %s (%s)\n", addr_to_color,\
+		  get_hakc_color_name(get_hakc_address_color(addr_to_color)),\
 		  get_hakc_color_name(color));
 }
 
@@ -223,7 +223,7 @@ EXPORT_SYMBOL(get_hakc_address_color);
 static void *sign_data(const void *address, pac_salt_t modifier)
 {
 	void *result;
-	HAKC_INFO("Signing data pointer %lx with salt %lx\n", address,
+	//HAKC_INFO("Signing data pointer %lx with salt %lx\n", address,\
 		  modifier);
 
 	asm(
@@ -237,7 +237,7 @@ static void *sign_data(const void *address, pac_salt_t modifier)
 		: "=r"(result)
 		: [addr] "0"(address), [mod] "r"(modifier)
 		:);
-	HAKC_INFO("Signed data pointer %lx with salt %lx\n", result,
+	//HAKC_INFO("Signed data pointer %lx with salt %lx\n", result,\
 		modifier);
 	return result;
 }
@@ -245,7 +245,7 @@ static void *sign_data(const void *address, pac_salt_t modifier)
 static void *sign_code(const void *address, pac_salt_t modifier)
 {
 	void *result;
-	HAKC_INFO("Signing code pointer %lx with salt %lx\n", address,
+	//HAKC_INFO("Signing code pointer %lx with salt %lx\n", address,\
 		  modifier);
 
 	asm(
@@ -307,7 +307,7 @@ EXPORT_SYMBOL(get_hakc_color_by_name);
 static inline bool verify_and_set_auth_ptr(uint64_t auth_ptr, void **ptr)
 {
 	bool result = !addr_is_signed((void *)auth_ptr);
-	HAKC_INFO("%lx is%s authenticated\n", auth_ptr, result ? "" : " not");
+	//HAKC_INFO("%lx is%s authenticated\n", auth_ptr, result ? "" : " not");
 	if (result && ptr) {
 		*ptr = (void *)auth_ptr;
 	} else if (!result && ptr) {
@@ -378,7 +378,7 @@ static __always_inline void *hakc_auth_data_ptr(const void *address,
     u64 idx;
     hakc_mte_debug_index(safe, &ctx, &idx);
 
-    HAKC_INFO("HAKC_SIGN: safe=%px addr=%px ctx=%#llx idx=%llu mod=%#llx caller=%pS\n",
+    //HAKC_INFO("HAKC_SIGN: safe=%px addr=%px ctx=%#llx idx=%llu mod=%#llx caller=%pS\n",\
             safe, res, ctx, idx, (u64)modifier, __builtin_return_address(0));
 
 	/*
@@ -403,7 +403,7 @@ static __always_inline void *hakc_auth_data_ptr(const void *address,
 static void *hakc_auth_code_ptr(const void *address, pac_salt_t modifier)
 {
 	void *result;
-	HAKC_INFO("Authenticating code at %lx with salt %lx\n", address,
+	//HAKC_INFO("Authenticating code at %lx with salt %lx\n", address, \
 		  modifier);
 
 	asm(
@@ -505,8 +505,8 @@ static void *check_hakc_access(const void *address,
 			//pr_info("CPU%d per-CPU base: %p\n", cpu, base_end);
 		}
 		end = (char *)base_end + (b1 - b0);
-		pr_info(" per-CPU start : %px\n", b0);
-		pr_info(" per-CPU end : %px\n", end);
+		//pr_info(" per-CPU start : %px\n", b0);
+		//pr_info(" per-CPU end : %px\n", end);
 	}
 
 	pac_salt_t salt;
@@ -517,27 +517,27 @@ static void *check_hakc_access(const void *address,
 	void *safe_addr;
 
 	if (is_userspace_addr(address)) {
-		HAKC_INFO("return immediately\n");
+		//HAKC_INFO("return immediately\n");
 		return (void *)address;
 	} else if (IS_ERR(address)) {
-		HAKC_INFO("return immediately\n");
+		//HAKC_INFO("return immediately\n");
 		return (void *)address;
 	}
 	u64 a = (u64)address;
     // clear top byte tag (TBI/MTE) so we read the canonical high bits
     if((a >> 48) == 0xFFFFull){
-		HAKC_INFO("return immediately\n");
+		//HAKC_INFO("return immediately\n");
 		return (void *)address;
 	}
 
     // clear top byte tag (TBI/MTE) so we read the canonical high bits
     if(((a >> 48) << 8) == 0xFFull){
-		HAKC_INFO("return immediately because of 0x**ff...\n");
+		//HAKC_INFO("return immediately because of 0x**ff...\n");
 		return (void *)address;
 	}
 	
 	if (is_percpu_va(address)){
-		HAKC_INFO("is_percpu_va so skip %p\n",address);
+		//HAKC_INFO("is_percpu_va so skip %p\n",address);
 		__s64 aa = (__s64)address;     // ptr might be 0x02ea… (unauthenticated alias), or even attacker-crafted
 		aa |= 0xFFFF000000000000;//(aa << 16) >> 16;  // canonicalize to 0xffff…
 		return (void *)aa;
@@ -545,17 +545,17 @@ static void *check_hakc_access(const void *address,
 
 	safe_addr = (void*)HAKC_GET_SAFE_PTR(address);
 
-	HAKC_INFO("hakc_access: caller=%pS addr=%px safe=%px tok=0x%lx\n", \
+	//HAKC_INFO("hakc_access: caller=%pS addr=%px safe=%px tok=0x%lx\n", \
 	  (void *)_RET_IP_, address, safe_addr, access_tok);
 	addr_claque = get_hakc_address_claque(address);
 
 	addr_color = _get_mte_tag(safe_addr);
-	HAKC_INFO("hakc_access: addr=%px color=%s claque=%lu\n", \
+	//HAKC_INFO("hakc_access: addr=%px color=%s claque=%lu\n", \
 		  address, get_hakc_color_name(addr_color), addr_claque);
 
 	ctx_addr = (const void *)HAKC_CONTEXT_ADDR(address);
 	pac_salt_t m =obtain_modifier_cert(addr_color, addr_claque);
-	HAKC_INFO("obtain_modifier_cert(addr_color, addr_claque)=0x%lx\n",m);
+	//HAKC_INFO("obtain_modifier_cert(addr_color, addr_claque)=0x%lx\n",m);
 	salt = m & access_tok;
 
 	void *addre = (0xFFull<<48) | (u64)ctx_addr;
@@ -566,25 +566,25 @@ static void *check_hakc_access(const void *address,
 		: [addre] "0"(addre), [mod] "r"(salt)
 	:);
 
-	HAKC_INFO("hakc_access correct one: ctx_addr=%px salt=%lx r=%px\n", ctx_addr, salt, r);
+	//HAKC_INFO("hakc_access correct one: ctx_addr=%px salt=%lx r=%px\n", ctx_addr, salt, r);
 
 	result = (unsigned long)auth_func(r, salt); //ctx_addr <---> r
 	result |= HAKC_CLAQUE_ADDR(address);
 
 	if (HAKC_ALLOW) {
 		if (addr_is_signed((void *)result)) {
-			HAKC_INFO("hakc_access: invalid PAC? result=%px salt=%lx\n",\
+			//HAKC_INFO("hakc_access: invalid PAC? result=%px salt=%lx\n",\
 				  (void *)result, (unsigned long)salt);
 		}
 		result |= 0xFFFF000000000000;
 	}
-	HAKC_INFO("hakc_access: done addr=%px -> result=%px\n", \
+	//HAKC_INFO("hakc_access: done addr=%px -> result=%px\n", \
 		  address, (void *)result);
 
 	__s64 aa = (__s64)result;     // ptr might be 0x02ea… (unauthenticated alias), or even attacker-crafted
 	aa |= 0xFFFF000000000000;//(aa << 16) >> 16;  // canonicalize to 0xffff…
 
-	HAKC_INFO("CHK: leaving check_hakc_data_access addr=%px\n", aa);
+	//HAKC_INFO("CHK: leaving check_hakc_data_access addr=%px\n", aa);
 	
 	return (void *)aa;
 }
@@ -627,9 +627,9 @@ void *check_hakc_data_access(const void *address,
         return (void *)address; // DO NOT touch percpu tokens
     }
 		*/
-	HAKC_INFO("CHK: enter check_hakc_data_access addr=%px tok=0x%lx caller=%pS\n",\
+	//HAKC_INFO("CHK: enter check_hakc_data_access addr=%px tok=0x%lx caller=%pS\n",\
             address, (unsigned long)access_tok, (void *)_RET_IP_);
-	HAKC_INFO("check_hakc_data_access: address=%px access_tok=%x\n", address, access_tok);
+	//HAKC_INFO("check_hakc_data_access: address=%px access_tok=%x\n", address, access_tok);
 	
 	return check_hakc_access(address, access_tok, hakc_auth_data_ptr);
 }
@@ -642,14 +642,14 @@ void *check_hakc_code_access(const void *address,
 {
 	bool result;
 	void *authenticated_ptr = NULL;
-	HAKC_INFO("Checking code access to %lx for %ld targets\n", address,
+	//HAKC_INFO("Checking code access to %lx for %ld targets\n", address, \
 		  n_targets);
 	authenticated_ptr =
 		check_hakc_access(address, access_tok, hakc_auth_code_ptr);
 	if (addr_is_signed(authenticated_ptr) && n_targets > 0) {
 		result = (hakc_get_valid_target_index(address, valid_targets,
 						      n_targets) >= 0);
-		HAKC_INFO("Code access to %lx is%s allowed\n", address,
+		//HAKC_INFO("Code access to %lx is%s allowed\n", address, \
 			  result ? "" : " not");
 		if (!result) {
 			authenticated_ptr = (void *)address;
@@ -705,8 +705,8 @@ void *hakc_sign_pointer(void *addr, claque_id_t claque_id, clique_color_t color,
 		addr = HAKC_GET_SAFE_PTR(addr);
 #else
 #endif
-		HAKC_INFO("TRANSFER RESULT to %d %lx %d %lx\n", claque_id, addr,
-			  get_hakc_address_claque((void *)addr),
+		//HAKC_INFO("TRANSFER RESULT to %d %lx %d %lx\n", claque_id, addr,\
+			  get_hakc_address_claque((void *)addr),\
 			  (unsigned long)claque_id << CLAQUE_START_2);
 	}
 
@@ -727,7 +727,7 @@ void *hakc_sign_pointer_with_color(void *addr, claque_id_t claque_id,
 
 	void *caller = __builtin_return_address(0);
 
-    HAKC_INFO("HAKC_SIGN: p=%px is_code=%d caller=%pS\n",
+    //HAKC_INFO("HAKC_SIGN: p=%px is_code=%d caller=%pS\n", \
             addr, is_code, caller);
 	struct percpu_info pcpu_info;
 
@@ -757,17 +757,17 @@ void *hakc_sign_pointer_with_color(void *addr, claque_id_t claque_id,
 
 		for_each_possible_cpu (cpu) {
 			pcpu_ptr = per_cpu_ptr(pcpu_info.percpu_addr, cpu);
-			HAKC_INFO("\tpcpu_ptr = %lx\n", pcpu_ptr);
+			//HAKC_INFO("\tpcpu_ptr = %lx\n", pcpu_ptr);
 			signed_ptr = hakc_sign_pointer(
 				pcpu_ptr, claque_id,
 				get_hakc_address_color(pcpu_ptr), is_code);
-			HAKC_INFO("\tsigned_ptr = %lx\n", signed_ptr);
+			//HAKC_INFO("\tsigned_ptr = %lx\n", signed_ptr);
 			if (cpu == get_boot_cpu_id()) {
 				u64 offset = ((u64)pcpu_ptr -
 					      (u64)pcpu_info.percpu_addr);
-				HAKC_INFO("\toffset = %lx\n", offset);
+				//HAKC_INFO("\toffset = %lx\n", offset);
 				result = (void *)((u64)signed_ptr - offset);
-				HAKC_INFO("\tresult = %lx\n", result);
+				//HAKC_INFO("\tresult = %lx\n", result);
 			}
 		}
 		return addr;//result;
@@ -789,19 +789,20 @@ static void *color_and_sign(void *data_to_transfer, size_t size,
 
 		/* 讀目前這塊記憶體的顏色（從 MTE tag） */
 		old_color = get_hakc_address_color(base);
-
+		/*
 		HAKC_INFO("TRANSFER: caller=%pS addr=%px size=%zu from_color=%s to_color=%s is_code=%d\n",
-			/*__builtin_return_address(0)*/(void *)_RET_IP_,
+			(void *)_RET_IP_,
 			base, size,
 			get_hakc_color_name(old_color),
 			get_hakc_color_name(color),
 			is_code);
+			*/
 		unsigned long addr = (unsigned long)data_to_transfer;
-		HAKC_INFO("Transferring %lu bytes at %lx to claque %d (%s)\n",
-			  size, data_to_transfer, claque_id,
+		//HAKC_INFO("Transferring %lu bytes at %lx to claque %d (%s)\n", \
+			  size, data_to_transfer, claque_id, \
 			  get_hakc_color_name(color));
 		
-		HAKC_INFO("Returning to %lx\n", _RET_IP_);
+		//HAKC_INFO("Returning to %lx\n", _RET_IP_);
 
 		//        if(pte_none(*virt_to_kpte(addr))) {
 		//		pr_info("hakc_transfer_to_clique pte_none when transferring "
@@ -819,7 +820,7 @@ static void *color_and_sign(void *data_to_transfer, size_t size,
 			hakc_color_address((void *)addr, color, size);
 		} else {
 			color = get_hakc_address_color(data_to_transfer);
-			HAKC_INFO("%lx is read-only and colored %s\n", addr,
+			//HAKC_INFO("%lx is read-only and colored %s\n", addr,\
 				  get_hakc_color_name(color));
 		}
 
@@ -836,12 +837,12 @@ void *mte_transfer_percpu(struct percpu_info *pcpu_info, size_t size,
 {
 	void *result, *pcpu_ptr, *signed_ptr;
 	//	unsigned int cpu;
-
+	/*
 	HAKC_INFO("Transferring percpu variable %lx with size %lx to %d and "
 		  "color %s\n",
 		  pcpu_info->signed_addr, size, claque_id,
 		  get_hakc_color_name(color));
-
+	*/
 	//	if(!pcpu_info->is_dynamic) {
 	//		return color_and_sign(raw_cpu_ptr(pcpu_info->signed_addr),
 	//				      size * num_online_cpus(),
@@ -876,12 +877,13 @@ void *mte_transfer_percpu(struct percpu_info *pcpu_info, size_t size,
 	//			result = (void *)((u64)signed_ptr - offset);
 	//		}
 	//	}
-
+	/*
 	HAKC_INFO(
 		"Transferred percpu variable %lx: %lx (%lx %lx)\n",
 		pcpu_info->percpu_addr, result, per_cpu_ptr(result, 0),
 		check_hakc_data_access(per_cpu_ptr(result, 0),
 				       obtain_modifier_cert(color, claque_id)));
+					   */
 	return result;
 }
 
@@ -898,14 +900,16 @@ void *hakc_transfer_to_clique(void *data_to_transfer, size_t size,
 	if (!data_to_transfer) {
 		return data_to_transfer;
 	} else if (get_percpu_info(&pcpu_info)) {
-		HAKC_INFO("Returning to %lx\n", _RET_IP_);
+		//HAKC_INFO("Returning to %lx\n", _RET_IP_);
 		return mte_transfer_percpu(&pcpu_info, size, claque_id, color,
 					   is_code);
 	}
+	/*
 	HAKC_INFO("hakc_transfer_to_clique: caller=%pS addr=%px size=%zu is_code=%d\n",
-			/*__builtin_return_address(0)*/(void *)_RET_IP_,
+			(void *)_RET_IP_,
 			data_to_transfer, size,
 			is_code);
+			*/
 	return color_and_sign(data_to_transfer, size, claque_id, color,
 			      is_code);
 }
@@ -925,10 +929,10 @@ void *hakc_transfer_data_to_target(const void *target, void *data_to_transfer,
 
 		target_color = get_hakc_address_color(target);
 		target_claque = get_hakc_address_claque(target);
-		HAKC_INFO("Transferring %lx to %lx (%s %d)\n", data_to_transfer,
-			  target, get_hakc_color_name(target_color),
+		//HAKC_INFO("Transferring %lx to %lx (%s %d)\n", data_to_transfer, \
+			  target, get_hakc_color_name(target_color), \
 			  target_claque);
-		HAKC_INFO("Returning to %lx\n", _RET_IP_);
+		//HAKC_INFO("Returning to %lx\n", _RET_IP_);
 		return hakc_transfer_to_clique(data_to_transfer, transfer_size,
 					       target_claque, target_color,
 					       is_code);
