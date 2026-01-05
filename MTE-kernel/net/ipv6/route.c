@@ -1073,14 +1073,14 @@ static struct net_device *ip6_rt_get_dev_rcu(const struct fib6_result *res)
 		 * device if it is a master device, the master device if
 		 * device is enslaved, and the loopback as the default
 		 */
-		HAKC_INFO("netif_is_l3_slave before\n");
+		//HAKC_INFO("netif_is_l3_slave before\n");
 		if (netif_is_l3_slave(dev) &&
 		    !rt6_need_strict(&res->f6i->fib6_dst.addr)){
 			dev = l3mdev_master_dev_rcu(dev);
-			HAKC_INFO("netif_is_l3_slave after\n");
+			//HAKC_INFO("netif_is_l3_slave after\n");
 		}else if (!netif_is_l3_master(dev)){
 			dev = dev_net(dev)->loopback_dev;
-			HAKC_INFO("netif_is_l3_master after\n");
+			//HAKC_INFO("netif_is_l3_master after\n");
 		}
 
 		/* last case is netif_is_l3_master(dev) is true in which
