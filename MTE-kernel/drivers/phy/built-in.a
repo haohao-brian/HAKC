@@ -1,0 +1,92 @@
+!<thin>
+//                                              1300      `
+phy-core.o/
+phy-core-mipi-dphy.o/
+phy-xgene.o/
+allwinner/phy-sun4i-usb.o/
+amlogic/phy-meson8b-usb2.o/
+amlogic/phy-meson-gxl-usb2.o/
+amlogic/phy-meson-g12a-usb2.o/
+amlogic/phy-meson-g12a-usb3-pcie.o/
+amlogic/phy-meson-axg-pcie.o/
+amlogic/phy-meson-axg-mipi-pcie-analog.o/
+broadcom/phy-bcm-ns2-pcie.o/
+broadcom/phy-bcm-ns2-usbdrd.o/
+broadcom/phy-brcm-sata.o/
+broadcom/phy-brcm-usb.o/
+broadcom/phy-brcm-usb-init.o/
+broadcom/phy-brcm-usb-init-synopsys.o/
+broadcom/phy-bcm-sr-pcie.o/
+broadcom/phy-bcm-sr-usb.o/
+freescale/phy-fsl-imx8mq-usb.o/
+hisilicon/phy-hi6220-usb.o/
+hisilicon/phy-histb-combphy.o/
+hisilicon/phy-hisi-inno-usb2.o/
+marvell/phy-mvebu-a3700-comphy.o/
+marvell/phy-mvebu-a3700-utmi.o/
+marvell/phy-mvebu-cp110-comphy.o/
+qualcomm/phy-qcom-usb-hs.o/
+qualcomm/phy-qcom-snps-femto-v2.o/
+renesas/phy-rcar-gen3-pcie.o/
+renesas/phy-rcar-gen3-usb2.o/
+rockchip/phy-rockchip-emmc.o/
+rockchip/phy-rockchip-inno-usb2.o/
+rockchip/phy-rockchip-typec.o/
+samsung/phy-exynos-dp-video.o/
+samsung/phy-exynos-mipi-video.o/
+samsung/phy-samsung-usb2.o/
+samsung/phy-exynos5-usbdrd.o/
+socionext/phy-uniphier-usb2.o/
+socionext/phy-uniphier-usb3hs.o/
+socionext/phy-uniphier-usb3ss.o/
+socionext/phy-uniphier-ahci.o/
+tegra/xusb.o/
+tegra/xusb-tegra124.o/
+tegra/xusb-tegra210.o/
+tegra/xusb-tegra186.o/
+ti/phy-gmii-sel.o/
+/0              0           0     0     644     322696    `
+/12             0           0     0     644     10016     `
+/34             0           0     0     644     632464    `
+/47             0           0     0     644     326136    `
+/74             0           0     0     644     230224    `
+/102            0           0     0     644     230608    `
+/132            0           0     0     644     222224    `
+/163            0           0     0     644     253568    `
+/199            0           0     0     644     223360    `
+/229            0           0     0     644     222152    `
+/271            0           0     0     644     213728    `
+/300            0           0     0     644     266992    `
+/331            0           0     0     644     360520    `
+/357            0           0     0     644     266952    `
+/382            0           0     0     644     119464    `
+/412            0           0     0     644     39752     `
+/451            0           0     0     644     225072    `
+/479            0           0     0     644     236800    `
+/506            0           0     0     644     229344    `
+/538            0           0     0     644     218904    `
+/566            0           0     0     644     232848    `
+/597            0           0     0     644     218264    `
+/629            0           0     0     644     227624    `
+/663            0           0     0     644     238056    `
+/695            0           0     0     644     320488    `
+/729            0           0     0     644     228776    `
+/757            0           0     0     644     248064    `
+/792            0           0     0     644     218864    `
+/822            0           0     0     644     292400    `
+/852            0           0     0     644     229184    `
+/882            0           0     0     644     345064    `
+/917            0           0     0     644     311040    `
+/948            0           0     0     644     215000    `
+/979            0           0     0     644     223744    `
+/1012           0           0     0     644     226376    `
+/1040           0           0     0     644     272528    `
+/1070           0           0     0     644     220984    `
+/1101           0           0     0     644     240640    `
+/1134           0           0     0     644     242040    `
+/1167           0           0     0     644     237976    `
+/1198           0           0     0     644     368144    `
+/1212           0           0     0     644     385504    `
+/1235           0           0     0     644     453696    `
+/1258           0           0     0     644     315168    `
+/1281           0           0     0     644     230512    `

@@ -1,0 +1,4 @@
+drivers/misc/eeprom/at24.ko
+drivers/misc/eeprom/at25.ko
+drivers/misc/pci_endpoint_test.ko
+drivers/misc/uacce/uacce.ko

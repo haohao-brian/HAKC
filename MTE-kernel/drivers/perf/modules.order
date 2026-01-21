@@ -1,0 +1,3 @@
+drivers/perf/arm_smmuv3_pmu.ko
+drivers/perf/fsl_imx8_ddr_perf.ko
+drivers/perf/thunderx2_pmu.ko

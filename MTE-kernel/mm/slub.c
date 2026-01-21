@@ -3172,7 +3172,7 @@ void kmem_cache_free(struct kmem_cache *s, void *x)
 		x = HAKC_GET_SAFE_PTR(x);
 	}
 #endif
-	s = cache_from_obj(s, x);
+	s = cache_from_obj(hakc_safe_ptr(s), x);
 	if (!s)
 		return;
 	//HAKC_INFO("HAKC FREE: kmem_cache_free ptr=%px caller=%pS\n", x, \

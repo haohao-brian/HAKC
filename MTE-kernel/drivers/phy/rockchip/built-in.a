@@ -1,0 +1,9 @@
+!<thin>
+//                                              70        `
+phy-rockchip-emmc.o/
+phy-rockchip-inno-usb2.o/
+phy-rockchip-typec.o/
+
+/0              0           0     0     644     229184    `
+/21             0           0     0     644     345064    `
+/47             0           0     0     644     311040    `

@@ -1,0 +1,2 @@
+drivers/gpu/drm/exynos/exynos_drm_drv.o drivers/gpu/drm/exynos/exynos_drm_crtc.o drivers/gpu/drm/exynos/exynos_drm_fb.o drivers/gpu/drm/exynos/exynos_drm_gem.o drivers/gpu/drm/exynos/exynos_drm_plane.o drivers/gpu/drm/exynos/exynos_drm_dma.o drivers/gpu/drm/exynos/exynos_drm_fbdev.o drivers/gpu/drm/exynos/exynos5433_drm_decon.o drivers/gpu/drm/exynos/exynos7_drm_decon.o drivers/gpu/drm/exynos/exynos_drm_dsi.o drivers/gpu/drm/exynos/exynos_hdmi.o drivers/gpu/drm/exynos/exynos_drm_mic.o
+

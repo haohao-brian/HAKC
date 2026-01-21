@@ -1,0 +1,56 @@
+!<thin>
+//                                              402       `
+clk.o/
+clk-busy.o/
+clk-composite-7ulp.o/
+clk-composite-8m.o/
+clk-cpu.o/
+clk-divider-gate.o/
+clk-fixup-div.o/
+clk-fixup-mux.o/
+clk-frac-pll.o/
+clk-gate2.o/
+clk-gate-exclusive.o/
+clk-pfd.o/
+clk-pfdv2.o/
+clk-pllv1.o/
+clk-pllv2.o/
+clk-pllv3.o/
+clk-pllv4.o/
+clk-pll14xx.o/
+clk-sscg-pll.o/
+clk-imx8mm.o/
+clk-imx8mn.o/
+clk-imx8mp.o/
+clk-imx8mq.o/
+clk-scu.o/
+clk-imx8qxp.o/
+clk-lpcg-scu.o/
+clk-imx8qxp-lpcg.o/
+/0              0           0     0     644     142184    `
+/7              0           0     0     644     23632     `
+/19             0           0     0     644     14448     `
+/41             0           0     0     644     31312     `
+/61             0           0     0     644     15520     `
+/72             0           0     0     644     29736     `
+/92             0           0     0     644     18952     `
+/109            0           0     0     644     17544     `
+/126            0           0     0     644     29184     `
+/142            0           0     0     644     131856    `
+/155            0           0     0     644     16144     `
+/177            0           0     0     644     18072     `
+/188            0           0     0     644     29672     `
+/201            0           0     0     644     15048     `
+/214            0           0     0     644     25720     `
+/227            0           0     0     644     52504     `
+/240            0           0     0     644     26328     `
+/253            0           0     0     644     44888     `
+/268            0           0     0     644     51136     `
+/284            0           0     0     644     344016    `
+/298            0           0     0     644     319072    `
+/312            0           0     0     644     358000    `
+/326            0           0     0     644     339696    `
+/340            0           0     0     644     96400     `
+/351            0           0     0     644     172728    `
+/366            0           0     0     644     84864     `
+/382            0           0     0     644     153888    `

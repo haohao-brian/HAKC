@@ -25,8 +25,9 @@ static void hakc_transfer_to_destination(const void *dest, void *ptr,
 static void hakc_restore_original(struct hakc_transfer_common *original)
 {
 	//	if(VALID_CLAQUE(original->original_id)) {
-	if (HAKC_GET_SAFE_PTR(original->transferred) !=
-	    HAKC_GET_SAFE_PTR(original->original)) {
+	//if (HAKC_GET_SAFE_PTR(original->transferred) !=
+	//    HAKC_GET_SAFE_PTR(original->original)) {
+	if (true){
 		hakc_transfer_to_clique(original->transferred, original->size,
 				       original->original_id,
 				       original->original_color, false);
@@ -56,11 +57,13 @@ void TRANSFER_FUNC_NAME(net)(struct net *orig, const void *dest, size_t sz,
 			     TRANSFER_STRUCT_TYPE(net) * transfer)
 {
 	/* NB: The sizes were determined at run time */
-	hakc_transfer_to_destination(dest, HAKC_GET_SAFE_PTR(orig)->proc_net, 172,
+	//172
+	hakc_transfer_to_destination(dest, HAKC_GET_SAFE_PTR(orig)->proc_net, 176,
 				    &transfer->HAKC_COMMON_NAME(proc_net));
 	HAKC_GET_SAFE_PTR(orig)->proc_net =
 		HAKC_TRANSFERRED(proc_net, *transfer);
-	hakc_transfer_to_destination(dest, orig, 3136,
+	// 3136
+	hakc_transfer_to_destination(dest, orig, 3328,
 				    &transfer->HAKC_COMMON_NAME(net));
 }
 EXPORT_SYMBOL(TRANSFER_FUNC_NAME(net));

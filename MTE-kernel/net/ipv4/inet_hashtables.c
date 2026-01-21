@@ -116,7 +116,7 @@ static void __inet_put_port(struct sock *sk)
 	__sk_del_bind_node(sk);
 	inet_csk(sk)->icsk_bind_hash = NULL;
 	inet_sk(sk)->inet_num = 0;
-	inet_bind_bucket_destroy(hashinfo->bind_bucket_cachep, tb);
+	inet_bind_bucket_destroy(hakc_safe_ptr(hashinfo->bind_bucket_cachep), tb);
 	spin_unlock(&head->lock);
 }
 

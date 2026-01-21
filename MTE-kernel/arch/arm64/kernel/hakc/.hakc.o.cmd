@@ -1045,6 +1045,8 @@ deps_arch/arm64/kernel/hakc/hakc.o := \
   include/linux/netfilter/nf_conntrack_common.h \
   include/uapi/linux/netfilter/nf_conntrack_common.h \
   include/uapi/linux/netlink.h \
+  include/linux/kallsyms.h \
+    $(wildcard include/config/kallsyms/all.h) \
 
 arch/arm64/kernel/hakc/hakc.o: $(deps_arch/arm64/kernel/hakc/hakc.o)
 

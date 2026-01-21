@@ -1,0 +1,33 @@
+!<thin>
+//                                              280       `
+pinctrl-msm.o/
+pinctrl-ipq8074.o/
+pinctrl-ipq6018.o/
+pinctrl-msm8916.o/
+pinctrl-msm8994.o/
+pinctrl-msm8996.o/
+pinctrl-msm8998.o/
+pinctrl-qcs404.o/
+pinctrl-qdf2xxx.o/
+pinctrl-spmi-gpio.o/
+pinctrl-spmi-mpp.o/
+pinctrl-sc7180.o/
+pinctrl-sdm845.o/
+pinctrl-sm8150.o/
+pinctrl-sm8250.o/
+
+/0              0           0     0     644     311184    `
+/15             0           0     0     644     203448    `
+/34             0           0     0     644     209328    `
+/53             0           0     0     644     234296    `
+/72             0           0     0     644     248472    `
+/91             0           0     0     644     276976    `
+/110            0           0     0     644     259984    `
+/129            0           0     0     644     246864    `
+/147            0           0     0     644     156784    `
+/166            0           0     0     644     250232    `
+/187            0           0     0     644     231208    `
+/207            0           0     0     644     230248    `
+/225            0           0     0     644     257048    `
+/243            0           0     0     644     259576    `
+/261            0           0     0     644     257400    `

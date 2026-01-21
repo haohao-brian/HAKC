@@ -1,0 +1,11 @@
+!<thin>
+//                                              90        `
+hisi_uncore_pmu.o/
+hisi_uncore_l3c_pmu.o/
+hisi_uncore_hha_pmu.o/
+hisi_uncore_ddrc_pmu.o/
+
+/0              0           0     0     644     238888    `
+/19             0           0     0     644     252552    `
+/42             0           0     0     644     254024    `
+/65             0           0     0     644     244312    `

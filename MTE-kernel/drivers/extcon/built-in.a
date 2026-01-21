@@ -1,0 +1,10 @@
+!<thin>
+//                                              62        `
+extcon.o/
+devres.o/
+extcon-usb-gpio.o/
+extcon-usbc-cros-ec.o/
+/0              0           0     0     644     242192    `
+/10             0           0     0     644     93272     `
+/20             0           0     0     644     169432    `
+/39             0           0     0     644     180960    `

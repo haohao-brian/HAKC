@@ -1,0 +1,20 @@
+!<thin>
+//                                              206       `
+arm_pmu.o/
+arm_pmu_platform.o/
+arm_pmu_acpi.o/
+hisilicon/hisi_uncore_pmu.o/
+hisilicon/hisi_uncore_l3c_pmu.o/
+hisilicon/hisi_uncore_hha_pmu.o/
+hisilicon/hisi_uncore_ddrc_pmu.o/
+qcom_l2_pmu.o/
+qcom_l3_pmu.o/
+/0              0           0     0     644     288416    `
+/11             0           0     0     644     206224    `
+/31             0           0     0     644     218904    `
+/47             0           0     0     644     238888    `
+/76             0           0     0     644     252552    `
+/109            0           0     0     644     254024    `
+/142            0           0     0     644     244312    `
+/176            0           0     0     644     317920    `
+/191            0           0     0     644     285760    `

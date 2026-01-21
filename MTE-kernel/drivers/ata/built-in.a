@@ -1,0 +1,47 @@
+!<thin>
+//                                              336       `
+libata-core.o/
+libata-scsi.o/
+libata-eh.o/
+libata-transport.o/
+libata-trace.o/
+libata-sata.o/
+libata-sff.o/
+libata-pmp.o/
+libata-acpi.o/
+libata-pata-timings.o/
+ahci.o/
+libahci.o/
+ahci_platform.o/
+libahci_platform.o/
+sata_sil24.o/
+ahci_ceva.o/
+ahci_mvebu.o/
+ahci_xgene.o/
+ahci_qoriq.o/
+sata_rcar.o/
+pata_platform.o/
+pata_of_platform.o/
+
+/0              0           0     0     644     899344    `
+/15             0           0     0     644     536288    `
+/30             0           0     0     644     490080    `
+/43             0           0     0     644     306768    `
+/63             0           0     0     644     53224     `
+/79             0           0     0     644     361496    `
+/94             0           0     0     644     535440    `
+/108            0           0     0     644     299944    `
+/122            0           0     0     644     306984    `
+/137            0           0     0     644     245280    `
+/160            0           0     0     644     432656    `
+/168            0           0     0     644     520904    `
+/179            0           0     0     644     256352    `
+/196            0           0     0     644     325400    `
+/216            0           0     0     644     363144    `
+/230            0           0     0     644     296104    `
+/243            0           0     0     644     263680    `
+/257            0           0     0     644     393008    `
+/271            0           0     0     644     319600    `
+/285            0           0     0     644     371504    `
+/298            0           0     0     644     249960    `
+/315            0           0     0     644     195008    `

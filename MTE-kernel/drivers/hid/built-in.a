@@ -1,0 +1,42 @@
+!<thin>
+//                                              286       `
+hid-core.o/
+hid-input.o/
+hid-quirks.o/
+hid-debug.o/
+hid-generic.o/
+hid-a4tech.o/
+hid-apple.o/
+hid-belkin.o/
+hid-cherry.o/
+hid-chicony.o/
+hid-cypress.o/
+hid-ezkey.o/
+hid-ite.o/
+hid-kensington.o/
+hid-lg.o/
+hid-lg-g15.o/
+hid-microsoft.o/
+hid-monterey.o/
+hid-redragon.o/
+usbhid/hid-core.o/
+/0              0           0     0     644     356680    `
+/12             0           0     0     644     1198112   `
+/25             0           0     0     644     166184    `
+/39             0           0     0     644     247728    `
+/52             0           0     0     644     150896    `
+/67             0           0     0     644     161968    `
+/81             0           0     0     644     213064    `
+/94             0           0     0     644     171792    `
+/108            0           0     0     644     170152    `
+/122            0           0     0     644     260088    `
+/137            0           0     0     644     160880    `
+/152            0           0     0     644     155896    `
+/165            0           0     0     644     168160    `
+/176            0           0     0     644     152528    `
+/194            0           0     0     644     456888    `
+/204            0           0     0     644     230296    `
+/218            0           0     0     644     275056    `
+/235            0           0     0     644     175928    `
+/251            0           0     0     644     147752    `
+/267            0           0     0     644     437096    `

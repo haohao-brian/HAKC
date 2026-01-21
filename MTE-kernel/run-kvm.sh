@@ -98,10 +98,11 @@ qemu-system-aarch64 \
   -drive if=none,file=$FS,id=vda,cache=none,format=raw \
   -device virtio-blk-pci,drive=vda \
   -display none \
-  -serial mon:stdio \
-  -serial file:/root/test/linux-compartment-hakc/MTE-kernel/shared/oopslog/serial.log \
+  -chardev stdio,id=char0,mux=on,signal=off,logfile=/tmp/serial.log,logappend=on \
+  -serial chardev:char0 \
+  -mon chardev=char0,mode=readline \
   -append "console=ttyAMA0,115200 root=/dev/vda rw earlycon=pl011,0x09000000 \
-           initcall_debug rcupdate.rcu_cpu_stall_timeout=20 loglevel=1 log_buf_len=16M cgroup_disable=memory" \
-  -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
-  -device virtio-net-pci,netdev=net0,mac=de:ad:be:ef:41:49 \
+           initcall_debug rcupdate.rcu_cpu_stall_timeout=20 loglevel=1 log_buf_len=160M cgroup_disable=memory" \
   -virtfs local,path=$SHARED_DIR,mount_tag=shared,security_model=mapped
+#  -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
+#  -device virtio-net-pci,netdev=net0,mac=de:ad:be:ef:41:49 \

@@ -1,0 +1,11 @@
+drivers/spi/spidev.ko
+drivers/spi/spi-bcm2835.ko
+drivers/spi/spi-bcm2835aux.ko
+drivers/spi/spi-bitbang.ko
+drivers/spi/spi-imx.ko
+drivers/spi/spi-meson-spicc.ko
+drivers/spi/spi-meson-spifc.ko
+drivers/spi/spi-geni-qcom.ko
+drivers/spi/spi-qcom-qspi.ko
+drivers/spi/spi-rpc-if.ko
+drivers/spi/spi-sh-msiof.ko

@@ -1,0 +1,34 @@
+!<thin>
+//                                              312       `
+arm/arm-smmu/qcom_iommu.o/
+arm/arm-smmu/arm-smmu.o/
+arm/arm-smmu/arm-smmu-impl.o/
+arm/arm-smmu/arm-smmu-nvidia.o/
+arm/arm-smmu/arm-smmu-qcom.o/
+arm/arm-smmu-v3/arm-smmu-v3.o/
+iommu.o/
+iommu-traces.o/
+iommu-sysfs.o/
+dma-iommu.o/
+io-pgtable.o/
+io-pgtable-arm.o/
+iova.o/
+of_iommu.o/
+rockchip-iommu.o/
+tegra-smmu.o/
+/0              0           0     0     644     247248    `
+/27             0           0     0     644     480272    `
+/52             0           0     0     644     162544    `
+/82             0           0     0     644     173232    `
+/114            0           0     0     644     160352    `
+/144            0           0     0     644     601704    `
+/175            0           0     0     644     504496    `
+/184            0           0     0     644     260152    `
+/200            0           0     0     644     148544    `
+/215            0           0     0     644     295664    `
+/228            0           0     0     644     139160    `
+/242            0           0     0     644     208776    `
+/260            0           0     0     644     122968    `
+/268            0           0     0     644     174632    `
+/280            0           0     0     644     283336    `
+/298            0           0     0     644     234688    `

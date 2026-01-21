@@ -1,0 +1,7 @@
+drivers/pwm/pwm-bcm2835.ko
+drivers/pwm/pwm-cros-ec.ko
+drivers/pwm/pwm-meson.ko
+drivers/pwm/pwm-rcar.ko
+drivers/pwm/pwm-sl28cpld.ko
+drivers/pwm/pwm-sun4i.ko
+drivers/pwm/pwm-tegra.ko

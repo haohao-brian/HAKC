@@ -1,0 +1,11 @@
+drivers/media/platform/sunxi/sun6i-csi/sun6i-csi.ko
+drivers/media/platform/s5p-jpeg/s5p-jpeg.ko
+drivers/media/platform/s5p-mfc/s5p-mfc.ko
+drivers/media/platform/exynos-gsc/exynos-gsc.ko
+drivers/media/platform/rcar_drif.ko
+drivers/media/platform/rcar-fcp.ko
+drivers/media/platform/rcar_fdp1.ko
+drivers/media/platform/vsp1/vsp1.ko
+drivers/media/platform/rcar-vin/rcar-csi2.ko
+drivers/media/platform/rcar-vin/rcar-vin.ko
+drivers/media/platform/qcom/camss/qcom-camss.ko

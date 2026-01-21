@@ -1,0 +1,34 @@
+!<thin>
+//                                              236       `
+timer-of.o/
+timer-probe.o/
+sh_cmt.o/
+sh_tmu.o/
+mmio.o/
+dw_apb_timer.o/
+dw_apb_timer_of.o/
+timer-rockchip.o/
+timer-tegra.o/
+timer-mediatek.o/
+timer-owl.o/
+timer-sprd.o/
+arm_arch_timer.o/
+timer-sp804.o/
+dummy_timer.o/
+timer-imx-sysctr.o/
+/0              0           0     0     644     75280     `
+/12             0           0     0     644     140576    `
+/27             0           0     0     644     223376    `
+/37             0           0     0     644     206432    `
+/47             0           0     0     644     14392     `
+/55             0           0     0     644     47880     `
+/71             0           0     0     644     81744     `
+/90             0           0     0     644     92704     `
+/108            0           0     0     644     132920    `
+/123            0           0     0     644     92328     `
+/141            0           0     0     644     84640     `
+/154            0           0     0     644     86320     `
+/168            0           0     0     644     353624    `
+/186            0           0     0     644     97512     `
+/201            0           0     0     644     21216     `
+/216            0           0     0     644     75264     `

@@ -1,0 +1,26 @@
+!<thin>
+//                                              214       `
+cros_ec.o/
+cros_ec_i2c.o/
+cros_ec_spi.o/
+cros_ec_proto.o/
+cros_ec_trace.o/
+cros_ec_lightbar.o/
+cros_ec_vbc.o/
+cros_ec_debugfs.o/
+cros_ec_sensorhub.o/
+cros_ec_sensorhub_ring.o/
+cros_ec_sysfs.o/
+cros_usbpd_notify.o/
+/0              0           0     0     644     231528    `
+/11             0           0     0     644     175272    `
+/26             0           0     0     644     215040    `
+/41             0           0     0     644     194464    `
+/58             0           0     0     644     235880    `
+/75             0           0     0     644     214640    `
+/95             0           0     0     644     152160    `
+/110            0           0     0     644     189328    `
+/129            0           0     0     644     174944    `
+/150            0           0     0     644     196720    `
+/176            0           0     0     644     169848    `
+/193            0           0     0     644     180856    `

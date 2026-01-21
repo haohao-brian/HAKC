@@ -1,0 +1,31 @@
+!<thin>
+//                                              204       `
+soc-core.o/
+soc-dapm.o/
+soc-jack.o/
+soc-utils.o/
+soc-dai.o/
+soc-component.o/
+soc-pcm.o/
+soc-devres.o/
+soc-ops.o/
+soc-link.o/
+soc-card.o/
+soc-generic-dmaengine-pcm.o/
+soc-compress.o/
+samsung/dmaengine.o/
+
+/0              0           0     0     644     671184    `
+/12             0           0     0     644     737136    `
+/24             0           0     0     644     317152    `
+/36             0           0     0     644     210928    `
+/49             0           0     0     644     255344    `
+/60             0           0     0     644     302616    `
+/77             0           0     0     644     392240    `
+/88             0           0     0     644     225792    `
+/102            0           0     0     644     260184    `
+/113            0           0     0     644     202880    `
+/125            0           0     0     644     209120    `
+/137            0           0     0     644     255352    `
+/166            0           0     0     644     241440    `
+/182            0           0     0     644     215760    `

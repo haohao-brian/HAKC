@@ -1,0 +1,23 @@
+!<thin>
+//                                              174       `
+fsnotify.o/
+notification.o/
+group.o/
+mark.o/
+fdinfo.o/
+dnotify/dnotify.o/
+inotify/inotify_fsnotify.o/
+inotify/inotify_user.o/
+fanotify/fanotify.o/
+fanotify/fanotify_user.o/
+
+/0              0           0     0     644     187488    `
+/12             0           0     0     644     149192    `
+/28             0           0     0     644     227080    `
+/37             0           0     0     644     254008    `
+/45             0           0     0     644     126816    `
+/55             0           0     0     644     156384    `
+/74             0           0     0     644     121952    `
+/102            0           0     0     644     311584    `
+/126            0           0     0     644     179336    `
+/147            0           0     0     644     377728    `

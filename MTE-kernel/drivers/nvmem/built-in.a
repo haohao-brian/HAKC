@@ -1,0 +1,18 @@
+!<thin>
+//                                              110       `
+core.o/
+bcm-ocotp.o/
+imx-ocotp.o/
+imx-ocotp-scu.o/
+qfprom.o/
+rockchip-efuse.o/
+sunxi_sid.o/
+uniphier-efuse.o/
+/0              0           0     0     644     319840    `
+/8              0           0     0     644     180808    `
+/21             0           0     0     644     183512    `
+/34             0           0     0     644     156456    `
+/51             0           0     0     644     230472    `
+/61             0           0     0     644     173008    `
+/79             0           0     0     644     154880    `
+/92             0           0     0     644     142952    `

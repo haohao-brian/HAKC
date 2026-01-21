@@ -1,0 +1,33 @@
+!<thin>
+//                                              274       `
+mtk-eint.o/
+pinctrl-mtk-common.o/
+pinctrl-mtk-common-v2.o/
+pinctrl-moore.o/
+pinctrl-paris.o/
+pinctrl-mt2712.o/
+pinctrl-mt6765.o/
+pinctrl-mt6779.o/
+pinctrl-mt6797.o/
+pinctrl-mt7622.o/
+pinctrl-mt8167.o/
+pinctrl-mt8173.o/
+pinctrl-mt8183.o/
+pinctrl-mt8192.o/
+pinctrl-mt8516.o/
+
+/0              0           0     0     644     194552    `
+/12             0           0     0     644     237672    `
+/34             0           0     0     644     234288    `
+/59             0           0     0     644     187376    `
+/76             0           0     0     644     227552    `
+/93             0           0     0     644     224648    `
+/111            0           0     0     644     250264    `
+/129            0           0     0     644     257064    `
+/147            0           0     0     644     241376    `
+/165            0           0     0     644     229584    `
+/183            0           0     0     644     196944    `
+/201            0           0     0     644     184480    `
+/219            0           0     0     644     235416    `
+/237            0           0     0     644     277824    `
+/255            0           0     0     644     193808    `

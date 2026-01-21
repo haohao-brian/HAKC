@@ -1,0 +1,121 @@
+!<thin>
+//                                              1134      `
+mtdcore.o/
+mtdsuper.o/
+mtdconcat.o/
+mtdpart.o/
+mtdchar.o/
+parsers/ofpart.o/
+mtd_blkdevs.o/
+mtdblock.o/
+chips/chipreg.o/
+chips/cfi_probe.o/
+chips/cfi_util.o/
+chips/cfi_cmdset_0020.o/
+chips/cfi_cmdset_0002.o/
+chips/cfi_cmdset_0001.o/
+chips/gen_probe.o/
+maps/physmap-core.o/
+devices/mtd_dataflash.o/
+devices/sst25l.o/
+nand/core.o/
+nand/bbt.o/
+nand/ecc.o/
+nand/raw/nand_base.o/
+nand/raw/nand_legacy.o/
+nand/raw/nand_bbt.o/
+nand/raw/nand_timings.o/
+nand/raw/nand_ids.o/
+nand/raw/nand_onfi.o/
+nand/raw/nand_jedec.o/
+nand/raw/nand_amd.o/
+nand/raw/nand_esmt.o/
+nand/raw/nand_hynix.o/
+nand/raw/nand_macronix.o/
+nand/raw/nand_micron.o/
+nand/raw/nand_samsung.o/
+nand/raw/nand_toshiba.o/
+nand/raw/nand_ecc.o/
+nand/raw/denali.o/
+nand/raw/denali_dt.o/
+nand/raw/marvell_nand.o/
+nand/raw/fsl_ifc_nand.o/
+nand/raw/qcom_nandc.o/
+spi-nor/core.o/
+spi-nor/sfdp.o/
+spi-nor/atmel.o/
+spi-nor/catalyst.o/
+spi-nor/eon.o/
+spi-nor/esmt.o/
+spi-nor/everspin.o/
+spi-nor/fujitsu.o/
+spi-nor/gigadevice.o/
+spi-nor/intel.o/
+spi-nor/issi.o/
+spi-nor/macronix.o/
+spi-nor/micron-st.o/
+spi-nor/spansion.o/
+spi-nor/sst.o/
+spi-nor/winbond.o/
+spi-nor/xilinx.o/
+spi-nor/xmc.o/
+
+/0              0           0     0     644     436808    `
+/11             0           0     0     644     211144    `
+/23             0           0     0     644     237152    `
+/36             0           0     0     644     192632    `
+/47             0           0     0     644     376632    `
+/58             0           0     0     644     159784    `
+/76             0           0     0     644     271248    `
+/91             0           0     0     644     168992    `
+/103            0           0     0     644     150984    `
+/120            0           0     0     644     158768    `
+/139            0           0     0     644     253016    `
+/157            0           0     0     644     279136    `
+/182            0           0     0     644     379304    `
+/207            0           0     0     644     333632    `
+/232            0           0     0     644     161224    `
+/251            0           0     0     644     184360    `
+/272            0           0     0     644     202640    `
+/297            0           0     0     644     210192    `
+/315            0           0     0     644     168288    `
+/328            0           0     0     644     93456     `
+/340            0           0     0     644     169128    `
+/352            0           0     0     644     568936    `
+/374            0           0     0     644     129952    `
+/398            0           0     0     644     160248    `
+/419            0           0     0     644     101936    `
+/444            0           0     0     644     108336    `
+/465            0           0     0     644     118288    `
+/487            0           0     0     644     108128    `
+/510            0           0     0     644     99920     `
+/531            0           0     0     644     101600    `
+/553            0           0     0     644     144728    `
+/576            0           0     0     644     122408    `
+/602            0           0     0     644     137216    `
+/626            0           0     0     644     103784    `
+/651            0           0     0     644     116816    `
+/676            0           0     0     644     166248    `
+/697            0           0     0     644     289272    `
+/716            0           0     0     644     183960    `
+/738            0           0     0     644     484744    `
+/763            0           0     0     644     339048    `
+/788            0           0     0     644     604736    `
+/811            0           0     0     644     378904    `
+/827            0           0     0     644     195168    `
+/843            0           0     0     644     150752    `
+/860            0           0     0     644     146480    `
+/880            0           0     0     644     146952    `
+/895            0           0     0     644     146304    `
+/911            0           0     0     644     146408    `
+/931            0           0     0     644     146192    `
+/950            0           0     0     644     148136    `
+/972            0           0     0     644     148192    `
+/989            0           0     0     644     149528    `
+/1005           0           0     0     644     151496    `
+/1025           0           0     0     644     153800    `
+/1046           0           0     0     644     151552    `
+/1066           0           0     0     644     155752    `
+/1081           0           0     0     644     153056    `
+/1100           0           0     0     644     150456    `
+/1118           0           0     0     644     146232    `

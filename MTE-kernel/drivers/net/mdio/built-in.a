@@ -1,0 +1,22 @@
+!<thin>
+//                                              168       `
+of_mdio.o/
+mdio-bcm-iproc.o/
+mdio-bitbang.o/
+mdio-cavium.o/
+mdio-thunder.o/
+mdio-xgene.o/
+mdio-mux.o/
+mdio-mux-bcm-iproc.o/
+mdio-mux-mmioreg.o/
+mdio-mux-multiplexer.o/
+/0              0           0     0     644     334912    `
+/11             0           0     0     644     163968    `
+/29             0           0     0     644     167832    `
+/45             0           0     0     644     156840    `
+/60             0           0     0     644     171152    `
+/76             0           0     0     644     440880    `
+/90             0           0     0     644     157056    `
+/102            0           0     0     644     179384    `
+/124            0           0     0     644     163456    `
+/144            0           0     0     644     153920    `

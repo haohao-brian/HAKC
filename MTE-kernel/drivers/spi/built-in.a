@@ -1,0 +1,36 @@
+!<thin>
+//                                              260       `
+spi.o/
+spi-mem.o/
+spi-armada-3700.o/
+spi-iproc-qspi.o/
+spi-brcmstb-qspi.o/
+spi-bcm-qspi.o/
+spi-cadence-quadspi.o/
+spi-fsl-dspi.o/
+spi-fsl-lpspi.o/
+spi-fsl-qspi.o/
+spi-nxp-fspi.o/
+spi-orion.o/
+spi-pl022.o/
+spi-qup.o/
+spi-rockchip.o/
+spi-s3c64xx.o/
+spi-sun6i.o/
+/0              0           0     0     644     794520    `
+/7              0           0     0     644     210872    `
+/18             0           0     0     644     294072    `
+/37             0           0     0     644     162592    `
+/55             0           0     0     644     137848    `
+/75             0           0     0     644     311696    `
+/91             0           0     0     644     338672    `
+/114            0           0     0     644     270416    `
+/130            0           0     0     644     250304    `
+/147            0           0     0     644     272536    `
+/163            0           0     0     644     290896    `
+/179            0           0     0     644     212920    `
+/192            0           0     0     644     438152    `
+/205            0           0     0     644     280928    `
+/216            0           0     0     644     253920    `
+/232            0           0     0     644     314600    `
+/247            0           0     0     644     207632    `

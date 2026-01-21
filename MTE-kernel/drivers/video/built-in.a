@@ -1,0 +1,65 @@
+!<thin>
+//                                              652       `
+hdmi.o/
+console/dummycon.o/
+logo/logo.o/
+logo/logo_linux_clut224.o/
+backlight/backlight.o/
+fbdev/core/fb_cmdline.o/
+fbdev/core/fb_notify.o/
+fbdev/core/fbmem.o/
+fbdev/core/fbmon.o/
+fbdev/core/fbcmap.o/
+fbdev/core/fbsysfs.o/
+fbdev/core/modedb.o/
+fbdev/core/fbcvt.o/
+fbdev/core/fb_defio.o/
+fbdev/core/fbcon.o/
+fbdev/core/bitblit.o/
+fbdev/core/softcursor.o/
+fbdev/core/cfbfillrect.o/
+fbdev/core/cfbcopyarea.o/
+fbdev/core/cfbimgblt.o/
+fbdev/core/sysfillrect.o/
+fbdev/core/syscopyarea.o/
+fbdev/core/sysimgblt.o/
+fbdev/core/fb_sys_fops.o/
+fbdev/xen-fbfront.o/
+fbdev/efifb.o/
+fbdev/mx3fb.o/
+display_timing.o/
+videomode.o/
+of_display_timing.o/
+of_videomode.o/
+
+/0              0           0     0     644     182744    `
+/8              0           0     0     644     155096    `
+/28             0           0     0     644     117456    `
+/41             0           0     0     644     9056      `
+/68             0           0     0     644     222752    `
+/91             0           0     0     644     10792     `
+/116            0           0     0     644     10168     `
+/140            0           0     0     644     409336    `
+/160            0           0     0     644     221320    `
+/180            0           0     0     644     195952    `
+/201            0           0     0     644     198432    `
+/223            0           0     0     644     206800    `
+/244            0           0     0     644     23184     `
+/264            0           0     0     644     245424    `
+/287            0           0     0     644     443032    `
+/307            0           0     0     644     200656    `
+/329            0           0     0     644     172048    `
+/354            0           0     0     644     180960    `
+/380            0           0     0     644     188296    `
+/406            0           0     0     644     167032    `
+/430            0           0     0     644     167944    `
+/456            0           0     0     644     166864    `
+/482            0           0     0     644     164816    `
+/506            0           0     0     644     164656    `
+/532            0           0     0     644     221624    `
+/553            0           0     0     644     199712    `
+/568            0           0     0     644     294016    `
+/583            0           0     0     644     6960      `
+/601            0           0     0     644     9136      `
+/614            0           0     0     644     84616     `
+/635            0           0     0     644     63016     `

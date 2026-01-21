@@ -1,0 +1,17 @@
+!<thin>
+//                                              122       `
+virtio.o/
+virtio_ring.o/
+virtio_mmio.o/
+virtio_pci_modern.o/
+virtio_pci_common.o/
+virtio_pci_legacy.o/
+virtio_balloon.o/
+
+/0              0           0     0     644     192064    `
+/10             0           0     0     644     288944    `
+/25             0           0     0     644     218296    `
+/40             0           0     0     644     224384    `
+/61             0           0     0     644     219368    `
+/82             0           0     0     644     179304    `
+/103            0           0     0     644     372440    `

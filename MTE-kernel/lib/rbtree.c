@@ -439,6 +439,8 @@ EXPORT_SYMBOL(rb_insert_color);
 
 void rb_erase(struct rb_node *node, struct rb_root *root)
 {
+	node = hakc_safe_ptr(node);
+	root = hakc_safe_ptr(root);
 	struct rb_node *rebalance;
 	rebalance = __rb_erase_augmented(node, root, &dummy_callbacks);
 	if (rebalance)
@@ -465,14 +467,14 @@ EXPORT_SYMBOL(__rb_insert_augmented);
  */
 struct rb_node *rb_first(const struct rb_root *root)
 {
-	struct rb_root *root1 = check_hakc_data_access(root,0x20001);
+	struct rb_root *root1 = hakc_safe_ptr(root);
 	struct rb_node	*n;
-	root1->rb_node = check_hakc_data_access(root1->rb_node,0x20001);
+	root1->rb_node = hakc_safe_ptr(root1->rb_node);
 	n = root1->rb_node;
 	if (!n)
 		return NULL;
-	while (check_hakc_data_access(n->rb_left,0x20001)){
-		n = check_hakc_data_access(n->rb_left,0x20001);
+	while (hakc_safe_ptr(n->rb_left)){
+		n = hakc_safe_ptr(n->rb_left);
 	}
 	return n;
 }

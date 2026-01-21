@@ -15,9 +15,9 @@
 #define HAKC_INVALID_PTR (void *)0xDEADBEEF
 
 #define HAKC_INFO(fmt, ...)                                                    \
-	if (HAKC_DEBUG) {}                                                     // \
-		//pr_err(fmt, ##__VA_ARGS__);                                   \
-//	}
+	if (HAKC_DEBUG) {                                                     \
+		pr_err(fmt, ##__VA_ARGS__);                                    \
+	}
 #define HAKC_ERR(fmt, ...)                                                     \
 	if (HAKC_DEBUG) {                                                      \
 		pr_err(fmt, ##__VA_ARGS__);                                    \
@@ -481,6 +481,28 @@ static __always_inline void *canonicalize_kva(const void *p) {
 #endif
     return (void *)v;
 }
+#include <linux/kallsyms.h>
+#include <linux/string.h>     // strstr()
+
+DEFINE_PER_CPU(unsigned long, hakc_last_chk_caller);
+
+char* white_list[] = {
+	"ipv6_add_dev+0x184",
+	"ipv6_sock_ac_close+0x24"
+};
+
+static __always_inline bool caller_in_whitelist(unsigned long ip)
+{
+    char sym[KSYM_SYMBOL_LEN];
+    int i;
+
+    sprint_symbol(sym, ip);  // e.g. "ipv6_add_dev+0x188/0x564"
+    for (i = 0; i < ARRAY_SIZE(white_list); i++) {
+        if (strstr(sym, white_list[i]))  // 只比對函式名，忽略 offset
+            return true;
+    }
+    return false;
+}
 
 static void *check_hakc_access(const void *address,
 			       const clique_access_tok_t access_tok,
@@ -568,6 +590,16 @@ static void *check_hakc_access(const void *address,
 
 	//HAKC_INFO("hakc_access correct one: ctx_addr=%px salt=%lx r=%px\n", ctx_addr, salt, r);
 
+	if (r != ctx_addr) {
+		unsigned long ip = this_cpu_read(hakc_last_chk_caller);
+		ip = ptrauth_strip_insn_pac(ip);
+		if (ip) ip -= 4;
+		HAKC_INFO("NOT CORRECT caller=%pS correct ptr=%px current ptr=%px\n", (void *)ip, r, ctx_addr);
+		if (caller_in_whitelist(ip)){
+			HAKC_INFO("white list detected\n");
+		}
+	}
+
 	result = (unsigned long)auth_func(r, salt); //ctx_addr <---> r
 	result |= HAKC_CLAQUE_ADDR(address);
 
@@ -630,7 +662,7 @@ void *check_hakc_data_access(const void *address,
 	//HAKC_INFO("CHK: enter check_hakc_data_access addr=%px tok=0x%lx caller=%pS\n",\
             address, (unsigned long)access_tok, (void *)_RET_IP_);
 	//HAKC_INFO("check_hakc_data_access: address=%px access_tok=%x\n", address, access_tok);
-	
+	this_cpu_write(hakc_last_chk_caller, (unsigned long)_RET_IP_);
 	return check_hakc_access(address, access_tok, hakc_auth_data_ptr);
 }
 EXPORT_SYMBOL(check_hakc_data_access);
@@ -705,7 +737,7 @@ void *hakc_sign_pointer(void *addr, claque_id_t claque_id, clique_color_t color,
 		addr = HAKC_GET_SAFE_PTR(addr);
 #else
 #endif
-		//HAKC_INFO("TRANSFER RESULT to %d %lx %d %lx\n", claque_id, addr,\
+		HAKC_INFO("TRANSFER RESULT to %d %lx %d %lx\n", claque_id, addr,\
 			  get_hakc_address_claque((void *)addr),\
 			  (unsigned long)claque_id << CLAQUE_START_2);
 	}
@@ -904,12 +936,11 @@ void *hakc_transfer_to_clique(void *data_to_transfer, size_t size,
 		return mte_transfer_percpu(&pcpu_info, size, claque_id, color,
 					   is_code);
 	}
-	/*
+	
 	HAKC_INFO("hakc_transfer_to_clique: caller=%pS addr=%px size=%zu is_code=%d\n",
 			(void *)_RET_IP_,
 			data_to_transfer, size,
-			is_code);
-			*/
+			is_code);			
 	return color_and_sign(data_to_transfer, size, claque_id, color,
 			      is_code);
 }

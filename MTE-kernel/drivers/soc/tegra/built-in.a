@@ -1,0 +1,21 @@
+!<thin>
+//                                              158       `
+fuse/fuse-tegra.o/
+fuse/fuse-tegra30.o/
+fuse/tegra-apbmisc.o/
+fuse/speedo-tegra124.o/
+fuse/speedo-tegra210.o/
+common.o/
+flowctrl.o/
+pmc.o/
+powergate-bpmp.o/
+
+/0              0           0     0     644     178240    `
+/19             0           0     0     644     155264    `
+/40             0           0     0     644     145264    `
+/62             0           0     0     644     10344     `
+/86             0           0     0     644     12696     `
+/110            0           0     0     644     61456     `
+/120            0           0     0     644     111240    `
+/132            0           0     0     644     517600    `
+/139            0           0     0     644     101320    `

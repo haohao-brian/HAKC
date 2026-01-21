@@ -1,0 +1,2 @@
+drivers/interconnect/qcom/sdm845.o
+

@@ -1,0 +1,63 @@
+!<thin>
+//                                              494       `
+trace_clock.o/
+ftrace.o/
+ring_buffer.o/
+trace.o/
+trace_output.o/
+trace_seq.o/
+trace_stat.o/
+trace_printk.o/
+trace_sched_switch.o/
+trace_functions.o/
+trace_preemptirq.o/
+trace_irqsoff.o/
+trace_sched_wakeup.o/
+trace_nop.o/
+trace_stack.o/
+trace_functions_graph.o/
+fgraph.o/
+blktrace.o/
+trace_events.o/
+trace_export.o/
+trace_syscalls.o/
+trace_event_perf.o/
+trace_events_filter.o/
+trace_events_trigger.o/
+power-traces.o/
+rpm-traces.o/
+trace_dynevent.o/
+trace_probe.o/
+trace_uprobe.o/
+trace_boot.o/
+
+/0              0           0     0     644     130808    `
+/15             0           0     0     644     764880    `
+/25             0           0     0     644     746752    `
+/40             0           0     0     644     1389992   `
+/49             0           0     0     644     326936    `
+/65             0           0     0     644     125688    `
+/78             0           0     0     644     217184    `
+/92             0           0     0     644     216088    `
+/108            0           0     0     644     198248    `
+/130            0           0     0     644     280032    `
+/149            0           0     0     644     260400    `
+/169            0           0     0     644     277112    `
+/186            0           0     0     644     328800    `
+/208            0           0     0     644     186744    `
+/221            0           0     0     644     251640    `
+/236            0           0     0     644     314536    `
+/261            0           0     0     644     241448    `
+/271            0           0     0     644     5952      `
+/283            0           0     0     644     599712    `
+/299            0           0     0     644     206856    `
+/315            0           0     0     644     282736    `
+/333            0           0     0     644     223400    `
+/353            0           0     0     644     321152    `
+/376            0           0     0     644     394968    `
+/400            0           0     0     644     379608    `
+/416            0           0     0     644     222640    `
+/430            0           0     0     644     214024    `
+/448            0           0     0     644     287288    `
+/463            0           0     0     644     414856    `
+/479            0           0     0     644     211912    `

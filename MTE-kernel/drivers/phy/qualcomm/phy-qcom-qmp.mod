@@ -1,0 +1,2 @@
+drivers/phy/qualcomm/phy-qcom-qmp.o
+

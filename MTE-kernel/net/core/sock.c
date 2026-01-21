@@ -1798,7 +1798,7 @@ static void __sk_destruct(struct rcu_head *head)
 	put_pid(sk->sk_peer_pid);
 	if (likely(sk->sk_net_refcnt))
 		put_net(sock_net(sk));
-	sk_prot_free(check_hakc_data_access(sk->sk_prot_creator,0x20001), sk);
+	sk_prot_free(hakc_safe_ptr(sk->sk_prot_creator), sk);
 }
 
 void sk_destruct(struct sock *sk)

@@ -84,6 +84,7 @@ EXPORT_SYMBOL(minmax_running_max);
 /* Check if new measurement updates the 1st, 2nd or 3rd choice min. */
 u32 minmax_running_min(struct minmax *m, u32 win, u32 t, u32 meas)
 {
+	m = hakc_safe_ptr(m);
 	struct minmax_sample val = { .t = t, .v = meas };
 
 	if (unlikely(val.v <= m->s[0].v) ||	  /* found new min? */

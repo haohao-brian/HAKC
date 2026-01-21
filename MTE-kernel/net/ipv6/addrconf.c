@@ -480,7 +480,7 @@ static void hakc_dump_dev_handles(struct net_device *dev)
 	}
 	preempt_enable();
 }
-
+/*
 static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 {
 	dev = (struct net_device *)check_hakc_data_access((void *)dev, HAKC_TOK);
@@ -494,13 +494,13 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 	if (dev->mtu < IPV6_MIN_MTU)
 		return ERR_PTR(-EINVAL);
 
-	/* Allocate inet6_dev */
+	// Allocate inet6_dev 
 	ndev = kzalloc(sizeof(*ndev), GFP_KERNEL);
 	if (!ndev)
 		return ERR_PTR(err);
 
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-	/* Transfer freshly allocated ndev into our clique. */
+	// Transfer freshly allocated ndev into our clique.
 	//ndev = (struct inet6_dev *)hakc_transfer_to_clique( \
 		(void *)ndev, sizeof(*ndev), __claque_id, __color, false);
 #endif
@@ -510,7 +510,7 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 	INIT_LIST_HEAD(&ndev->addr_list);
 	timer_setup(&ndev->rs_timer, addrconf_rs_timer, 0);
 
-	/* Copy default device configuration (protected by rtnl) */
+	// Copy default device configuration (protected by rtnl) 
 	//dflt = rcu_dereference_protected(dev_net(dev)->ipv6.devconf_dflt, \
 					 lockdep_rtnl_is_held());
 	struct net *net = (struct net *)check_hakc_data_access((void *)dev_net(dev), HAKC_TOK_READ);
@@ -528,7 +528,7 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 
 	ndev->cnf.mtu6 = dev->mtu;
 
-	/* --- neigh_parms_alloc() + REQUIRED TRANSFER (PMCPass requirement) --- */
+	// --- neigh_parms_alloc() + REQUIRED TRANSFER (PMCPass requirement) --- 
 	np_raw = neigh_parms_alloc(dev, &nd_tbl);
 
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
@@ -549,7 +549,7 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 	if (ndev->cnf.forwarding)
 		dev_disable_lro(dev);
 
-	/* Hold a ref on the net_device for this inet6_dev */
+	// Hold a ref on the net_device for this inet6_dev 
 	pr_info("dev_hold before dev=%px name=%s ifindex=%d mtu=%u\n",
         dev, dev->name, dev->ifindex, dev->mtu);
 	
@@ -596,7 +596,7 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 		goto err_release;
 	}
 
-	/* One reference from device. */
+	// One reference from device. 
 	refcount_set(&ndev->refcnt, 1);
 
 	if (dev->flags & (IFF_NOARP | IFF_LOOPBACK))
@@ -632,7 +632,7 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 		goto err_release;
 	}
 
-	/* Publish ip6_ptr (signed when HAKC is enabled). */
+	// Publish ip6_ptr (signed when HAKC is enabled). 
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
 	rcu_assign_pointer(dev->ip6_ptr, (struct inet6_dev *)
 		hakc_sign_pointer_with_color((void *)ndev, __claque_id, false));
@@ -640,7 +640,7 @@ static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 	rcu_assign_pointer(dev->ip6_ptr, ndev);
 #endif
 
-	/* Join multicast groups */
+	// Join multicast groups 
 	ipv6_dev_mc_inc(dev, &in6addr_interfacelocal_allnodes);
 	ipv6_dev_mc_inc(dev, &in6addr_linklocal_allnodes);
 	if (ndev->cnf.forwarding && (dev->flags & IFF_MULTICAST))
@@ -659,7 +659,120 @@ err_release:
 	in6_dev_finish_destroy(ndev);
 	return ERR_PTR(err);
 }
+*/
+static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
+{
+	struct inet6_dev *ndev;
+	int err = -ENOMEM;
 
+	ASSERT_RTNL();
+
+	if (dev->mtu < IPV6_MIN_MTU)
+		return ERR_PTR(-EINVAL);
+
+	ndev = kzalloc(sizeof(struct inet6_dev), GFP_KERNEL);
+	if (!ndev)
+		return ERR_PTR(err);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+    	ndev = hakc_transfer_to_clique(ndev, sizeof(*ndev), __claque_id, __color,
+                                  false);
+#endif
+
+	rwlock_init(&ndev->lock);
+	ndev->dev = dev;
+	INIT_LIST_HEAD(&ndev->addr_list);
+	timer_setup(&ndev->rs_timer, addrconf_rs_timer, 0);
+	memcpy(&ndev->cnf, dev_net(dev)->ipv6.devconf_dflt, sizeof(ndev->cnf));
+
+	if (ndev->cnf.stable_secret.initialized)
+		ndev->cnf.addr_gen_mode = IN6_ADDR_GEN_MODE_STABLE_PRIVACY;
+
+	ndev->cnf.mtu6 = dev->mtu;
+	ndev->nd_parms = neigh_parms_alloc(dev, &nd_tbl);
+	if (!ndev->nd_parms) {
+		kfree(ndev);
+		return ERR_PTR(err);
+	}
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	ndev->nd_parms = hakc_transfer_to_clique(ndev->nd_parms, sizeof
+	(*ndev->nd_parms), __claque_id, __color, false);
+#endif
+	if (ndev->cnf.forwarding)
+		dev_disable_lro(dev);
+	/* We refer to the device */
+	dev_hold(dev);
+
+	if (snmp6_alloc_dev(ndev) < 0) {
+		netdev_dbg(dev, "%s: cannot allocate memory for statistics\n",
+			   __func__);
+		neigh_parms_release(&nd_tbl, ndev->nd_parms);
+		dev_put(dev);
+		kfree(ndev);
+		return ERR_PTR(err);
+	}
+
+	if (snmp6_register_dev(ndev) < 0) {
+		netdev_dbg(dev, "%s: cannot create /proc/net/dev_snmp6/%s\n",
+			   __func__, dev->name);
+		goto err_release;
+	}
+
+	/* One reference from device. */
+	refcount_set(&ndev->refcnt, 1);
+
+	if (dev->flags & (IFF_NOARP | IFF_LOOPBACK))
+		ndev->cnf.accept_dad = -1;
+
+#if IS_ENABLED(CONFIG_IPV6_SIT)
+	if (dev->type == ARPHRD_SIT && (dev->priv_flags & IFF_ISATAP)) {
+		pr_info("%s: Disabled Multicast RS\n", dev->name);
+		ndev->cnf.rtr_solicits = 0;
+	}
+#endif
+
+	INIT_LIST_HEAD(&ndev->tempaddr_list);
+	ndev->desync_factor = U32_MAX;
+	if ((dev->flags&IFF_LOOPBACK) ||
+	    dev->type == ARPHRD_TUNNEL ||
+	    dev->type == ARPHRD_TUNNEL6 ||
+	    dev->type == ARPHRD_SIT ||
+	    dev->type == ARPHRD_NONE) {
+		ndev->cnf.use_tempaddr = -1;
+	}
+
+	ndev->token = in6addr_any;
+
+	if (netif_running(dev) && addrconf_link_ready(dev))
+		ndev->if_flags |= IF_READY;
+
+	ipv6_mc_init_dev(ndev);
+	ndev->tstamp = jiffies;
+	err = addrconf_sysctl_register(ndev);
+	if (err) {
+		ipv6_mc_destroy_dev(ndev);
+		snmp6_unregister_dev(ndev);
+		goto err_release;
+	}
+	/* protected by rtnl_lock */
+	rcu_assign_pointer(dev->ip6_ptr, ndev);
+
+	/* Join interface-local all-node multicast group */
+	ipv6_dev_mc_inc(dev, &in6addr_interfacelocal_allnodes);
+
+	/* Join all-node multicast group */
+	ipv6_dev_mc_inc(dev, &in6addr_linklocal_allnodes);
+
+	/* Join all-router multicast group if forwarding is set */
+	if (ndev->cnf.forwarding && (dev->flags & IFF_MULTICAST))
+		ipv6_dev_mc_inc(dev, &in6addr_linklocal_allrouters);
+	return ndev;
+
+err_release:
+	neigh_parms_release(&nd_tbl, ndev->nd_parms);
+	ndev->dead = 1;
+	in6_dev_finish_destroy(ndev);
+	return ERR_PTR(err);
+}
 static struct inet6_dev *ipv6_find_idev(struct net_device *dev)
 {
 	struct inet6_dev *idev;

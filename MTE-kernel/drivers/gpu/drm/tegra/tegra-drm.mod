@@ -1,0 +1,2 @@
+drivers/gpu/drm/tegra/drm.o drivers/gpu/drm/tegra/gem.o drivers/gpu/drm/tegra/fb.o drivers/gpu/drm/tegra/dp.o drivers/gpu/drm/tegra/hub.o drivers/gpu/drm/tegra/plane.o drivers/gpu/drm/tegra/dc.o drivers/gpu/drm/tegra/output.o drivers/gpu/drm/tegra/rgb.o drivers/gpu/drm/tegra/hda.o drivers/gpu/drm/tegra/hdmi.o drivers/gpu/drm/tegra/mipi-phy.o drivers/gpu/drm/tegra/dsi.o drivers/gpu/drm/tegra/sor.o drivers/gpu/drm/tegra/dpaux.o drivers/gpu/drm/tegra/gr2d.o drivers/gpu/drm/tegra/gr3d.o drivers/gpu/drm/tegra/falcon.o drivers/gpu/drm/tegra/vic.o drivers/gpu/drm/tegra/trace.o
+

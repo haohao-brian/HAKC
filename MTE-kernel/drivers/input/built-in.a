@@ -1,0 +1,52 @@
+!<thin>
+//                                              448       `
+input.o/
+input-compat.o/
+input-mt.o/
+input-poller.o/
+ff-core.o/
+ff-memless.o/
+matrix-keymap.o/
+input-leds.o/
+evdev.o/
+keyboard/atkbd.o/
+keyboard/cros_ec_keyb.o/
+keyboard/gpio_keys.o/
+mouse/psmouse-base.o/
+mouse/synaptics.o/
+mouse/focaltech.o/
+mouse/alps.o/
+mouse/byd.o/
+mouse/logips2pp.o/
+mouse/trackpoint.o/
+mouse/cypress_ps2.o/
+mouse/psmouse-smbus.o/
+touchscreen/of_touchscreen.o/
+misc/hisi_powerkey.o/
+misc/pm8941-pwrkey.o/
+misc/xen-kbdfront.o/
+/0              0           0     0     644     434144    `
+/9              0           0     0     644     123016    `
+/25             0           0     0     644     162640    `
+/37             0           0     0     644     148784    `
+/53             0           0     0     644     159144    `
+/64             0           0     0     644     185256    `
+/78             0           0     0     644     156168    `
+/95             0           0     0     644     157544    `
+/109            0           0     0     644     361312    `
+/118            0           0     0     644     300376    `
+/136            0           0     0     644     199512    `
+/161            0           0     0     644     243448    `
+/183            0           0     0     644     361368    `
+/205            0           0     0     644     298800    `
+/224            0           0     0     644     158144    `
+/243            0           0     0     644     371520    `
+/257            0           0     0     644     153568    `
+/270            0           0     0     644     153256    `
+/289            0           0     0     644     200528    `
+/309            0           0     0     644     184104    `
+/330            0           0     0     644     179344    `
+/353            0           0     0     644     161024    `
+/383            0           0     0     644     164928    `
+/405            0           0     0     644     169848    `
+/427            0           0     0     644     195512    `

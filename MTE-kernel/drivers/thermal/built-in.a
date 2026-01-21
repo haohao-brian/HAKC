@@ -1,0 +1,50 @@
+!<thin>
+//                                              438       `
+thermal_core.o/
+thermal_sysfs.o/
+thermal_helpers.o/
+thermal_hwmon.o/
+thermal_of.o/
+gov_step_wise.o/
+gov_power_allocator.o/
+cpufreq_cooling.o/
+broadcom/ns-thermal.o/
+broadcom/sr-thermal.o/
+sun8i_thermal.o/
+rcar_thermal.o/
+rcar_gen3_thermal.o/
+samsung/exynos_tmu.o/
+armada_thermal.o/
+qcom/tsens.o/
+qcom/tsens-v2.o/
+qcom/tsens-v1.o/
+qcom/tsens-v0_1.o/
+qcom/tsens-8960.o/
+hisi_thermal.o/
+mtk_thermal.o/
+uniphier_thermal.o/
+amlogic_thermal.o/
+/0              0           0     0     644     476816    `
+/16             0           0     0     644     148976    `
+/33             0           0     0     644     102672    `
+/52             0           0     0     644     103376    `
+/69             0           0     0     644     157728    `
+/83             0           0     0     644     95400     `
+/100            0           0     0     644     258872    `
+/123            0           0     0     644     126840    `
+/142            0           0     0     644     152448    `
+/165            0           0     0     644     153880    `
+/188            0           0     0     644     182136    `
+/205            0           0     0     644     217368    `
+/221            0           0     0     644     205736    `
+/242            0           0     0     644     319704    `
+/264            0           0     0     644     199184    `
+/282            0           0     0     644     255616    `
+/296            0           0     0     644     88152     `
+/313            0           0     0     644     97120     `
+/330            0           0     0     644     101680    `
+/349            0           0     0     644     95440     `
+/368            0           0     0     644     193320    `
+/384            0           0     0     644     196168    `
+/399            0           0     0     644     170248    `
+/419            0           0     0     644     170928    `

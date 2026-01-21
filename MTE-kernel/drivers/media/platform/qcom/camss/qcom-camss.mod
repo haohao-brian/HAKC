@@ -1,0 +1,2 @@
+drivers/media/platform/qcom/camss/camss.o drivers/media/platform/qcom/camss/camss-csid.o drivers/media/platform/qcom/camss/camss-csiphy-2ph-1-0.o drivers/media/platform/qcom/camss/camss-csiphy-3ph-1-0.o drivers/media/platform/qcom/camss/camss-csiphy.o drivers/media/platform/qcom/camss/camss-ispif.o drivers/media/platform/qcom/camss/camss-vfe-4-1.o drivers/media/platform/qcom/camss/camss-vfe-4-7.o drivers/media/platform/qcom/camss/camss-vfe.o drivers/media/platform/qcom/camss/camss-video.o
+

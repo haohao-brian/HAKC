@@ -1,0 +1,54 @@
+!<thin>
+//                                              458       `
+core.o/
+dummy.o/
+fixed-helper.o/
+helpers.o/
+devres.o/
+of_regulator.o/
+fixed.o/
+axp20x-regulator.o/
+bd718x7-regulator.o/
+bd9571mwv-regulator.o/
+fan53555.o/
+gpio-regulator.o/
+hi6421v530-regulator.o/
+hi655x-regulator.o/
+max77620-regulator.o/
+max8973-regulator.o/
+qcom-rpmh-regulator.o/
+qcom_smd-regulator.o/
+qcom_spmi-regulator.o/
+pca9450-regulator.o/
+pfuze100-regulator.o/
+pwm-regulator.o/
+rk808-regulator.o/
+rohm-regulator.o/
+s2mps11.o/
+uniphier-regulator.o/
+/0              0           0     0     644     834984    `
+/8              0           0     0     644     211520    `
+/17             0           0     0     644     201360    `
+/33             0           0     0     644     261560    `
+/44             0           0     0     644     247056    `
+/54             0           0     0     644     253264    `
+/70             0           0     0     644     230296    `
+/79             0           0     0     644     301136    `
+/99             0           0     0     644     282160    `
+/120            0           0     0     644     241184    `
+/143            0           0     0     644     253232    `
+/155            0           0     0     644     238312    `
+/173            0           0     0     644     220368    `
+/197            0           0     0     644     226048    `
+/217            0           0     0     644     302552    `
+/239            0           0     0     644     289448    `
+/260            0           0     0     644     276512    `
+/283            0           0     0     644     292408    `
+/305            0           0     0     644     378768    `
+/328            0           0     0     644     262888    `
+/349            0           0     0     644     285304    `
+/371            0           0     0     644     250248    `
+/388            0           0     0     644     318272    `
+/407            0           0     0     644     213632    `
+/425            0           0     0     644     338768    `
+/436            0           0     0     644     228992    `

@@ -1,0 +1,4 @@
+net/qrtr/qrtr.ko
+net/qrtr/ns.ko
+net/qrtr/qrtr-smd.ko
+net/qrtr/qrtr-tun.ko

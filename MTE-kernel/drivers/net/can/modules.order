@@ -1,0 +1,4 @@
+drivers/net/can/rcar/rcar_can.ko
+drivers/net/can/rcar/rcar_canfd.ko
+drivers/net/can/can-dev.ko
+drivers/net/can/flexcan.ko

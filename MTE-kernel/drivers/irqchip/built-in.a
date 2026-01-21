@@ -1,0 +1,94 @@
+!<thin>
+//                                              810       `
+irqchip.o/
+irq-alpine-msi.o/
+irq-bcm2835.o/
+irq-bcm2836.o/
+irq-owl-sirq.o/
+irq-tegra.o/
+irq-dw-apb-ictl.o/
+irq-sun4i.o/
+irq-sunxi-nmi.o/
+irq-gic.o/
+irq-gic-common.o/
+irq-gic-pm.o/
+irq-gic-v2m.o/
+irq-gic-v3.o/
+irq-gic-v3-mbi.o/
+irq-gic-v3-its.o/
+irq-gic-v3-its-platform-msi.o/
+irq-gic-v4.o/
+irq-gic-v3-its-pci-msi.o/
+irq-gic-v3-its-fsl-mc-msi.o/
+irq-partition-percpu.o/
+irq-mbigen.o/
+irq-renesas-irqc.o/
+irq-bcm7038-l1.o/
+irq-brcmstb-l2.o/
+irq-mtk-sysirq.o/
+irq-mtk-cirq.o/
+irq-imx-gpcv2.o/
+irq-mvebu-gicp.o/
+irq-mvebu-icu.o/
+irq-mvebu-odmi.o/
+irq-mvebu-pic.o/
+irq-mvebu-sei.o/
+irq-ls-extirq.o/
+irq-ls-scfg-msi.o/
+qcom-irq-combiner.o/
+irq-uniphier-aidet.o/
+irq-sni-exiu.o/
+irq-meson-gpio.o/
+qcom-pdc.o/
+irq-imx-irqsteer.o/
+irq-imx-intmux.o/
+irq-ti-sci-intr.o/
+irq-ti-sci-inta.o/
+irq-mst-intc.o/
+irq-sl28cpld.o/
+/0              0           0     0     644     152992    `
+/11             0           0     0     644     178768    `
+/29             0           0     0     644     177320    `
+/44             0           0     0     644     201336    `
+/59             0           0     0     644     179584    `
+/75             0           0     0     644     188136    `
+/88             0           0     0     644     173400    `
+/107            0           0     0     644     174136    `
+/120            0           0     0     644     175128    `
+/137            0           0     0     644     328336    `
+/148            0           0     0     644     71464     `
+/166            0           0     0     644     158112    `
+/180            0           0     0     644     217024    `
+/195            0           0     0     644     389064    `
+/209            0           0     0     644     190656    `
+/227            0           0     0     644     828672    `
+/245            0           0     0     644     170648    `
+/276            0           0     0     644     99440     `
+/290            0           0     0     644     182840    `
+/316            0           0     0     644     172184    `
+/345            0           0     0     644     182432    `
+/369            0           0     0     644     190656    `
+/383            0           0     0     644     177768    `
+/403            0           0     0     644     213504    `
+/421            0           0     0     644     182744    `
+/439            0           0     0     644     171064    `
+/457            0           0     0     644     179600    `
+/473            0           0     0     644     182208    `
+/490            0           0     0     644     114144    `
+/508            0           0     0     644     190960    `
+/525            0           0     0     644     177080    `
+/543            0           0     0     644     175296    `
+/560            0           0     0     644     208816    `
+/577            0           0     0     644     169888    `
+/594            0           0     0     644     207416    `
+/613            0           0     0     644     207944    `
+/634            0           0     0     644     114384    `
+/656            0           0     0     644     179728    `
+/672            0           0     0     644     203400    `
+/690            0           0     0     644     181776    `
+/702            0           0     0     644     125680    `
+/722            0           0     0     644     128272    `
+/740            0           0     0     644     185168    `
+/759            0           0     0     644     236440    `
+/778            0           0     0     644     173328    `
+/794            0           0     0     644     142792    `

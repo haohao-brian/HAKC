@@ -1,0 +1,14 @@
+!<thin>
+//                                              120       `
+meson-clk-measure.o/
+meson-gx-socinfo.o/
+meson-gx-pwrc-vpu.o/
+meson-mx-socinfo.o/
+meson-ee-pwrc.o/
+meson-secure-pwrc.o/
+/0              0           0     0     644     179824    `
+/21             0           0     0     644     87120     `
+/41             0           0     0     644     122704    `
+/62             0           0     0     644     84800     `
+/82             0           0     0     644     118376    `
+/99             0           0     0     644     95392     `
