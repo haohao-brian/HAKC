@@ -10655,11 +10655,6 @@ struct net_device *alloc_netdev_mqs(int sizeof_priv, const char *name,
 	if (!dev->pcpu_refcnt)
 		goto free_dev;
 
-	//dev->pcpu_refcnt = hakc_transfer_percpu_to_clique(dev->pcpu_refcnt, \
-                                                  sizeof(*dev->pcpu_refcnt), \
-                                                  2, \
-                                                  4);
-
 	if (dev_addr_init(dev))
 		goto free_pcpu;
 

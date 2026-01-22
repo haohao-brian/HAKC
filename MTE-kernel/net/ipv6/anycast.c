@@ -217,7 +217,7 @@ void __ipv6_sock_ac_close(struct sock *sk)
 
 void ipv6_sock_ac_close(struct sock *sk)
 {
-	sk = check_hakc_data_access(sk,0x20004);
+	
 	struct ipv6_pinfo *np = inet6_sk(sk);
 
 	if (!np->ipv6_ac_list)

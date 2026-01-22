@@ -237,7 +237,7 @@ static void *sign_data(const void *address, pac_salt_t modifier)
 		: "=r"(result)
 		: [addr] "0"(address), [mod] "r"(modifier)
 		:);
-	//HAKC_INFO("Signed data pointer %lx with salt %lx\n", result,\
+	HAKC_INFO("Signed data pointer %lx with salt %lx\n", result,\
 		modifier);
 	return result;
 }
@@ -498,7 +498,7 @@ static __always_inline bool caller_in_whitelist(unsigned long ip)
 
     sprint_symbol(sym, ip);  // e.g. "ipv6_add_dev+0x188/0x564"
     for (i = 0; i < ARRAY_SIZE(white_list); i++) {
-        if (strstr(sym, white_list[i]))  // 只比對函式名，忽略 offset
+        if (strstr(sym, white_list[i])) 
             return true;
     }
     return false;

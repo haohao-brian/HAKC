@@ -304,22 +304,16 @@ drop:
 
 int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, struct net_device *orig_dev)
 {
-const struct ipv6hdr *ip6h = ipv6_hdr(skb);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	skb->dev = hakc_transfer_to_clique(skb->dev,sizeof(skb->dev),__claque_id,__color,false);
+#endif
+	struct net *net = dev_net(skb->dev);
 
-//pr_err("HAKC_DEBUG ipv6_rcv: dev=%s nexthdr=%u src=%pI6c dst=%pI6c len=%u\n", \
-       skb->dev ? skb->dev->name : "NULL", \
-       ip6h->nexthdr, &ip6h->saddr, &ip6h->daddr, skb->len);
-
-	//struct inet6_skb_parm *opt = IP6CB(skb);
-	struct sk_buff *skb_tmp = skb;
-	//skb_tmp = hakc_transfer_to_clique(skb_tmp, 216, 2, 0xf2, false);
-	struct net *net = dev_net(skb_tmp->dev);
-
-	skb_tmp = ip6_rcv_core(skb_tmp, dev, net);
-	if (skb_tmp == NULL)
+	skb = ip6_rcv_core(skb, dev, net);
+	if (skb == NULL)
 		return NET_RX_DROP;
 	return NF_HOOK(NFPROTO_IPV6, NF_INET_PRE_ROUTING,
-		       net, NULL, skb_tmp, dev, NULL,
+		       net, NULL, skb, dev, NULL,
 		       ip6_rcv_finish);
 }
 

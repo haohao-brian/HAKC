@@ -4476,6 +4476,9 @@ int ipv6_route_ioctl(struct net *net, unsigned int cmd, struct in6_rtmsg *rtmsg)
 static int ip6_pkt_drop(struct sk_buff *skb, u8 code, int ipstats_mib_noroutes)
 {
 	struct dst_entry *dst = skb_dst(skb);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	dst->dev = hakc_transfer_to_clique(dst->dev,sizeof(dst->dev),__claque_id,__color,false);
+#endif
 	struct net *net = dev_net(dst->dev);
 	struct inet6_dev *idev;
 	int type;

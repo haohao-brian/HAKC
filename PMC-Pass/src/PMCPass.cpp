@@ -319,7 +319,7 @@ namespace {
               compartmentalized(isModuleCompartmentalized(Module)),
               moduleModified(false),
               breakOnMissingTransfer(true),
-              debugName("doSomethingDemo"), totalDataChecks(0),
+              debugName("ip6_pkt_drop"), totalDataChecks(0),
               totalCodeChecks(0), totalTransfers(0) {
 
         bool sourceShouldBeInstrumented = false;

@@ -875,8 +875,7 @@ void __kfree_skb_flush(void)
 			if (!skb)
 				continue;
 
-			skb = check_hakc_data_access(skb, 0x20007);
-			nc->skb_cache[i] = skb;
+			nc->skb_cache[i] = hakc_safe_ptr(skb);
 		}
 
 		kmem_cache_free_bulk(skbuff_head_cache, nc->skb_count,
