@@ -549,6 +549,7 @@ deps_drivers/net/ethernet/atheros/atl1c/atl1c_main.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/wait.h \
   include/uapi/linux/wait.h \
   include/linux/sem.h \
@@ -1152,7 +1153,6 @@ deps_drivers/net/ethernet/atheros/atl1c/atl1c_main.o := \
     $(wildcard include/config/can.h) \
     $(wildcard include/config/crypto/user.h) \
     $(wildcard include/config/net/ns.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/net/netns/core.h \
   include/net/netns/mib.h \
     $(wildcard include/config/xfrm/statistics.h) \

@@ -484,6 +484,7 @@ deps_drivers/bluetooth/hci_qca.o := \
   include/linux/dcache.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rculist_bl.h \
   include/linux/list_bl.h \
   include/linux/bit_spinlock.h \
@@ -1316,7 +1317,6 @@ deps_drivers/bluetooth/hci_qca.o := \
     $(wildcard include/config/net/rx/busy/poll.h) \
     $(wildcard include/config/sock/validate/xmit.h) \
     $(wildcard include/config/rps.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
     $(wildcard include/config/tls/device.h) \
   include/linux/list_nulls.h \
   include/linux/netdevice.h \

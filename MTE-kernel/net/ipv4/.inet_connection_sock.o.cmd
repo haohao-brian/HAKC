@@ -4,6 +4,7 @@ source_net/ipv4/inet_connection_sock.o := net/ipv4/inet_connection_sock.c
 
 deps_net/ipv4/inet_connection_sock.o := \
     $(wildcard include/config/ipv6.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/kconfig.h \
     $(wildcard include/config/cc/version/text.h) \
     $(wildcard include/config/cpu/big/endian.h) \
@@ -1116,7 +1117,6 @@ deps_net/ipv4/inet_connection_sock.o := \
     $(wildcard include/config/can.h) \
     $(wildcard include/config/crypto/user.h) \
     $(wildcard include/config/net/ns.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/net/netns/core.h \
   include/net/netns/mib.h \
     $(wildcard include/config/xfrm/statistics.h) \

@@ -627,6 +627,7 @@ deps_drivers/media/platform/sunxi/sun6i-csi/sun6i_video.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/sem.h \
   include/uapi/linux/sem.h \
   include/linux/ipc.h \

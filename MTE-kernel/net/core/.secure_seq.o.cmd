@@ -391,6 +391,7 @@ deps_net/core/secure_seq.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rcupdate.h \
     $(wildcard include/config/tiny/rcu.h) \
     $(wildcard include/config/tasks/rcu/generic.h) \
@@ -1059,7 +1060,6 @@ deps_net/core/secure_seq.o := \
     $(wildcard include/config/sock/validate/xmit.h) \
     $(wildcard include/config/rps.h) \
     $(wildcard include/config/sock/cgroup/data.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/hardirq.h \
   include/linux/context_tracking_state.h \
     $(wildcard include/config/context/tracking.h) \

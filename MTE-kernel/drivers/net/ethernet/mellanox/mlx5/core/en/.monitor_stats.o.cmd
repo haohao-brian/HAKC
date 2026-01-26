@@ -467,6 +467,7 @@ deps_drivers/net/ethernet/mellanox/mlx5/core/en/monitor_stats.o := \
   include/linux/prefetch.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rcupdate.h \
     $(wildcard include/config/preempt/rcu.h) \
     $(wildcard include/config/tiny/rcu.h) \
@@ -1076,7 +1077,6 @@ deps_drivers/net/ethernet/mellanox/mlx5/core/en/monitor_stats.o := \
     $(wildcard include/config/can.h) \
     $(wildcard include/config/crypto/user.h) \
     $(wildcard include/config/net/ns.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/net/netns/core.h \
   include/net/netns/mib.h \
     $(wildcard include/config/xfrm/statistics.h) \

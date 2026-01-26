@@ -107,20 +107,50 @@ static struct ipv6_pinfo *tcp_inet6_sk(const struct sock *sk)
 	return (struct ipv6_pinfo *)(((u8 *)sk) + offset);
 }
 
-static void inet6_sk_rx_dst_set(struct sock *sk, const struct sk_buff *skb)
+static noinline void inet6_sk_rx_dst_set(struct sock *sk, const struct sk_buff *skb)
 {
-	struct sk_buff *skbb = check_hakc_data_access(skb,0x20004);
-	struct dst_entry *dst = skb_dst(skbb);
-	sk = check_hakc_data_access(sk,0x20004);
+	const struct sk_buff *skb2 = skb;
+	struct dst_entry *dst = skb_dst(skb2);
+	
+	struct sock *sk2 = sk;
 
 	if (dst && dst_hold_safe(dst)) {
+		/* ★關鍵：把 dst 指標轉成 sock 所屬 claque/color 的表示法再存進去 */
+        claque_id_t sk_cl = get_hakc_address_claque(sk);
+        clique_color_t sk_col = get_hakc_address_color(sk);
+        dst = hakc_transfer_to_clique(dst, sizeof(*dst), sk_cl, sk_col, false);
+		
 		const struct rt6_info *rt = (const struct rt6_info *)dst;
 
-		sk->sk_rx_dst = dst;
-		inet_sk(sk)->rx_dst_ifindex = skbb->skb_iif;
-		tcp_inet6_sk(sk)->rx_dst_cookie = rt6_get_cookie(rt);
+		sk2->sk_rx_dst = dst;
+		inet_sk(sk2)->rx_dst_ifindex = skb2->skb_iif;
+		tcp_inet6_sk(sk2)->rx_dst_cookie = rt6_get_cookie(rt);
 	}
 }
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_sk_rx_dst_set, static void,
+	struct sock *sk, const struct sk_buff *skb){
+		clique_color_t sk_color = get_hakc_address_color(sk);
+		claque_id_t sk_claque = get_hakc_address_claque(sk);
+		clique_color_t skb_color = get_hakc_address_color(skb);
+		claque_id_t skb_claque = get_hakc_address_claque(skb);
+
+		sk = hakc_transfer_to_clique(sk,sizeof(struct sock),__claque_id, __color, false);
+		skb = (const struct sk_buff *)hakc_transfer_to_clique(
+                (void *)skb, sizeof(struct sk_buff), __claque_id, __color, false);
+		inet6_sk_rx_dst_set(sk,skb);
+		/*
+		if (((struct sock *)hakc_safe_ptr(sk))->sk_rx_dst)
+        	((struct sock *)hakc_safe_ptr(sk))->sk_rx_dst =  \
+				hakc_sign_pointer_with_color(((struct sock *)hakc_safe_ptr(sk))->sk_rx_dst, \
+                                                     sk_claque, sk_color);
+													 */
+		sk = hakc_transfer_to_clique(sk,sizeof(struct sock),sk_claque, sk_color, false);
+		skb = (const struct sk_buff *)hakc_transfer_to_clique(
+                (void *)skb, sizeof(struct sk_buff), skb_claque, skb_color, false);
+	}
+#endif
 
 static u32 tcp_v6_init_seq(const struct sk_buff *skb)
 {
@@ -1559,6 +1589,18 @@ ipv6_pktoptions:
 	kfree_skb(opt_skb);
 	return 0;
 }
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(tcp_v6_do_rcv, static int,
+    struct sock *sk, struct sk_buff *skb)
+{
+    struct sock *sk_tcp =
+        (struct sock *)hakc_sign_pointer_with_color(sk, __claque_id, false);
+    struct sk_buff *skb_tcp =
+        (struct sk_buff *)hakc_sign_pointer_with_color(skb, __claque_id, false);
+
+    return tcp_v6_do_rcv(sk_tcp, skb_tcp);
+}
+#endif
 
 static void tcp_v6_fill_cb(struct sk_buff *skb, const struct ipv6hdr *hdr,
 			   const struct tcphdr *th)
@@ -1859,7 +1901,7 @@ const struct inet_connection_sock_af_ops ipv6_specific = {
 	.queue_xmit	   = inet6_csk_xmit,
 	.send_check	   = tcp_v6_send_check,
 	.rebuild_header	   = inet6_sk_rebuild_header,
-	.sk_rx_dst_set	   = inet6_sk_rx_dst_set,
+	.sk_rx_dst_set	   = HAKC_OUTSIDE_TRANSFER_FUNC(inet6_sk_rx_dst_set),
 	.conn_request	   = tcp_v6_conn_request,
 	.syn_recv_sock	   = tcp_v6_syn_recv_sock,
 	.net_header_len	   = sizeof(struct ipv6hdr),
@@ -2129,7 +2171,7 @@ struct proto tcpv6_prot = {
 	.recvmsg		= tcp_recvmsg,
 	.sendmsg		= tcp_sendmsg,
 	.sendpage		= tcp_sendpage,
-	.backlog_rcv		= tcp_v6_do_rcv,
+	.backlog_rcv		= HAKC_OUTSIDE_TRANSFER_FUNC(tcp_v6_do_rcv),
 	.release_cb		= tcp_release_cb,
 	.hash			= inet6_hash,
 	.unhash			= inet_unhash,

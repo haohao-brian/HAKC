@@ -542,6 +542,7 @@ deps_drivers/net/ethernet/mellanox/mlx5/core/diag/en_tc_tracepoint.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/refcount.h \
   include/linux/sem.h \
   include/uapi/linux/sem.h \
@@ -1115,7 +1116,6 @@ deps_drivers/net/ethernet/mellanox/mlx5/core/diag/en_tc_tracepoint.o := \
     $(wildcard include/config/can.h) \
     $(wildcard include/config/crypto/user.h) \
     $(wildcard include/config/net/ns.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/net/netns/core.h \
   include/net/netns/mib.h \
     $(wildcard include/config/xfrm/statistics.h) \

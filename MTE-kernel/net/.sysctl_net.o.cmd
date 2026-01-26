@@ -651,6 +651,7 @@ deps_net/sysctl_net.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/sem.h \
   include/uapi/linux/sem.h \
   include/linux/ipc.h \
@@ -870,7 +871,6 @@ deps_net/sysctl_net.o := \
     $(wildcard include/config/sock/validate/xmit.h) \
     $(wildcard include/config/rps.h) \
     $(wildcard include/config/sock/cgroup/data.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
     $(wildcard include/config/tls/device.h) \
   include/linux/hardirq.h \
   include/linux/context_tracking_state.h \

@@ -542,6 +542,7 @@ deps_drivers/gpu/drm/msm/msm_atomic_tracepoints.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/refcount.h \
   include/linux/sem.h \
   include/uapi/linux/sem.h \

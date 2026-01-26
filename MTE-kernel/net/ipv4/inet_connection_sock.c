@@ -491,6 +491,11 @@ struct sock *inet_csk_accept(struct sock *sk, int flags, int *err, bool kern)
 			goto out_err;
 	}
 	req = reqsk_queue_remove(queue, sk);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+
+    req = (struct request_sock *)hakc_transfer_to_clique(hakc_safe_ptr(req),
+        sizeof(struct request_sock), 2, 0xf2, false);
+#endif
 	newsk = req->sk;
 
 	if (sk->sk_protocol == IPPROTO_TCP &&
@@ -690,16 +695,32 @@ EXPORT_SYMBOL(inet_rtx_syn_ack);
 /* return true if req was found in the ehash table */
 static bool reqsk_queue_unlink(struct request_sock *req)
 {
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+
+    req = (struct request_sock *)hakc_transfer_to_clique(hakc_safe_ptr(req),
+        sizeof(struct request_sock), 2, 0xf2, false);
+	req_to_sk(req)->sk_prot = hakc_sign_pointer_with_color(\
+		hakc_safe_ptr(req_to_sk(req)->sk_prot),\
+        2, false);	
+	req_to_sk(req)->sk_prot->h.hashinfo = hakc_sign_pointer_with_color(\
+		req_to_sk(req)->sk_prot->h.hashinfo,\
+        2, false);	
+#endif
 	struct inet_hashinfo *hashinfo = req_to_sk(req)->sk_prot->h.hashinfo;
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+    hashinfo = (struct inet_hashinfo *)hakc_sign_pointer_with_color(
+            hakc_safe_ptr(hashinfo), 2, false);
+#endif
 	bool found = false;
 
 	if (sk_hashed(req_to_sk(req))) {
 		spinlock_t *lock = inet_ehash_lockp(hashinfo, req->rsk_hash);
-
+		lock = hakc_safe_ptr(lock);
 		spin_lock(lock);
 		found = __sk_nulls_del_node_init_rcu(req_to_sk(req));
 		spin_unlock(lock);
 	}
+
 	if (timer_pending(&req->rsk_timer) && del_timer_sync(&req->rsk_timer))
 		reqsk_put(req);
 	return found;
@@ -976,7 +997,7 @@ struct sock *inet_csk_reqsk_queue_add(struct sock *sk,
 		inet_child_forget(sk, req, child);
 		child = NULL;
 	} else {
-		req->sk = child;
+		WRITE_ONCE(req->sk, hakc_safe_ptr(child));
 		req->dl_next = NULL;
 		if (queue->rskq_accept_head == NULL)
 			WRITE_ONCE(queue->rskq_accept_head, req);

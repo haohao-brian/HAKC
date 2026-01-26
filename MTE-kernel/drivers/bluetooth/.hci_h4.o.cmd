@@ -388,6 +388,7 @@ deps_drivers/bluetooth/hci_h4.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rcupdate.h \
     $(wildcard include/config/tiny/rcu.h) \
     $(wildcard include/config/tasks/rcu/generic.h) \
@@ -1099,7 +1100,6 @@ deps_drivers/bluetooth/hci_h4.o := \
     $(wildcard include/config/rps.h) \
     $(wildcard include/config/sock/cgroup/data.h) \
     $(wildcard include/config/inet.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/list_nulls.h \
   include/linux/netdevice.h \
     $(wildcard include/config/dcb.h) \

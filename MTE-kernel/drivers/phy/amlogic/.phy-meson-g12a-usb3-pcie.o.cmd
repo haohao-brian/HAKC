@@ -536,6 +536,7 @@ deps_drivers/phy/amlogic/phy-meson-g12a-usb3-pcie.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/refcount.h \
   include/linux/sem.h \
   include/uapi/linux/sem.h \

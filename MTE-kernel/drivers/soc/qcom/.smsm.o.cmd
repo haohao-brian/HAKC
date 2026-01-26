@@ -549,6 +549,7 @@ deps_drivers/soc/qcom/smsm.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/wait.h \
   include/uapi/linux/wait.h \
   include/linux/sem.h \

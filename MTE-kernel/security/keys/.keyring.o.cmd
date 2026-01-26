@@ -132,6 +132,7 @@ deps_security/keys/keyring.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/list.h \
     $(wildcard include/config/debug/list.h) \
   include/linux/poison.h \
@@ -908,7 +909,6 @@ deps_security/keys/keyring.o := \
     $(wildcard include/config/xdp/sockets.h) \
     $(wildcard include/config/crypto/user.h) \
     $(wildcard include/config/net/ns.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/net/flow.h \
   include/linux/socket.h \
   arch/arm64/include/generated/uapi/asm/socket.h \

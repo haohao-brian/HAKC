@@ -629,6 +629,7 @@ deps_net/sunrpc/auth_gss/gss_mech_switch.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/sem.h \
   include/uapi/linux/sem.h \
   include/linux/ipc.h \
@@ -866,7 +867,6 @@ deps_net/sunrpc/auth_gss/gss_mech_switch.o := \
     $(wildcard include/config/xdp/sockets.h) \
     $(wildcard include/config/crypto/user.h) \
     $(wildcard include/config/net/ns.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/net/flow.h \
   include/linux/socket.h \
   arch/arm64/include/generated/uapi/asm/socket.h \

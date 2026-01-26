@@ -406,6 +406,7 @@ deps_fs/nfs/nfs42proc.o := \
   include/linux/dcache.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rcupdate.h \
     $(wildcard include/config/preempt/rcu.h) \
     $(wildcard include/config/tiny/rcu.h) \
@@ -799,7 +800,6 @@ deps_fs/nfs/nfs42proc.o := \
   include/uapi/linux/in6.h \
   include/net/ipv6.h \
     $(wildcard include/config/have/efficient/unaligned/access.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/ipv6.h \
     $(wildcard include/config/ipv6/router/pref.h) \
     $(wildcard include/config/ipv6/route/info.h) \

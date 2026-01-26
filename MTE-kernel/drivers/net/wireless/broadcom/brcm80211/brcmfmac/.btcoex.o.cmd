@@ -605,6 +605,7 @@ deps_drivers/net/wireless/broadcom/brcm80211/brcmfmac/btcoex.o := \
   include/linux/prefetch.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/dynamic_queue_limits.h \
   include/linux/ethtool.h \
   include/linux/compat.h \
@@ -1069,7 +1070,6 @@ deps_drivers/net/wireless/broadcom/brcm80211/brcmfmac/btcoex.o := \
     $(wildcard include/config/can.h) \
     $(wildcard include/config/crypto/user.h) \
     $(wildcard include/config/net/ns.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/net/netns/core.h \
   include/net/netns/mib.h \
     $(wildcard include/config/xfrm/statistics.h) \

@@ -441,6 +441,7 @@ deps_fs/nfs/blocklayout/extent_tree.o := \
   include/linux/dcache.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rculist_bl.h \
   include/linux/list_bl.h \
   include/linux/bit_spinlock.h \
@@ -1129,7 +1130,6 @@ deps_fs/nfs/blocklayout/extent_tree.o := \
     $(wildcard include/config/xdp/sockets.h) \
     $(wildcard include/config/crypto/user.h) \
     $(wildcard include/config/net/ns.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/net/flow.h \
   include/linux/in6.h \
   include/uapi/linux/in6.h \

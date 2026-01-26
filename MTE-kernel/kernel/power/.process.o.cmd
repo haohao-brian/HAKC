@@ -479,6 +479,7 @@ deps_kernel/power/process.o := \
     $(wildcard include/config/stack/growsup.h) \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/signal.h \
   include/linux/signal_types.h \
     $(wildcard include/config/old/sigaction.h) \

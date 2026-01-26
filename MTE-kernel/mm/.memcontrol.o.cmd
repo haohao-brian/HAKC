@@ -307,6 +307,7 @@ deps_mm/memcontrol.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/list.h \
     $(wildcard include/config/debug/list.h) \
   include/linux/poison.h \
@@ -1203,7 +1204,6 @@ deps_mm/memcontrol.o := \
     $(wildcard include/config/net/rx/busy/poll.h) \
     $(wildcard include/config/sock/validate/xmit.h) \
     $(wildcard include/config/rps.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
     $(wildcard include/config/tls/device.h) \
   include/linux/list_nulls.h \
   include/linux/netdevice.h \

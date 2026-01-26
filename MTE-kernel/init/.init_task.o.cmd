@@ -419,6 +419,7 @@ deps_init/init_task.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/wait.h \
   include/linux/spinlock.h \
   arch/arm64/include/generated/asm/mmiowb.h \
@@ -977,7 +978,6 @@ deps_init/init_task.o := \
     $(wildcard include/config/xdp/sockets.h) \
     $(wildcard include/config/crypto/user.h) \
     $(wildcard include/config/net/ns.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/net/flow.h \
   include/linux/in6.h \
   include/uapi/linux/in6.h \

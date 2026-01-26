@@ -304,10 +304,7 @@ drop:
 
 int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, struct net_device *orig_dev)
 {
-#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-	skb->dev = hakc_transfer_to_clique(skb->dev,sizeof(skb->dev),__claque_id,__color,false);
-#endif
-	struct net *net = dev_net(skb->dev);
+	struct net *net = dev_net(dev);
 
 	skb = ip6_rcv_core(skb, dev, net);
 	if (skb == NULL)
@@ -316,6 +313,23 @@ int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt
 		       net, NULL, skb, dev, NULL,
 		       ip6_rcv_finish);
 }
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(ipv6_rcv, int, struct sk_buff *skb,\
+	 struct net_device *dev, struct packet_type *pt, \
+	 struct net_device *orig_dev) {
+    if (skb)
+        skb = hakc_transfer_to_clique(skb, sizeof(skb), __claque_id, __color, false);
+    if (dev)
+        dev = hakc_transfer_to_clique(dev, sizeof(dev), __claque_id, __color, false);
+    if (pt)
+        pt  = hakc_transfer_to_clique(pt, sizeof(pt), __claque_id, __color, false);
+    if (orig_dev)
+        orig_dev = hakc_transfer_to_clique(orig_dev, sizeof(orig_dev), __claque_id, __color, false);
+
+    return ipv6_rcv(skb, dev, pt, orig_dev);
+}
+#endif
 
 static void ip6_sublist_rcv(struct list_head *head, struct net_device *dev,
 			    struct net *net)

@@ -383,6 +383,7 @@ deps_kernel/irq_work.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rcupdate.h \
     $(wildcard include/config/tasks/rcu/generic.h) \
     $(wildcard include/config/rcu/stall/common.h) \

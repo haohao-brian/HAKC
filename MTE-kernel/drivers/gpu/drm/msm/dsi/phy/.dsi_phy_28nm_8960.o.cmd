@@ -619,6 +619,7 @@ deps_drivers/gpu/drm/msm/dsi/phy/dsi_phy_28nm_8960.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/sem.h \
   include/uapi/linux/sem.h \
   include/linux/ipc.h \

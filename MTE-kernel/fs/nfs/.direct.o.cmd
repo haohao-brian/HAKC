@@ -126,6 +126,7 @@ deps_fs/nfs/direct.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/list.h \
     $(wildcard include/config/debug/list.h) \
   include/linux/poison.h \
@@ -1061,7 +1062,6 @@ deps_fs/nfs/direct.o := \
     $(wildcard include/config/xdp/sockets.h) \
     $(wildcard include/config/crypto/user.h) \
     $(wildcard include/config/net/ns.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/net/flow.h \
   include/linux/in6.h \
   include/uapi/linux/in6.h \

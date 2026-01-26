@@ -355,6 +355,7 @@ deps_arch/arm64/kvm/perf.o := \
   include/linux/debug_locks.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rcupdate.h \
     $(wildcard include/config/preempt/rcu.h) \
     $(wildcard include/config/tiny/rcu.h) \

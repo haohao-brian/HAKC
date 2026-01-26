@@ -666,6 +666,7 @@ deps_drivers/gpu/drm/msm/disp/mdp4/mdp4_dsi_encoder.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/sem.h \
   include/uapi/linux/sem.h \
   include/linux/ipc.h \

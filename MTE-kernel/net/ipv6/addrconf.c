@@ -481,8 +481,22 @@ static void hakc_dump_dev_handles(struct net_device *dev)
 	preempt_enable();
 }
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+HAKC_SYMBOL_CLAQUE(demotest2, 2, GREEN_CLIQUE,
+		  HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(RED_CLIQUE));
+#endif
+
+noinline int demotest2(struct net_device *dev){
+    return READ_ONCE(dev->mtu);   // 真的 deref dev，避免被折掉
+}
+
+noinline int demotest1(struct net_device *dev){
+    pr_err("%d\n", demotest2(dev));
+    return 0;
+}
 static struct inet6_dev *ipv6_add_dev(struct net_device *dev)
 {
+	demotest1(dev);
 	struct inet6_dev *ndev;
 	int err = -ENOMEM;
 
@@ -5300,6 +5314,14 @@ struct inet6_fill_args {
 static int inet6_fill_ifaddr(struct sk_buff *skb, struct inet6_ifaddr *ifa,
 			     struct inet6_fill_args *args)
 {
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+    ifa = hakc_transfer_to_clique(ifa, sizeof(*ifa), __claque_id, __color,
+                                false);
+	skb = hakc_transfer_to_clique(skb, sizeof(*skb), __claque_id, __color,
+								false);
+	args = hakc_transfer_to_clique(args, sizeof(*args), __claque_id, __color,
+								false);
+#endif
 	struct nlmsghdr  *nlh;
 	u32 preferred, valid;
 
@@ -5308,8 +5330,21 @@ static int inet6_fill_ifaddr(struct sk_buff *skb, struct inet6_ifaddr *ifa,
 	if (!nlh)
 		return -EMSGSIZE;
 
-	put_ifaddrmsg(nlh, ifa->prefix_len, ifa->flags, rt_scope(ifa->scope),
-		      ifa->idev->dev->ifindex);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+    /* 這兩個是你現在最可能炸的點：ifa->idev、idev->dev */
+    struct inet6_dev *idev_local =
+        (struct inet6_dev *)hakc_sign_pointer_with_color(hakc_safe_ptr(ifa->idev),
+                                                         __claque_id, false);
+    struct net_device *dev_local =
+        (struct net_device *)hakc_sign_pointer_with_color(hakc_safe_ptr(idev_local->dev),
+                                                          __claque_id, false);
+
+    put_ifaddrmsg(nlh, ifa->prefix_len, ifa->flags, rt_scope(ifa->scope),
+                  dev_local->ifindex);
+#else
+    put_ifaddrmsg(nlh, ifa->prefix_len, ifa->flags, rt_scope(ifa->scope),
+                  ifa->idev->dev->ifindex);
+#endif
 
 	if (args->netnsid >= 0 &&
 	    nla_put_s32(skb, IFA_TARGET_NETNSID, args->netnsid))
@@ -5550,9 +5585,21 @@ static int inet6_valid_dump_ifaddr_req(const struct nlmsghdr *nlh,
 	return 0;
 }
 
-static int inet6_dump_addr(struct sk_buff *skb, struct netlink_callback *cb,
+static noinline int inet6_dump_addr(struct sk_buff *skb, struct netlink_callback *cb,
 			   enum addr_type_t type)
 {
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	cb = (struct netlink_callback *)hakc_sign_pointer_with_color( \
+		hakc_safe_ptr(cb), __claque_id, false);
+	skb = (struct sk_buff *)hakc_sign_pointer_with_color( \
+		hakc_safe_ptr(skb), __claque_id, false);
+	cb->skb = hakc_sign_pointer_with_color( \
+		hakc_safe_ptr(cb->skb), __claque_id, false);
+    cb->nlh = hakc_sign_pointer_with_color(\
+		hakc_safe_ptr(cb->nlh), __claque_id, false);
+    skb->sk = hakc_sign_pointer_with_color(\
+		hakc_safe_ptr(skb->sk), __claque_id, false);
+#endif
 	const struct nlmsghdr *nlh = cb->nlh;
 	struct inet6_fill_args fillargs = {
 		.portid = NETLINK_CB(cb->skb).portid,
@@ -5561,6 +5608,7 @@ static int inet6_dump_addr(struct sk_buff *skb, struct netlink_callback *cb,
 		.netnsid = -1,
 		.type = type,
 	};
+	skb->sk = hakc_safe_ptr(skb->sk);
 	struct net *net = sock_net(skb->sk);
 	struct net *tgt_net = net;
 	int idx, s_idx, s_ip_idx;
@@ -5570,24 +5618,34 @@ static int inet6_dump_addr(struct sk_buff *skb, struct netlink_callback *cb,
 	struct hlist_head *head;
 	int err = 0;
 
-	s_h = cb->args[0];
-	s_idx = idx = cb->args[1];
-	s_ip_idx = cb->args[2];
+	s_h = hakc_safe_ptr(cb->args[0]);
+	s_idx = idx = hakc_safe_ptr(cb->args[1]);
+	s_ip_idx = hakc_safe_ptr(cb->args[2]);
 
 	if (cb->strict_check) {
 		err = inet6_valid_dump_ifaddr_req(nlh, &fillargs, &tgt_net,
 						  skb->sk, cb);
 		if (err < 0)
 			goto put_tgt_net;
-
+		
 		err = 0;
 		if (fillargs.ifindex) {
 			dev = __dev_get_by_index(tgt_net, fillargs.ifindex);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+			dev = (struct net_device *)hakc_sign_pointer_with_color(
+        				hakc_safe_ptr(dev), __claque_id, false);
+#endif
 			if (!dev) {
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+				idev = (struct inet6_dev *)hakc_sign_pointer_with_color(
+						hakc_safe_ptr(idev), __claque_id, false);
+#endif
+
 				err = -ENODEV;
 				goto put_tgt_net;
 			}
 			idev = __in6_dev_get(dev);
+			idev = hakc_safe_ptr(idev);
 			if (idev) {
 				err = in6_dump_addrs(idev, skb, cb, s_ip_idx,
 						     &fillargs);
@@ -5603,20 +5661,61 @@ static int inet6_dump_addr(struct sk_buff *skb, struct netlink_callback *cb,
 	for (h = s_h; h < NETDEV_HASHENTRIES; h++, s_idx = 0) {
 		idx = 0;
 		head = &tgt_net->dev_index_head[h];
-		hlist_for_each_entry_rcu(dev, head, index_hlist) {
+		head = hakc_safe_ptr(head);
+		dev = hakc_safe_ptr(dev);
+		struct hlist_node *n_raw, *n_next_raw;
+
+		n_raw = rcu_dereference_raw(hlist_first_rcu(head));
+		while (n_raw) {
+			/* 1) 先把 node 變 canonical / safe，避免 container_of 用到 0x02.. */
+			struct hlist_node *n_safe = (struct hlist_node *)hakc_safe_ptr(n_raw);
+
+			/* 2) 用 safe node 算回 dev（這時 dev 是 ffff...） */
+			struct net_device *dev_safe =
+				container_of(n_safe, struct net_device, index_hlist);
+
+			/* 3) 下一個 node 也要從「safe node」取，否則又會用 0x02.. 去讀 next */
+			n_next_raw = rcu_dereference_raw(n_safe->next);
+
+			/* === 下面開始就是你原本的邏輯，只是把 dev 改成 dev_safe/dev_local === */
+
+			struct net_device *dev_raw = dev_safe;
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+			/* 只做 localize：不改 list、不改 dev 指標本體 */
+			struct net_device *dev_local =
+				(struct net_device *)hakc_sign_pointer_with_color(
+					hakc_safe_ptr(dev_raw), __claque_id, false);
+#else
+			struct net_device *dev_local = dev_raw;
+#endif
+
+			pr_err("hlist_iter dev_safe=%px dev_local=%px node_raw=%px node_safe=%px\n",
+				dev_safe, dev_local, n_raw, n_safe);
+
 			if (idx < s_idx)
 				goto cont;
 			if (h > s_h || idx > s_idx)
 				s_ip_idx = 0;
-			idev = __in6_dev_get(dev);
+
+			/* ✅ __in6_dev_get 會 deref dev，所以傳 dev_local */
+			idev = __in6_dev_get(dev_local);
 			if (!idev)
 				goto cont;
 
-			if (in6_dump_addrs(idev, skb, cb, s_ip_idx,
-					   &fillargs) < 0)
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+			idev = (struct inet6_dev *)hakc_sign_pointer_with_color(
+				hakc_safe_ptr(idev), __claque_id, false);
+#endif
+
+			if (in6_dump_addrs(idev, skb, cb, s_ip_idx, &fillargs) < 0)
 				goto done;
+
 cont:
 			idx++;
+
+			/* 4) 迭代前進：用我們剛取到的 next_raw */
+			n_raw = n_next_raw;
 		}
 	}
 done:
@@ -5633,7 +5732,6 @@ put_tgt_net:
 static int inet6_dump_ifaddr(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	enum addr_type_t type = UNICAST_ADDR;
-
 	return inet6_dump_addr(skb, cb, type);
 }
 
@@ -7818,8 +7916,6 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(addrconf_init, void, void) {
 	init_net.loopback_dev = hakc_sign_pointer_with_color(
 		init_net.loopback_dev, __claque_id, false);
 }
-
-
 #endif
 
 /*

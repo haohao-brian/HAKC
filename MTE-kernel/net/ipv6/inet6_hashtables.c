@@ -56,45 +56,94 @@ u32 inet6_ehashfn(const struct net *net,
  * The sockhash lock must be held as a reader here.
  */
 struct sock *__inet6_lookup_established(struct net *net,
-					struct inet_hashinfo *hashinfo,
-					   const struct in6_addr *saddr,
-					   const __be16 sport,
-					   const struct in6_addr *daddr,
-					   const u16 hnum,
-					   const int dif, const int sdif)
+                                        struct inet_hashinfo *hashinfo,
+                                        const struct in6_addr *saddr,
+                                        const __be16 sport,
+                                        const struct in6_addr *daddr,
+                                        const u16 hnum,
+                                        const int dif, const int sdif)
 {
-	struct sock *sk;
-	const struct hlist_nulls_node *node;
-	const __portpair ports = INET_COMBINED_PORTS(sport, hnum);
-	/* Optimize here for direct hit, only listening connections can
-	 * have wildcards anyways.
-	 */
-	unsigned int hash = inet6_ehashfn(net, daddr, hnum, saddr, sport);
-	unsigned int slot = hash & hashinfo->ehash_mask;
-	struct inet_ehash_bucket *head = &hashinfo->ehash[slot];
+    struct sock *sk;
+    const struct hlist_nulls_node *nulls_end;   /* 原本的 node（for-each 迴圈跑完的那顆 nulls） */
+    const __portpair ports = INET_COMBINED_PORTS(sport, hnum);
+    unsigned int hash = inet6_ehashfn(net, daddr, hnum, saddr, sport);
+    unsigned int slot, mask;
 
+    struct inet_ehash_bucket *head;
+    struct hlist_nulls_node *hn_raw;            /* raw node ptr (可能帶 nulls marker) */
+    struct hlist_nulls_node *hn;                /* localized node ptr (拿來 deref) */
+    struct sock *sk_raw;
+    struct sock *sk_local;
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+    struct inet_hashinfo *hi;
+    struct inet_ehash_bucket *ehash;
+    hi = (struct inet_hashinfo *)hakc_sign_pointer_with_color(
+            hakc_safe_ptr(hashinfo), __claque_id, false);
+    ehash = (struct inet_ehash_bucket *)hakc_sign_pointer_with_color(
+            hakc_safe_ptr(READ_ONCE(hi->ehash)), __claque_id, false);
+    mask = READ_ONCE(hi->ehash_mask);
+    slot = hash & mask;
+    head = &ehash[slot];
+#else
+    mask = hashinfo->ehash_mask;
+    slot = hash & mask;
+    head = &hashinfo->ehash[slot];
+#endif
 
 begin:
-	sk_nulls_for_each_rcu(sk, node, &head->chain) {
-		if (sk->sk_hash != hash)
-			continue;
-		if (!INET6_MATCH(sk, net, saddr, daddr, ports, dif, sdif))
-			continue;
-		if (unlikely(!refcount_inc_not_zero(&sk->sk_refcnt)))
-			goto out;
+    barrier();
+    hn_raw = rcu_dereference_raw(hlist_nulls_first_rcu(&head->chain));
 
-		if (unlikely(!INET6_MATCH(sk, net, saddr, daddr, ports, dif, sdif))) {
-			sock_gen_put(sk);
-			goto begin;
-		}
-		goto found;
-	}
-	if (get_nulls_value(node) != slot)
-		goto begin;
+    for (; !is_a_nulls(hn_raw); ) {
+
+        /* 用 raw 判斷完非 nulls 後，再做 localize 來 deref */
+        hn = hn_raw;
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+        hn = (struct hlist_nulls_node *)
+                hakc_sign_pointer_with_color(hakc_safe_ptr(hn_raw),
+                                            __claque_id, false);
+#endif
+
+        sk_raw = hlist_nulls_entry(hn, struct sock, sk_nulls_node);
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+        sk_local = (struct sock *)hakc_sign_pointer_with_color(
+                        hakc_safe_ptr(sk_raw), __claque_id, __color);
+#else
+        sk_local = sk_raw;
+#endif
+
+        if (sk_local->sk_hash != hash)
+            goto next;
+        if (!INET6_MATCH(sk_local, net, saddr, daddr, ports, dif, sdif))
+            goto next;
+
+        if (unlikely(!refcount_inc_not_zero(&sk_raw->sk_refcnt)))
+            goto out;
+
+        if (unlikely(!INET6_MATCH(sk_local, net, saddr, daddr, ports, dif, sdif))) {
+            sock_gen_put(sk_raw);
+            goto begin;
+        }
+
+        sk = sk_raw;          /* 回傳 raw */
+        goto found;
+
+next:
+        /* next 一定用 localized hn 去 deref next */
+        hn_raw = rcu_dereference_raw(hlist_nulls_next_rcu(hn));
+    }
+
+    /* 迴圈結束時 hn_raw 就是 nulls marker */
+    nulls_end = (const struct hlist_nulls_node *)hn_raw;
+    if (get_nulls_value(nulls_end) != slot)
+        goto begin;
+
 out:
-	sk = NULL;
+    sk = NULL;
 found:
-	return sk;
+    return sk;
 }
 EXPORT_SYMBOL(__inet6_lookup_established);
 

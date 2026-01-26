@@ -553,10 +553,10 @@ static void *check_hakc_access(const void *address,
 	}
 
     // clear top byte tag (TBI/MTE) so we read the canonical high bits
-    if(((a >> 48) << 8) == 0xFFull){
+    //if(((a >> 48) << 8) == 0xFFull){
 		//HAKC_INFO("return immediately because of 0x**ff...\n");
-		return (void *)address;
-	}
+	//	return (void *)address;
+	//}
 	
 	if (is_percpu_va(address)){
 		//HAKC_INFO("is_percpu_va so skip %p\n",address);
@@ -594,7 +594,8 @@ static void *check_hakc_access(const void *address,
 		unsigned long ip = this_cpu_read(hakc_last_chk_caller);
 		ip = ptrauth_strip_insn_pac(ip);
 		if (ip) ip -= 4;
-		HAKC_INFO("NOT CORRECT caller=%pS correct ptr=%px current ptr=%px\n", (void *)ip, r, ctx_addr);
+		HAKC_INFO("NOT CORRECT caller=%pS correct ptr=%px current ptr=%px addr=%px\n",\
+			 (void *)ip, r, ctx_addr, address);
 		if (caller_in_whitelist(ip)){
 			HAKC_INFO("white list detected\n");
 		}

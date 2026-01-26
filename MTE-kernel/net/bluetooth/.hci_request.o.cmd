@@ -26,6 +26,7 @@ deps_net/bluetooth/hci_request.o := \
     $(wildcard include/config/stack/growsup.h) \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/list.h \
     $(wildcard include/config/debug/list.h) \
   include/linux/types.h \
@@ -797,7 +798,6 @@ deps_net/bluetooth/hci_request.o := \
     $(wildcard include/config/rps.h) \
     $(wildcard include/config/sock/cgroup/data.h) \
     $(wildcard include/config/inet.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
     $(wildcard include/config/tls/device.h) \
   include/linux/hardirq.h \
   include/linux/context_tracking_state.h \

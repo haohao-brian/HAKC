@@ -440,6 +440,7 @@ deps_drivers/iommu/iova.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/wait.h \
   include/linux/spinlock.h \
   arch/arm64/include/generated/asm/mmiowb.h \

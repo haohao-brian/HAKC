@@ -392,6 +392,7 @@ deps_fs/nfs/client.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rcupdate.h \
     $(wildcard include/config/tiny/rcu.h) \
     $(wildcard include/config/tasks/rcu/generic.h) \
@@ -928,7 +929,6 @@ deps_fs/nfs/client.o := \
   include/uapi/linux/in6.h \
   include/net/ipv6.h \
     $(wildcard include/config/have/efficient/unaligned/access.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/ipv6.h \
     $(wildcard include/config/ipv6/router/pref.h) \
     $(wildcard include/config/ipv6/route/info.h) \

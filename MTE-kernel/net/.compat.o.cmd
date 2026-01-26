@@ -567,6 +567,7 @@ deps_net/compat.o := \
   include/linux/dcache.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rculist_bl.h \
   include/linux/list_bl.h \
   include/linux/bit_spinlock.h \
@@ -1028,7 +1029,6 @@ deps_net/compat.o := \
     $(wildcard include/config/rps.h) \
     $(wildcard include/config/sock/cgroup/data.h) \
     $(wildcard include/config/inet.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/hardirq.h \
   include/linux/context_tracking_state.h \
     $(wildcard include/config/context/tracking.h) \

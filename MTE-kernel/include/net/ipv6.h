@@ -981,6 +981,11 @@ static inline __be32 flowi6_get_flowlabel(const struct flowi6 *fl6)
 
 int ipv6_rcv(struct sk_buff *skb, struct net_device *dev,
 	     struct packet_type *pt, struct net_device *orig_dev);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(ipv6_rcv, int, struct sk_buff *skb, \
+	struct net_device *dev, \
+	struct packet_type *pt, struct net_device *orig_dev);
+#endif
 void ipv6_list_rcv(struct list_head *head, struct packet_type *pt,
 		   struct net_device *orig_dev);
 

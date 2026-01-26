@@ -420,6 +420,7 @@ deps_kernel/events/core.o := \
   include/linux/dcache.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rcupdate.h \
     $(wildcard include/config/preempt/rcu.h) \
     $(wildcard include/config/tiny/rcu.h) \
@@ -1321,7 +1322,6 @@ deps_kernel/events/core.o := \
     $(wildcard include/config/mpls.h) \
     $(wildcard include/config/can.h) \
     $(wildcard include/config/crypto/user.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/net/netns/core.h \
   include/net/netns/mib.h \
     $(wildcard include/config/xfrm/statistics.h) \

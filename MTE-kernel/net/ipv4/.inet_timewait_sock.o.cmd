@@ -628,6 +628,7 @@ deps_net/ipv4/inet_timewait_sock.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/sem.h \
   include/uapi/linux/sem.h \
   include/linux/ipc.h \
@@ -1081,7 +1082,6 @@ deps_net/ipv4/inet_timewait_sock.o := \
     $(wildcard include/config/rps.h) \
     $(wildcard include/config/sock/cgroup/data.h) \
     $(wildcard include/config/inet.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/list_nulls.h \
   include/linux/netdevice.h \
     $(wildcard include/config/dcb.h) \

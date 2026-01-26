@@ -378,6 +378,7 @@ deps_net/bluetooth/hci_sock.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/rcupdate.h \
     $(wildcard include/config/tiny/rcu.h) \
     $(wildcard include/config/tasks/rcu/generic.h) \
@@ -829,7 +830,6 @@ deps_net/bluetooth/hci_sock.o := \
     $(wildcard include/config/rps.h) \
     $(wildcard include/config/sock/cgroup/data.h) \
     $(wildcard include/config/inet.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
     $(wildcard include/config/tls/device.h) \
   include/linux/hardirq.h \
   include/linux/context_tracking_state.h \

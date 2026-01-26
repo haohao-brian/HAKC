@@ -251,6 +251,7 @@ deps_drivers/net/ethernet/mellanox/mlx5/core/esw/acl/egress_ofld.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/list.h \
     $(wildcard include/config/debug/list.h) \
   include/linux/poison.h \
@@ -1098,7 +1099,6 @@ deps_drivers/net/ethernet/mellanox/mlx5/core/esw/acl/egress_ofld.o := \
   include/linux/irq_poll.h \
   include/net/ipv6.h \
     $(wildcard include/config/ipv6.h) \
-    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/ipv6.h \
     $(wildcard include/config/ipv6/router/pref.h) \
     $(wildcard include/config/ipv6/route/info.h) \

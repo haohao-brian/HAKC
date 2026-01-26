@@ -584,16 +584,37 @@ static inline void hlists_swap_heads_rcu(struct hlist_head *left, struct hlist_h
  * problems on Alpha CPUs.  Regardless of the type of CPU, the
  * list-traversal primitive must be guarded by rcu_read_lock().
  */
+#define HAKC_BADPTR(p)  ((((unsigned long)(p)) >> 56) == 0x02)
+#define HAKC_LOG_PTR(tag, p) pr_err("HAKC:%s %s=%px\n", __func__, tag, (void *)(p))
+
 static inline void hlist_add_head_rcu(struct hlist_node *n,
 					struct hlist_head *h)
 {
+#ifdef CONFIG_PAC_MTE_COMPART_IPV6
+	if (HAKC_BADPTR(n) || HAKC_BADPTR(h) || HAKC_BADPTR(READ_ONCE(h->first))) {
+		pr_err("HAKC DIRTY add: n=%px h=%px h->first=%px caller=%pS\n",
+			n, h, READ_ONCE(h->first), __builtin_return_address(0));
+		dump_stack();
+	}
+	n = hakc_safe_ptr(n);
+	h = hakc_safe_ptr(h);
+#endif
 	struct hlist_node *first = h->first;
-
+#ifdef CONFIG_PAC_MTE_COMPART_IPV6
+	first = hakc_safe_ptr(first);
+#endif
 	n->next = first;
 	WRITE_ONCE(n->pprev, &h->first);
 	rcu_assign_pointer(hlist_first_rcu(h), n);
 	if (first)
 		WRITE_ONCE(first->pprev, &n->next);
+	#ifdef CONFIG_PAC_MTE_COMPART_IPV6
+	/* 真的要驗證 linkage 是否 canonical：印「寫完之後」 */
+	if (HAKC_BADPTR(READ_ONCE(h->first)) || HAKC_BADPTR(READ_ONCE(n->next))) {
+		pr_err("HAKC DIRTY add(out): h->first=%px n->next=%px caller=%pS\n",
+		       READ_ONCE(h->first), READ_ONCE(n->next), __builtin_return_address(0));
+	}
+#endif
 }
 
 /**

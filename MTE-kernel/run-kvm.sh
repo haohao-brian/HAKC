@@ -102,7 +102,10 @@ qemu-system-aarch64 \
   -serial chardev:char0 \
   -mon chardev=char0,mode=readline \
   -append "console=ttyAMA0,115200 root=/dev/vda rw earlycon=pl011,0x09000000 \
-           initcall_debug rcupdate.rcu_cpu_stall_timeout=20 loglevel=1 log_buf_len=160M cgroup_disable=memory" \
-  -virtfs local,path=$SHARED_DIR,mount_tag=shared,security_model=mapped
+           initcall_debug rcupdate.rcu_cpu_stall_timeout=20 loglevel=1 log_buf_len=160M cgroup_disable=memory nokaslr" \
+  -virtfs local,path=$SHARED_DIR,mount_tag=shared,security_model=mapped 
+#  -s -S
 #  -netdev tap,id=net0,ifname=tap0,script=no,downscript=no \
 #  -device virtio-net-pci,netdev=net0,mac=de:ad:be:ef:41:49 \
+#  -d plugin -D /tmp/qemu-plugin.log \
+#  -plugin ./memtrace.so,begin=0x13228,end=0x13738,load=1 \

@@ -366,6 +366,7 @@ static void list_netdevice(struct net_device *dev)
 	write_lock_bh(&dev_base_lock);
 	list_add_tail_rcu(&dev->dev_list, &net->dev_base_head);
 	netdev_name_node_add(net, dev->name_node);
+	
 	hlist_add_head_rcu(&dev->index_hlist,
 			   dev_index_hash(net, dev->ifindex));
 	write_unlock_bh(&dev_base_lock);
@@ -10184,6 +10185,7 @@ int register_netdevice(struct net_device *dev)
 	linkwatch_init_dev(dev);
 
 	dev_init_scheduler(dev);
+
 	dev_hold(dev);
 	list_netdevice(dev);
 	add_device_randomness(dev->dev_addr, dev->addr_len);
@@ -10866,6 +10868,7 @@ EXPORT_SYMBOL(unregister_netdev);
 
 int dev_change_net_namespace(struct net_device *dev, struct net *net, const char *pat)
 {
+	dev = hakc_safe_ptr(dev);
 	struct net *net_old = dev_net(dev);
 	int err, new_nsid, new_ifindex;
 

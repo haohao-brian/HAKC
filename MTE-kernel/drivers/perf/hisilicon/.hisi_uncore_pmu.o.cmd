@@ -551,6 +551,7 @@ deps_drivers/perf/hisilicon/hisi_uncore_pmu.o := \
   include/linux/pid.h \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/wait.h \
   include/uapi/linux/wait.h \
   include/linux/sem.h \

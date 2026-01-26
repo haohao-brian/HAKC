@@ -559,6 +559,7 @@ deps_fs/notify/group.o := \
     $(wildcard include/config/kasan/inline.h) \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   include/linux/memcontrol.h \
     $(wildcard include/config/cgroup/writeback.h) \
     $(wildcard include/config/memcg/swap.h) \

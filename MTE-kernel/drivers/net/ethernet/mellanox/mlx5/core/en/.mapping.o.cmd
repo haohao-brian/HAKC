@@ -566,6 +566,7 @@ deps_drivers/net/ethernet/mellanox/mlx5/core/en/mapping.o := \
     $(wildcard include/config/have/arch/hash.h) \
   include/linux/rculist.h \
     $(wildcard include/config/prove/rcu/list.h) \
+    $(wildcard include/config/pac/mte/compart/ipv6.h) \
   drivers/net/ethernet/mellanox/mlx5/core/en/mapping.h \
 
 drivers/net/ethernet/mellanox/mlx5/core/en/mapping.o: $(deps_drivers/net/ethernet/mellanox/mlx5/core/en/mapping.o)
