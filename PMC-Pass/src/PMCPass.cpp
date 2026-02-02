@@ -1969,6 +1969,143 @@ namespace {
                 }
             }
         }
+        // ============================================================
+        // [GEP-CHECK-ONLY] Ensure "GEP -> mem-use" has a data-check right before use.
+        // Prefer using cloned GEP (authenticatedPtrs[GEP]) as mem operand.
+        // Do NOT replace mem operand with auth-call return value.
+        // ============================================================
+
+        unsigned gepCheckInserted = 0;
+        unsigned gepMemOpToClone = 0;
+
+        auto isMemUseInst = [](Instruction *I) -> bool {
+            return isa<LoadInst>(I) || isa<StoreInst>(I) || isa<MemIntrinsic>(I);
+        };
+
+        auto getMemPtrFromLoadStore = [](Instruction *I) -> Value * {
+            if (auto *LI = dyn_cast<LoadInst>(I))  return LI->getPointerOperand(); // op0
+            if (auto *SI = dyn_cast<StoreInst>(I)) return SI->getPointerOperand(); // op1
+            return nullptr;
+        };
+
+        auto setLoadStorePtr = [&](Instruction *I, Value *NewPtr) {
+            if (auto *LI = dyn_cast<LoadInst>(I)) {
+                if (NewPtr->getType() != LI->getPointerOperand()->getType()) {
+                    IRBuilder<> B(I);
+                    NewPtr = B.CreateBitOrPointerCast(NewPtr, LI->getPointerOperand()->getType());
+                }
+                LI->setOperand(0, NewPtr);
+                return;
+            }
+            if (auto *SI = dyn_cast<StoreInst>(I)) {
+                if (NewPtr->getType() != SI->getPointerOperand()->getType()) {
+                    IRBuilder<> B(I);
+                    NewPtr = B.CreateBitOrPointerCast(NewPtr, SI->getPointerOperand()->getType());
+                }
+                SI->setOperand(1, NewPtr);
+                return;
+            }
+        };
+
+        auto setCallArg = [&](CallInst *CI, unsigned ArgNo, Value *NewPtr) {
+            Value *Old = CI->getArgOperand(ArgNo);
+            if (NewPtr->getType() != Old->getType()) {
+                IRBuilder<> B(CI);
+                NewPtr = B.CreateBitOrPointerCast(NewPtr, Old->getType());
+            }
+            CI->setArgOperand(ArgNo, NewPtr);
+        };
+
+        for (auto &it : signedPtrsUses) {
+            Value *BaseKey = it.first;
+
+            for (auto *U : it.second) {
+                Instruction *UseI = dyn_cast<Instruction>(U);
+                if (!UseI) continue;
+                if (!isMemUseInst(UseI)) continue;
+
+                // -------- Load / Store --------
+                if (isa<LoadInst>(UseI) || isa<StoreInst>(UseI)) {
+                    Value *Ptr = getMemPtrFromLoadStore(UseI);
+                    if (!Ptr) continue;
+
+                    // 允許 bitcast / gep -> bitcast
+                    Value *Under = Ptr->stripPointerCasts();
+                    auto *G = dyn_cast<GetElementPtrInst>(Under);
+                    if (!G) continue;
+
+                    if (getDef(G) != BaseKey) continue;
+
+                    // Prefer clone GEP
+                    auto CIt = authenticatedPtrs.find(G);
+                    if (CIt != authenticatedPtrs.end() && CIt->second && isa<Instruction>(CIt->second)) {
+                        setLoadStorePtr(UseI, CIt->second);
+                        Ptr = (isa<LoadInst>(UseI) || isa<StoreInst>(UseI))
+                                ? getMemPtrFromLoadStore(UseI) : Ptr;
+                        gepMemOpToClone++;
+                    }
+
+                    // Insert check right before mem-use (ignore return value)
+                    if (isCompartmentalizedFunction())
+                        (void)addDataAuthCheckAtLocation(Ptr, UseI);
+                    else
+                        (void)addGetSafePointerAtLocation(Ptr, UseI); // optional: for non-compart path
+
+                    gepCheckInserted++;
+                    continue;
+                }
+
+                // -------- MemIntrinsic: memset/memcpy/memmove --------
+                if (auto *MI = dyn_cast<MemIntrinsic>(UseI)) {
+                    CallInst *CI = cast<CallInst>(MI);
+
+                    // arg0 = dest
+                    {
+                        Value *Dest = CI->getArgOperand(0);
+                        Value *Under = Dest->stripPointerCasts();
+                        if (auto *G = dyn_cast<GetElementPtrInst>(Under)) {
+                            if (getDef(G) == BaseKey) {
+                                auto CIt = authenticatedPtrs.find(G);
+                                if (CIt != authenticatedPtrs.end() && CIt->second && isa<Instruction>(CIt->second)) {
+                                    setCallArg(CI, 0, CIt->second);
+                                    Dest = CI->getArgOperand(0);
+                                    gepMemOpToClone++;
+                                }
+                                if (isCompartmentalizedFunction())
+                                    (void)addDataAuthCheckAtLocation(Dest, UseI);
+                                else
+                                    (void)addGetSafePointerAtLocation(Dest, UseI);
+                                gepCheckInserted++;
+                            }
+                        }
+                    }
+
+                    // memcpy/memmove: arg1 = src
+                    if (isa<MemTransferInst>(MI)) {
+                        Value *Src = CI->getArgOperand(1);
+                        Value *Under = Src->stripPointerCasts();
+                        if (auto *G = dyn_cast<GetElementPtrInst>(Under)) {
+                            if (getDef(G) == BaseKey) {
+                                auto CIt = authenticatedPtrs.find(G);
+                                if (CIt != authenticatedPtrs.end() && CIt->second && isa<Instruction>(CIt->second)) {
+                                    setCallArg(CI, 1, CIt->second);
+                                    Src = CI->getArgOperand(1);
+                                    gepMemOpToClone++;
+                                }
+                                if (isCompartmentalizedFunction())
+                                    (void)addDataAuthCheckAtLocation(Src, UseI);
+                                else
+                                    (void)addGetSafePointerAtLocation(Src, UseI);
+                                gepCheckInserted++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        errs() << "[PMCPass] gepCheckInserted=" << gepCheckInserted
+            << " gepMemOpToClone=" << gepMemOpToClone << "\n";
     }
 
     /**
