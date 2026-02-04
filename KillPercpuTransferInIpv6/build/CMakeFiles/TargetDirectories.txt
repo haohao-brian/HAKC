@@ -1,8 +1,0 @@
-/home/user/HAKC/KillPercpuTransferInIpv6/build/CMakeFiles/intrinsics_gen.dir
-/home/user/HAKC/KillPercpuTransferInIpv6/build/CMakeFiles/omp_gen.dir
-/home/user/HAKC/KillPercpuTransferInIpv6/build/CMakeFiles/acc_gen.dir
-/home/user/HAKC/KillPercpuTransferInIpv6/build/CMakeFiles/edit_cache.dir
-/home/user/HAKC/KillPercpuTransferInIpv6/build/CMakeFiles/rebuild_cache.dir
-/home/user/HAKC/KillPercpuTransferInIpv6/build/src/CMakeFiles/KillPercpuTransferInIpv6.dir
-/home/user/HAKC/KillPercpuTransferInIpv6/build/src/CMakeFiles/edit_cache.dir
-/home/user/HAKC/KillPercpuTransferInIpv6/build/src/CMakeFiles/rebuild_cache.dir
