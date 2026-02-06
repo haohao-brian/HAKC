@@ -33,3 +33,9 @@ PMC-Pass/build
 *.exe
 *.out
 *.app
+
+# script
+*.sh
+
+# Image
+MTE-kernel/ubuntu-22.04-server-cloudimg-arm64-root.tar.xz
