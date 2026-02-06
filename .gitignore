@@ -18,10 +18,15 @@ PMC-Pass/build
 *.so
 *.dylib
 *.dll
+*.ko
+*.cmd
+*.order
 
 # Fortran module files
 *.mod
 *.smod
+*.mod.c
+
 
 # Compiled Static libraries
 *.lai
@@ -40,3 +45,46 @@ PMC-Pass/build
 # Image
 *.img
 MTE-kernel/ubuntu-22.04-server-cloudimg-arm64-root.tar.xz
+
+*.tmp
+*.dtb.S
+*.dtb
+
+MTE-kernel/.config
+MTE-kernel/.config.old
+MTE-kernel/.tmp_System.map
+MTE-kernel/.tmp_vmlinux.kallsyms1
+MTE-kernel/.tmp_vmlinux.kallsyms1.S
+MTE-kernel/.tmp_vmlinux.kallsyms2
+MTE-kernel/.tmp_vmlinux.kallsyms2.S
+MTE-kernel/.version
+MTE-kernel/Module.symvers
+MTE-kernel/System.map
+MTE-kernel/arch/arm64/include/generated/
+MTE-kernel/arch/arm64/kernel/asm-offsets.s
+MTE-kernel/arch/arm64/kernel/vdso/vdso.so.dbg
+MTE-kernel/crypto/asymmetric_keys/pkcs7.asn1.c
+MTE-kernel/crypto/asymmetric_keys/pkcs7.asn1.h
+MTE-kernel/crypto/asymmetric_keys/x509.asn1.c
+MTE-kernel/crypto/asymmetric_keys/x509.asn1.h
+MTE-kernel/crypto/asymmetric_keys/x509_akid.asn1.c
+MTE-kernel/crypto/asymmetric_keys/x509_akid.asn1.h
+MTE-kernel/crypto/rsaprivkey.asn1.c
+MTE-kernel/crypto/rsaprivkey.asn1.h
+MTE-kernel/crypto/rsapubkey.asn1.c
+MTE-kernel/crypto/rsapubkey.asn1.h
+MTE-kernel/include/config/
+MTE-kernel/include/generated/
+MTE-kernel/kernel/bounds.s
+MTE-kernel/kernel/config_data.gz
+MTE-kernel/modules.builtin
+MTE-kernel/modules.builtin.modinfo
+MTE-kernel/scripts/dtc/dtc-lexer.lex.c
+MTE-kernel/scripts/dtc/dtc-parser.tab.c
+MTE-kernel/scripts/dtc/dtc-parser.tab.h
+MTE-kernel/scripts/kconfig/lexer.lex.c
+MTE-kernel/scripts/kconfig/parser.tab.c
+MTE-kernel/scripts/kconfig/parser.tab.h
+MTE-kernel/scripts/mod/devicetable-offsets.s
+MTE-kernel/vmlinux
+MTE-kernel/vmlinux.symvers
