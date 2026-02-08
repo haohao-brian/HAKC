@@ -481,7 +481,7 @@ int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 }
 EXPORT_SYMBOL(inet6_bind);
 
-int inet6_release(struct socket *sock)
+noinline int inet6_release(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
 
