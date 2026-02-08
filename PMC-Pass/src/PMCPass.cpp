@@ -4,16 +4,21 @@
  */
 
 #include "PMCPass.h"
+#include "llvm/Support/FileSystem.h"
+#include "llvm/Support/raw_ostream.h"
 
 using namespace llvm;
-
 namespace {
     /**
      * @brief Core kernel functions that are called directly. Transfers to
      * these functions
      * are not recolored, and the authenticated pointer is passed when invoked.
      */
-    const std::set<StringRef> safe_transition_functions = {
+    const std::set<StringRef> safe_transition_functions = { 
+            "mem_cgroup_sk_free",
+            "memcg_slab_free_hook",
+            "skb_copy_and_csum_bits",
+            "__arch_copy_from_user",
             "mod_delayed_work",
             "kasan_check_write",
             "arch_static_branch_jump",
@@ -185,27 +190,27 @@ namespace {
      * @brief The set of files to run our analysis on
      */
     const std::set<StringRef> source_files_to_instrument = {
-            "../net/",
-            "../fs/proc/proc_sysctl.c",
-            "../lib/list_debug.c",
-            "../lib/nlattr.c",
-            "../lib/rhashtable.c",
-            "../lib/string.c",
-            "../lib/kobject_uevent.c",
-            "../fs/proc/generic.c",
-            "../kernel/",
-            "../security/commoncap.c",
-            "../drivers/net",
-            "../lib/percpu_counter.c",
-            "../lib/vsprintf.c",
+            "net/",
+            "fs/proc/proc_sysctl.c",
+            "lib/list_debug.c",
+            "lib/nlattr.c",
+            "lib/rhashtable.c",
+            "lib/string.c",
+            "lib/kobject_uevent.c",
+            "fs/proc/generic.c",
+            "kernel/",
+            "security/commoncap.c",
+            "drivers/net",
+            "lib/percpu_counter.c",
+            "lib/vsprintf.c",
     };
 
     /**
      * @brief The set of files to NOT run our analysis on
      */
     const std::set<StringRef> source_files_to_skip = {
-            "../lib/idr.c",
-            "../lib/xarray.c",
+            "lib/idr.c",
+            "lib/xarray.c",
     };
 
     /**
@@ -272,7 +277,7 @@ namespace {
             claque_transfer_name,
             get_safe_ptr_name,
             sign_ptr_with_color_name,
-            sign_ptr_name,
+            sign_ptr_name,            
     };
 
     /**
@@ -319,7 +324,7 @@ namespace {
               compartmentalized(isModuleCompartmentalized(Module)),
               moduleModified(false),
               breakOnMissingTransfer(true),
-              debugName("fib6_nh_release"), totalDataChecks(0),
+              debugName("icmpv6_getfrag"), totalDataChecks(0),
               totalCodeChecks(0), totalTransfers(0) {
 
         bool sourceShouldBeInstrumented = false;
@@ -328,7 +333,12 @@ namespace {
                 std::string::npos &&
                 source_files_to_skip.find(M.getSourceFileName()) ==
                 source_files_to_skip.end()) {
+                if (M.getSourceFileName().find("hakc.c") != std::string::npos || M.getSourceFileName().find("hakc-transfer.c") != std::string::npos) {
+                    errs() << "HAKC source file detected: " << M.getSourceFileName() << ". Skipping XOR instrumentation at API entry points.\n";
+                    break;
+                }
                 sourceShouldBeInstrumented = true;
+                errs() << "Find files to Instrument " << M.getSourceFileName() << "\n";
                 break;
             }
         }
@@ -1848,7 +1858,6 @@ namespace {
         std::set<Instruction *> clonedInsts;
 
         std::map<Value *, Instruction *> authenticationLocations = findAllInsertionLocations();
-
         for (auto &it : signedPtrsUses) {
             for (auto *use : it.second) {
                 for (auto &operand : use->operands()) {
@@ -1964,6 +1973,143 @@ namespace {
                 }
             }
         }
+        // ============================================================
+        // [GEP-CHECK-ONLY] Ensure "GEP -> mem-use" has a data-check right before use.
+        // Prefer using cloned GEP (authenticatedPtrs[GEP]) as mem operand.
+        // Do NOT replace mem operand with auth-call return value.
+        // ============================================================
+
+        unsigned gepCheckInserted = 0;
+        unsigned gepMemOpToClone = 0;
+
+        auto isMemUseInst = [](Instruction *I) -> bool {
+            return isa<LoadInst>(I) || isa<StoreInst>(I) || isa<MemIntrinsic>(I);
+        };
+
+        auto getMemPtrFromLoadStore = [](Instruction *I) -> Value * {
+            if (auto *LI = dyn_cast<LoadInst>(I))  return LI->getPointerOperand(); // op0
+            if (auto *SI = dyn_cast<StoreInst>(I)) return SI->getPointerOperand(); // op1
+            return nullptr;
+        };
+
+        auto setLoadStorePtr = [&](Instruction *I, Value *NewPtr) {
+            if (auto *LI = dyn_cast<LoadInst>(I)) {
+                if (NewPtr->getType() != LI->getPointerOperand()->getType()) {
+                    IRBuilder<> B(I);
+                    NewPtr = B.CreateBitOrPointerCast(NewPtr, LI->getPointerOperand()->getType());
+                }
+                LI->setOperand(0, NewPtr);
+                return;
+            }
+            if (auto *SI = dyn_cast<StoreInst>(I)) {
+                if (NewPtr->getType() != SI->getPointerOperand()->getType()) {
+                    IRBuilder<> B(I);
+                    NewPtr = B.CreateBitOrPointerCast(NewPtr, SI->getPointerOperand()->getType());
+                }
+                SI->setOperand(1, NewPtr);
+                return;
+            }
+        };
+
+        auto setCallArg = [&](CallInst *CI, unsigned ArgNo, Value *NewPtr) {
+            Value *Old = CI->getArgOperand(ArgNo);
+            if (NewPtr->getType() != Old->getType()) {
+                IRBuilder<> B(CI);
+                NewPtr = B.CreateBitOrPointerCast(NewPtr, Old->getType());
+            }
+            CI->setArgOperand(ArgNo, NewPtr);
+        };
+
+        for (auto &it : signedPtrsUses) {
+            Value *BaseKey = it.first;
+
+            for (auto *U : it.second) {
+                Instruction *UseI = dyn_cast<Instruction>(U);
+                if (!UseI) continue;
+                if (!isMemUseInst(UseI)) continue;
+
+                // -------- Load / Store --------
+                if (isa<LoadInst>(UseI) || isa<StoreInst>(UseI)) {
+                    Value *Ptr = getMemPtrFromLoadStore(UseI);
+                    if (!Ptr) continue;
+
+                    // 允許 bitcast / gep -> bitcast
+                    Value *Under = Ptr->stripPointerCasts();
+                    auto *G = dyn_cast<GetElementPtrInst>(Under);
+                    if (!G) continue;
+
+                    if (getDef(G) != BaseKey) continue;
+
+                    // Prefer clone GEP
+                    auto CIt = authenticatedPtrs.find(G);
+                    if (CIt != authenticatedPtrs.end() && CIt->second && isa<Instruction>(CIt->second)) {
+                        setLoadStorePtr(UseI, CIt->second);
+                        Ptr = (isa<LoadInst>(UseI) || isa<StoreInst>(UseI))
+                                ? getMemPtrFromLoadStore(UseI) : Ptr;
+                        gepMemOpToClone++;
+                    }
+
+                    // Insert check right before mem-use (ignore return value)
+                    if (isCompartmentalizedFunction())
+                        (void)addDataAuthCheckAtLocation(Ptr, UseI);
+                    else
+                        (void)addGetSafePointerAtLocation(Ptr, UseI); // optional: for non-compart path
+
+                    gepCheckInserted++;
+                    continue;
+                }
+
+                // -------- MemIntrinsic: memset/memcpy/memmove --------
+                if (auto *MI = dyn_cast<MemIntrinsic>(UseI)) {
+                    CallInst *CI = cast<CallInst>(MI);
+
+                    // arg0 = dest
+                    {
+                        Value *Dest = CI->getArgOperand(0);
+                        Value *Under = Dest->stripPointerCasts();
+                        if (auto *G = dyn_cast<GetElementPtrInst>(Under)) {
+                            if (getDef(G) == BaseKey) {
+                                auto CIt = authenticatedPtrs.find(G);
+                                if (CIt != authenticatedPtrs.end() && CIt->second && isa<Instruction>(CIt->second)) {
+                                    setCallArg(CI, 0, CIt->second);
+                                    Dest = CI->getArgOperand(0);
+                                    gepMemOpToClone++;
+                                }
+                                if (isCompartmentalizedFunction())
+                                    (void)addDataAuthCheckAtLocation(Dest, UseI);
+                                else
+                                    (void)addGetSafePointerAtLocation(Dest, UseI);
+                                gepCheckInserted++;
+                            }
+                        }
+                    }
+
+                    // memcpy/memmove: arg1 = src
+                    if (isa<MemTransferInst>(MI)) {
+                        Value *Src = CI->getArgOperand(1);
+                        Value *Under = Src->stripPointerCasts();
+                        if (auto *G = dyn_cast<GetElementPtrInst>(Under)) {
+                            if (getDef(G) == BaseKey) {
+                                auto CIt = authenticatedPtrs.find(G);
+                                if (CIt != authenticatedPtrs.end() && CIt->second && isa<Instruction>(CIt->second)) {
+                                    setCallArg(CI, 1, CIt->second);
+                                    Src = CI->getArgOperand(1);
+                                    gepMemOpToClone++;
+                                }
+                                if (isCompartmentalizedFunction())
+                                    (void)addDataAuthCheckAtLocation(Src, UseI);
+                                else
+                                    (void)addGetSafePointerAtLocation(Src, UseI);
+                                gepCheckInserted++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        errs() << "[PMCPass] gepCheckInserted=" << gepCheckInserted
+            << " gepMemOpToClone=" << gepMemOpToClone << "\n";
     }
 
     /**
@@ -2169,11 +2315,17 @@ namespace {
                 bool recurse = needsRecursion(value, structType, i);
 
                 if (typeNeedsSigning(currType)) {
+                    if (isa<GlobalVariable>(value)) {
+                        // 不要污染全域結構欄位：只在 use-site 再 localize/sign
+                        // （這裡直接 skip store）
+                        continue;
+                    }
                     if (debug_output) {
                         errs() << "Member " << i << " (type ";
                         currType->print(errs());
                         errs() << ") needs signing\n";
                     }
+                    
                     Value *structMember = irBuilder.CreateStructGEP(value,
                                                                     i);
                     //                    Value *color = saveColor(structMember);
@@ -3165,6 +3317,7 @@ namespace {
     }
 
     void HAKCFunctionAnalysis::addStackTransfers() {
+        /*
         for (auto it : stackPtrsPassedToFuncs) {
             CallInst *call = it.first;
             for (unsigned i = 0; i < call->getNumArgOperands(); i++) {
@@ -3176,6 +3329,7 @@ namespace {
                 }
             }
         }
+            */
     }
 
     /**
@@ -3360,13 +3514,43 @@ namespace {
             if (debug_output) {
                 errs() << "^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n";
             }
-
             if (debug_output) {
                 getFunction().print(errs());
             }
         }
     }
+    static void dumpModuleIRToTmp(llvm::Module &M, llvm::StringRef Tag) {
+        const std::string dir = "/tmp/pmc-ir";
+        (void)llvm::sys::fs::create_directories(dir);
 
+        // 用 source file 名當檔名 (e.g., route.c.after.ll)
+        std::string base = llvm::sys::path::filename(M.getSourceFileName()).str();
+
+        // 如果 SourceFileName 是空的，就退回用 module identifier
+        if (base.empty()) {
+            base = llvm::sys::path::filename(M.getModuleIdentifier()).str();
+            if (base.empty()) base = "module";
+        }
+
+        // 避免奇怪字元導致路徑問題（最簡單：把 '/' 換成 '_'）
+        for (char &c : base) {
+            if (c == '/') c = '_';
+        }
+
+        const std::string path = dir + "/" + base + "." + Tag.str() + ".ll";
+
+        std::error_code EC;
+        llvm::raw_fd_ostream OS(path, EC, llvm::sys::fs::OF_Text);
+        if (EC) {
+            llvm::errs() << "PMCPass: failed to open " << path
+                        << " : " << EC.message() << "\n";
+            return;
+        }
+
+        M.print(OS, nullptr);
+        OS.flush();
+        llvm::errs() << "PMCPass: dumped module IR to " << path << "\n";
+    }
     struct PMCPass : public ModulePass {
         static char ID;
 
@@ -3375,6 +3559,9 @@ namespace {
         bool runOnModule(Module &M) override {
             HAKCModuleTransformation transformation(M);
             transformation.performTransformations();
+
+            dumpModuleIRToTmp(M, "after");
+
             if (transformation.isCompartmentalized()) {
                 errs() << "Total Data Checks: "
                        << transformation.totalDataChecks << "\n"
