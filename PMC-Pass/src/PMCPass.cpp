@@ -14,7 +14,27 @@ namespace {
      * these functions
      * are not recolored, and the authenticated pointer is passed when invoked.
      */
-    const std::set<StringRef> safe_transition_functions = { 
+    const std::set<StringRef> safe_transition_functions = {
+            "sock_zerocopy_realloc",
+            "__skb_queue_tail",
+            "sock_wfree",
+            "dst_init",
+            "rb_erase",
+            "skb_dst",
+            "dev_net",
+            "napi_consume_skb",
+            "net_rx_action",
+            "_kfree_skb_defer",
+            "__kfree_skb_flush",
+            "kmem_cache_free_bulk",
+            "unix_stream_connect",
+            "path_get",
+            "rb_first",
+            "put_cmsg",
+            "__siphash_aligned",
+            "csum_ipv6_magic",
+            "_copy_from_iter_full",
+            "sk_fullsock",
             "mem_cgroup_sk_free",
             "memcg_slab_free_hook",
             "skb_copy_and_csum_bits",
@@ -324,7 +344,7 @@ namespace {
               compartmentalized(isModuleCompartmentalized(Module)),
               moduleModified(false),
               breakOnMissingTransfer(true),
-              debugName("icmpv6_getfrag"), totalDataChecks(0),
+              debugName("__ip6_append_data"), totalDataChecks(0),
               totalCodeChecks(0), totalTransfers(0) {
 
         bool sourceShouldBeInstrumented = false;
@@ -1978,7 +1998,7 @@ namespace {
         // Prefer using cloned GEP (authenticatedPtrs[GEP]) as mem operand.
         // Do NOT replace mem operand with auth-call return value.
         // ============================================================
-
+        /*
         unsigned gepCheckInserted = 0;
         unsigned gepMemOpToClone = 0;
 
@@ -2109,7 +2129,7 @@ namespace {
         }
 
         errs() << "[PMCPass] gepCheckInserted=" << gepCheckInserted
-            << " gepMemOpToClone=" << gepMemOpToClone << "\n";
+            << " gepMemOpToClone=" << gepMemOpToClone << "\n";*/
     }
 
     /**
@@ -3317,7 +3337,7 @@ namespace {
     }
 
     void HAKCFunctionAnalysis::addStackTransfers() {
-        /*
+        
         for (auto it : stackPtrsPassedToFuncs) {
             CallInst *call = it.first;
             for (unsigned i = 0; i < call->getNumArgOperands(); i++) {
@@ -3329,7 +3349,7 @@ namespace {
                 }
             }
         }
-            */
+         
     }
 
     /**
