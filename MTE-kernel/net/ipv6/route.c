@@ -3696,8 +3696,16 @@ static struct fib6_info *ip6_route_info_create(struct fib6_config *cfg,
 	if (!rt)
 		goto out;
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* EXPERIMENT (smp 1 only): sign the metrics ptr (often &dst_default_metrics,
+	 * a shared global) so the check on rt->fib6_metrics passes. NOT multi-cpu-safe. */
+	rt->fib6_metrics = hakc_transfer_to_clique(
+		ip_fib_metrics_init(net, cfg->fc_mx, cfg->fc_mx_len, extack),
+		sizeof(struct dst_metrics), __claque_id, __color, false);
+#else
 	rt->fib6_metrics = ip_fib_metrics_init(net, cfg->fc_mx, cfg->fc_mx_len,
 					       extack);
+#endif
 	if (IS_ERR(rt->fib6_metrics)) {
 		err = PTR_ERR(rt->fib6_metrics);
 		/* Do not leave garbage there. */
@@ -6363,7 +6371,13 @@ struct ctl_table * __net_init ipv6_route_sysctl_init(struct net *net)
 		table[10].data = &net->ipv6.sysctl.skip_notify_on_dev_down;
 
 		/* Don't export sysctls to unprivileged users */
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+		/* compare-only: read user_ns as scalar so PMCPass does not autia a
+		 * core pointer (net->user_ns -> &init_user_ns) we never dereference */
+		if (*(unsigned long *)&net->user_ns != (unsigned long)&init_user_ns)
+#else
 		if (net->user_ns != &init_user_ns)
+#endif
 			table[0].procname = NULL;
 	}
 

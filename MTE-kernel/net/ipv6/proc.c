@@ -310,6 +310,11 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(ipv6_proc_init_net, int, struct net* net) {
 	net = hakc_transfer_to_clique(net, sizeof(*net), __claque_id,
 				      __color, false);
 	result = ipv6_proc_init_net(net);
+	if (!result)
+		HAKC_GET_SAFE_PTR(net)->mib.proc_net_devsnmp6 =
+			hakc_transfer_to_clique(
+				HAKC_GET_SAFE_PTR(net)->mib.proc_net_devsnmp6,
+				172, __claque_id, __color, false);
 	HAKC_GET_SAFE_PTR(net)->proc_net = orig_proc_net;
 
 	return result;

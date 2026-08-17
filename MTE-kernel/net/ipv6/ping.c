@@ -233,9 +233,13 @@ static int __net_init noinline ping_v6_proc_init_net(struct net *net)
 DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(ping_v6_proc_init_net, int, struct net* net) {
 	int result;
 
+	struct proc_dir_entry *orig_proc_net = net->proc_net;
+	net->proc_net = hakc_transfer_to_clique(net->proc_net, 172,
+						__claque_id, __color, false);
 	net = hakc_transfer_to_clique(net, sizeof(*net), __claque_id,
 				      __color, false);
 	result = ping_v6_proc_init_net(net);
+	HAKC_GET_SAFE_PTR(net)->proc_net = orig_proc_net;
 
 	return result;
 }

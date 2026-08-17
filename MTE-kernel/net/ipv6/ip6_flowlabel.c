@@ -910,9 +910,14 @@ static void __net_exit ip6_flowlabel_net_exit(struct net *net)
 DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(ip6_flowlabel_proc_init, int, struct net* net) {
 	int result;
 
+	struct proc_dir_entry *orig_proc_net = net->proc_net;
+	/* NB: The sizes were determined at run time */
+	net->proc_net = hakc_transfer_to_clique(net->proc_net, 172,
+						__claque_id, __color, false);
 	net = hakc_transfer_to_clique(net, sizeof(*net), __claque_id,
 				      __color, false);
 	result = ip6_flowlabel_proc_init(net);
+	HAKC_GET_SAFE_PTR(net)->proc_net = orig_proc_net;
 
 	return result;
 }

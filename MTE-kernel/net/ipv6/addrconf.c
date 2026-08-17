@@ -7654,6 +7654,10 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(addrconf_init, void, void) {
 	init_net.loopback_dev->pcpu_refcnt = hakc_transfer_percpu_to_clique(
 		init_net.loopback_dev->pcpu_refcnt, sizeof(int),
 		__claque_id, __color);
+	init_net.loopback_dev->_tx = hakc_transfer_to_clique(
+		init_net.loopback_dev->_tx,
+		init_net.loopback_dev->num_tx_queues * sizeof(struct netdev_queue),
+		__claque_id, __color, false);
 	init_net.loopback_dev = hakc_sign_pointer_with_color(
 		init_net.loopback_dev, __claque_id, false);
 }

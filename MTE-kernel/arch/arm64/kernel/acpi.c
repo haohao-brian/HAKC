@@ -285,7 +285,7 @@ pgprot_t __acpi_get_mem_attribute(phys_addr_t addr)
 
 	attr = efi_mem_attributes(addr);
 	if (attr & EFI_MEMORY_WB)
-		return PAGE_KERNEL;
+		return __pgprot(PROT_NORMAL);
 	if (attr & EFI_MEMORY_WT)
 		return __pgprot(PROT_NORMAL_WT);
 	if (attr & EFI_MEMORY_WC)
@@ -371,7 +371,7 @@ void __iomem *acpi_os_ioremap(acpi_physical_address phys, acpi_size size)
 
 		default:
 			if (region->attribute & EFI_MEMORY_WB)
-				prot = PAGE_KERNEL;
+				prot =  __pgprot(PROT_NORMAL);
 			else if (region->attribute & EFI_MEMORY_WT)
 				prot = __pgprot(PROT_NORMAL_WT);
 			else if (region->attribute & EFI_MEMORY_WC)

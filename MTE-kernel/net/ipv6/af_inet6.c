@@ -481,7 +481,7 @@ int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 }
 EXPORT_SYMBOL(inet6_bind);
 
-int inet6_release(struct socket *sock)
+noinline int inet6_release(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
 
@@ -493,6 +493,13 @@ int inet6_release(struct socket *sock)
 
 	/* Free ac lists */
 	ipv6_sock_ac_close(sk);
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* restore sk to canonical before the core free path: __sk_free/__sk_destruct/
+	 * mem_cgroup_sk_free are uninstrumented core and deref a raw pointer, so a
+	 * signed sk would fault there. */
+	sock->sk = HAKC_GET_SAFE_PTR(sk);
+#endif
 
 	return inet_release(sock);
 }
