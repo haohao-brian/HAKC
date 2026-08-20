@@ -86,10 +86,20 @@ static u32 udp6_ehashfn(const struct net *net,
 
 int udp_v6_get_port(struct sock *sk, unsigned short snum)
 {
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Faithful (a): sign net so ipv6_portaddr_hash check(net) passes, instead
+	 * of the single-namespace init_net direct-global shortcut. */
+	struct net *net = hakc_transfer_to_clique(sock_net(sk), sizeof(struct net),
+						 __claque_id, __color, false);
+	unsigned int hash2_nulladdr = ipv6_portaddr_hash(net, &in6addr_any, snum);
+	unsigned int hash2_partial =
+		ipv6_portaddr_hash(net, &sk->sk_v6_rcv_saddr, 0);
+#else
 	unsigned int hash2_nulladdr =
 		ipv6_portaddr_hash(sock_net(sk), &in6addr_any, snum);
 	unsigned int hash2_partial =
 		ipv6_portaddr_hash(sock_net(sk), &sk->sk_v6_rcv_saddr, 0);
+#endif
 
 	/* precompute partial secondary hash */
 	udp_sk(sk)->udp_portaddr_hash = hash2_partial;
@@ -1362,6 +1372,12 @@ do_udp_sendmsg:
 		return -EMSGSIZE;
 
 	getfrag  =  is_udplite ?  udplite_getfrag : ip_generic_getfrag;
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Sign the getfrag callback as a code target so the instrumented indirect
+	 * call in __ip6_append_data (check_hakc_code_access) can authenticate it. */
+	getfrag = (typeof(getfrag))hakc_sign_pointer_with_color((void *)getfrag,
+							__claque_id, true);
+#endif
 	if (up->pending) {
 		/*
 		 * There are pending frames.

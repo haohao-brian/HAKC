@@ -670,16 +670,71 @@ EXPORT_SYMBOL_GPL(inet6_compat_ioctl);
 
 INDIRECT_CALLABLE_DECLARE(int udpv6_sendmsg(struct sock *, struct msghdr *,
 					    size_t));
-int inet6_sendmsg(struct socket *sock, struct msghdr *msg, size_t size)
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+int udpv6_sendmsg(struct sock *sk, struct msghdr *msg, size_t len);
+int udp_v6_get_port(struct sock *sk, unsigned short snum);
+#endif
+noinline int inet6_sendmsg(struct socket *sock, struct msghdr *msg, size_t size)
 {
 	struct sock *sk = sock->sk;
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Do inet_send_prepare's autobind inline with the SIGNED sk so the ipv6
+	 * get_port callee's entry check passes; do NOT call core inet_send_prepare,
+	 * whose autobind would re-enter ipv6 with a canonical sk and FPAC. */
+	if (!inet_sk(sk)->inet_num) {
+		/* UDP-only for now: assign a local port with the SIGNED sk. (proper
+		 * tcp/udp dispatch deferred until get_port internals pass.) */
+		if (udp_v6_get_port(sk, 0))
+			return -EAGAIN;
+		inet_sk(sk)->inet_sport = htons(inet_sk(sk)->inet_num);
+	}
+#else
 	if (unlikely(inet_send_prepare(sk)))
 		return -EAGAIN;
+#endif
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Do NOT dereference sk->sk_prot: it is a shared global proto, never
+	 * HAKC-signed, so a check would FPAC. Compare the proto pointer VALUE
+	 * (scalar, no deref -> no check) and call the target DIRECTLY by name
+	 * (direct call -> no code check, no proto deref). */
+	/* sk->sk_prot is a SIGNED pointer (PAC/claque in the top 16 bits); the
+	 * &udpv6_prot global symbol is canonical. Compare only the low 48 address
+	 * bits so the same proto matches regardless of signing. */
+	if ((*(unsigned long *)&sk->sk_prot & 0x0000FFFFFFFFFFFFUL) ==
+	    ((unsigned long)&udpv6_prot & 0x0000FFFFFFFFFFFFUL)) {
+		/* msg is a canonical core (stack) object; sign it for the ipv6 callee. */
+		msg = hakc_transfer_to_clique(msg, sizeof(*msg), __claque_id,
+					      __color, false);
+		/* nested pointer: msg->msg_name (dest sockaddr) is a canonical
+		 * kernel buffer; sign it too so the ipv6 callee check passes. */
+		if (msg->msg_name && msg->msg_namelen)
+			msg->msg_name = hakc_transfer_to_clique(msg->msg_name,
+						msg->msg_namelen, __claque_id,
+						__color, false);
+		return udpv6_sendmsg(sk, msg, size);
+	}
+	return tcp_sendmsg(sk, msg, size);
+#else
 	return INDIRECT_CALL_2(sk->sk_prot->sendmsg, tcp_sendmsg, udpv6_sendmsg,
 			       sk, msg, size);
+#endif
 }
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_sendmsg, int, struct socket *sock,
+				  struct msghdr *msg, size_t size) {
+	int ret;
+
+	sock = hakc_transfer_to_clique(sock, sizeof(*sock), __claque_id,
+				       __color, false);
+	ret = inet6_sendmsg(sock, msg, size);
+
+	return ret;
+}
+EXPORT_SYMBOL(HAKC_OUTSIDE_TRANSFER_FUNC(inet6_sendmsg));
+#endif
 
 INDIRECT_CALLABLE_DECLARE(int udpv6_recvmsg(struct sock *, struct msghdr *,
 					    size_t, int, int, int *));
@@ -723,7 +778,7 @@ const struct proto_ops inet6_stream_ops = {
 	.shutdown	   = inet_shutdown,		/* ok		*/
 	.setsockopt	   = sock_common_setsockopt,	/* ok		*/
 	.getsockopt	   = sock_common_getsockopt,	/* ok		*/
-	.sendmsg	   = inet6_sendmsg,		/* retpoline's sake */
+	.sendmsg	   = HAKC_OUTSIDE_TRANSFER_FUNC(inet6_sendmsg),		/* retpoline's sake */
 	.recvmsg	   = inet6_recvmsg,		/* retpoline's sake */
 #ifdef CONFIG_MMU
 	.mmap		   = tcp_mmap,
@@ -760,7 +815,7 @@ const struct proto_ops inet6_dgram_ops = {
 	.shutdown	   = inet_shutdown,		/* ok		*/
 	.setsockopt	   = sock_common_setsockopt,	/* ok		*/
 	.getsockopt	   = sock_common_getsockopt,	/* ok		*/
-	.sendmsg	   = inet6_sendmsg,		/* retpoline's sake */
+	.sendmsg	   = HAKC_OUTSIDE_TRANSFER_FUNC(inet6_sendmsg),		/* retpoline's sake */
 	.recvmsg	   = inet6_recvmsg,		/* retpoline's sake */
 	.mmap		   = sock_no_mmap,
 	.sendpage	   = sock_no_sendpage,

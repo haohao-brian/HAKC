@@ -364,12 +364,12 @@ struct rt6_info *ip6_dst_alloc(struct net *net, struct net_device *dev,
 					1, DST_OBSOLETE_FORCE_CHK, flags);
 
 	if (rt) {
-		rt6_info_init(rt);
-		atomic_inc(&net->ipv6.rt6_stats->fib_rt_alloc);
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
 	    rt = hakc_transfer_to_clique(rt, sizeof(*rt), __claque_id, __color,
-                                 false);
+                                 false); /* PROTO: transfer BEFORE rt6_info_init (was after -> init wrote canonical rt -> FPAC) */
 #endif
+		rt6_info_init(rt);
+		atomic_inc(&net->ipv6.rt6_stats->fib_rt_alloc);
 	}
 
 	return rt;
@@ -3513,6 +3513,12 @@ int fib6_nh_init(struct net *net, struct fib6_nh *fib6_nh,
 			}
 			dev = net->loopback_dev;
 			dev_hold(dev);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+			/* Faithful (a): sign the loopback dev like the normal
+			 * branch (@3478). Missing here -> the ::1 route stored a
+			 * canonical nhc_dev -> lookup check(nhc_dev) FPAC. */
+			dev = hakc_sign_pointer_with_color(dev, __claque_id, false);
+#endif
 			idev = in6_dev_get(dev);
 			if (!idev) {
 				err = -ENODEV;
@@ -6391,6 +6397,14 @@ static int __net_init noinline ip6_route_net_init(struct net *net)
 
 	memcpy(&net->ipv6.ip6_dst_ops, &ip6_dst_ops_template,
 	       sizeof(net->ipv6.ip6_dst_ops));
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* PoC: sign the dst_ops->mtu code target so the instrumented indirect
+	 * call in dst_mtu() (check_hakc_code_access) can authenticate it. The
+	 * wrapper reads the code page color internally (is_code = true). */
+	net->ipv6.ip6_dst_ops.mtu =
+		(typeof(net->ipv6.ip6_dst_ops.mtu))hakc_sign_pointer_with_color(
+			(void *)net->ipv6.ip6_dst_ops.mtu, __claque_id, true);
+#endif
 
 	if (dst_entries_init(&net->ipv6.ip6_dst_ops) < 0)
 		goto out_ip6_dst_ops;

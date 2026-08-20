@@ -182,7 +182,7 @@ static inline void *hakc_safe_ptr2(unsigned long addr)
 	}
 }
 
-static inline void *hakc_safe_ptr(unsigned long addr)
+static noinline void *hakc_safe_ptr(unsigned long addr)
 {
 	if (!addr) {
 		return (void *)addr;

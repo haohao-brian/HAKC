@@ -1239,7 +1239,18 @@ struct dst_entry *ip6_sk_dst_lookup_flow(struct sock *sk, struct flowi6 *fl6,
 	if (dst)
 		return dst;
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Transfer net ONCE here: signed net threads down through the whole
+	 * ipv6-instrumented route subtree (ip6_dst_lookup_tail -> route_output ->
+	 * fib6_rule_lookup -> fib6_table_lookup ...) so their check(net) all pass. */
+	{
+		struct net *__n = hakc_transfer_to_clique(sock_net(sk),
+					sizeof(struct net), __claque_id, __color, false);
+		dst = ip6_dst_lookup_flow(__n, sk, fl6, final_dst);
+	}
+#else
 	dst = ip6_dst_lookup_flow(sock_net(sk), sk, fl6, final_dst);
+#endif
 	if (connected && !IS_ERR(dst))
 		ip6_sk_dst_store_flow(sk, dst_clone(dst), fl6);
 
@@ -1658,6 +1669,11 @@ alloc_new_skb:
 			}
 			if (!skb)
 				goto error;
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+			/* Transfer the freshly-allocated skb (struct + head buffer) into
+			 * this clique so the compartment can authenticate it. */
+			skb = hakc_transfer_skb(skb, __claque_id, __color);
+#endif
 			/*
 			 *	Fill in the control structures
 			 */
@@ -1855,7 +1871,12 @@ struct sk_buff *__ip6_make_skb(struct sock *sk,
 	struct sk_buff **tail_skb;
 	struct in6_addr final_dst_buf, *final_dst = &final_dst_buf;
 	struct ipv6_pinfo *np = inet6_sk(sk);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	struct net *net = hakc_sign_pointer_with_color(sock_net(sk), __claque_id,
+						       false);
+#else
 	struct net *net = sock_net(sk);
+#endif
 	struct ipv6hdr *hdr;
 	struct ipv6_txoptions *opt = v6_cork->opt;
 	struct rt6_info *rt = (struct rt6_info *)cork->base.dst;
@@ -1985,6 +2006,8 @@ struct sk_buff *ip6_make_skb(struct sock *sk,
 			     struct inet_cork_full *cork)
 {
 	struct inet6_cork v6_cork;
+	struct inet6_cork *v6_cork_c;
+	struct sk_buff_head *queue_c;
 	struct sk_buff_head queue;
 	int exthdrlen = (ipc6->opt ? ipc6->opt->opt_flen : 0);
 	int err;
@@ -1992,29 +2015,47 @@ struct sk_buff *ip6_make_skb(struct sock *sk,
 	if (flags & MSG_PROBE)
 		return NULL;
 
-	__skb_queue_head_init(&queue);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* queue is on this stack too; transfer BEFORE init so the sk_buff_head
+	 * self-pointers (next/prev) hold the signed pointer, then let
+	 * __ip6_append_data and friends authenticate it. */
+	queue_c = hakc_transfer_to_clique(&queue, sizeof(queue),
+					  __claque_id, __color, false);
+#else
+	queue_c = &queue;
+#endif
+	__skb_queue_head_init(queue_c);
 
 	cork->base.flags = 0;
 	cork->base.addr = 0;
 	cork->base.opt = NULL;
 	cork->base.dst = NULL;
 	v6_cork.opt = NULL;
-	err = ip6_setup_cork(sk, cork, &v6_cork, ipc6, rt, fl6);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* v6_cork lives on this stack; transfer it into the clique once here so
+	 * every callee below (ip6_setup_cork, __ip6_append_data, ...) can
+	 * authenticate it instead of faulting on an unsigned stack pointer. */
+	v6_cork_c = hakc_transfer_to_clique(&v6_cork, sizeof(v6_cork),
+					    __claque_id, __color, false);
+#else
+	v6_cork_c = &v6_cork;
+#endif
+	err = ip6_setup_cork(sk, cork, v6_cork_c, ipc6, rt, fl6);
 	if (err) {
-		ip6_cork_release(cork, &v6_cork);
+		ip6_cork_release(cork, v6_cork_c);
 		return ERR_PTR(err);
 	}
 	if (ipc6->dontfrag < 0)
 		ipc6->dontfrag = inet6_sk(sk)->dontfrag;
 
-	err = __ip6_append_data(sk, fl6, &queue, &cork->base, &v6_cork,
+	err = __ip6_append_data(sk, fl6, queue_c, &cork->base, v6_cork_c,
 				&current->task_frag, getfrag, from,
 				length + exthdrlen, transhdrlen + exthdrlen,
 				flags, ipc6);
 	if (err) {
-		__ip6_flush_pending_frames(sk, &queue, cork, &v6_cork);
+		__ip6_flush_pending_frames(sk, queue_c, cork, v6_cork_c);
 		return ERR_PTR(err);
 	}
 
-	return __ip6_make_skb(sk, &queue, cork, &v6_cork);
+	return __ip6_make_skb(sk, queue_c, cork, v6_cork_c);
 }
