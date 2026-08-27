@@ -61,6 +61,73 @@
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
 HAKC_EXIT(HAKC_ENTRY_TOKEN(0, HAKC_MASK_COLOR(SILVER_CLIQUE)),
          HAKC_ENTRY_TOKEN(1, HAKC_MASK_COLOR(SILVER_CLIQUE)));
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* mte_transfer_percpu returns a raw percpu base; the instrumented this_cpu deref
+ * of a MIB counter would autia the raw resolved slot and FPAC. Resolve this cpu's
+ * slot from a clean offset and re-sign it for its own 1MB region before the
+ * counter deref, then route every IPv6/ICMPv6 MIB update through it (same pattern
+ * as ip6_input.c). SNMP counters stay protected; only ipv6.ko sees these. */
+static inline struct ipstats_mib *hakc_ip6_mib(void *base)
+{
+	unsigned long off = (unsigned long)base & 0x0000FFFFFFFFFFFFUL;
+	struct ipstats_mib *s = this_cpu_ptr((struct ipstats_mib __percpu *)off);
+
+	return hakc_sign_pointer(s, __claque_id, __color, false);
+}
+static inline struct icmpv6_mib *hakc_icmpv6_mib(void *base)
+{
+	unsigned long off = (unsigned long)base & 0x0000FFFFFFFFFFFFUL;
+	struct icmpv6_mib *s = this_cpu_ptr((struct icmpv6_mib __percpu *)off);
+
+	return hakc_sign_pointer(s, __claque_id, __color, false);
+}
+#undef IP6_INC_STATS
+#undef __IP6_INC_STATS
+#undef IP6_ADD_STATS
+#undef __IP6_ADD_STATS
+#undef IP6_UPD_PO_STATS
+#undef __IP6_UPD_PO_STATS
+#define IP6_INC_STATS(net, idev, field)					\
+	do {								\
+		struct inet6_dev *__d = (idev);				\
+		preempt_disable();					\
+		if (likely(__d))					\
+			hakc_ip6_mib((__d)->stats.ipv6)->mibs[field]++;	\
+		hakc_ip6_mib((net)->mib.ipv6_statistics)->mibs[field]++; \
+		preempt_enable();					\
+	} while (0)
+#define __IP6_INC_STATS(net, idev, field) IP6_INC_STATS(net, idev, field)
+#define IP6_ADD_STATS(net, idev, field, val)				\
+	do {								\
+		struct inet6_dev *__d = (idev);				\
+		unsigned long __v = (val);				\
+		preempt_disable();					\
+		if (likely(__d))					\
+			hakc_ip6_mib((__d)->stats.ipv6)->mibs[field] += __v; \
+		hakc_ip6_mib((net)->mib.ipv6_statistics)->mibs[field] += __v; \
+		preempt_enable();					\
+	} while (0)
+#define __IP6_ADD_STATS(net, idev, field, val) IP6_ADD_STATS(net, idev, field, val)
+#define IP6_UPD_PO_STATS(net, idev, field, val)				\
+	do {								\
+		IP6_INC_STATS(net, idev, field##PKTS);			\
+		IP6_ADD_STATS(net, idev, field##OCTETS, val);		\
+	} while (0)
+#define __IP6_UPD_PO_STATS(net, idev, field, val) IP6_UPD_PO_STATS(net, idev, field, val)
+#undef ICMP6_INC_STATS
+#undef __ICMP6_INC_STATS
+#define ICMP6_INC_STATS(net, idev, field)				\
+	do {								\
+		struct inet6_dev *__d = (idev);				\
+		preempt_disable();					\
+		if (likely(__d))					\
+			SNMP_INC_STATS_ATOMIC_LONG((__d)->stats.icmpv6dev, field); \
+		hakc_icmpv6_mib((net)->mib.icmpv6_statistics)->mibs[field]++; \
+		preempt_enable();					\
+	} while (0)
+#define __ICMP6_INC_STATS(net, idev, field) ICMP6_INC_STATS(net, idev, field)
+#endif
 #endif
 
 static int ip6_finish_output2(struct net *net, struct sock *sk, struct sk_buff *skb)
@@ -116,6 +183,39 @@ static int ip6_finish_output2(struct net *net, struct sock *sk, struct sk_buff *
 
 	rcu_read_lock_bh();
 	nexthop = rt6_nexthop((struct rt6_info *)dst, &ipv6_hdr(skb)->daddr);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* The inlined __ipv6_neigh_lookup_noref walks the neighbour hash table;
+	 * its instrumented copy autias each RAW (core-colored) neighbour in the
+	 * bucket and FPACs.  Run the walk in CORE (uninstrumented) via the real
+	 * neigh_lookup(), which returns a *referenced* neigh; sign the result so
+	 * the instrumented neigh_output()/sock_confirm_neigh() authenticate, then
+	 * drop the reference after output.  (Refcounted path replaces the noref
+	 * fast path only under instrumentation.) */
+	neigh = neigh_lookup(&nd_tbl, nexthop, dst->dev);
+	if (!neigh)
+		neigh = __neigh_create(&nd_tbl, nexthop, dst->dev, true);
+	/* Sign the raw neigh (from core neigh_lookup/__neigh_create) for its
+	 * existing memory color + ipv6 claque BEFORE any ordinary use: PMCPass
+	 * auto-authenticates a pointer at its first use (e.g. IS_ERR), which
+	 * would autia the raw core neigh and FPAC; the sign intrinsic itself is
+	 * exempt, so signing first is the working order (as upstream did). */
+	neigh = hakc_sign_pointer_with_color(neigh, __claque_id, false);
+	if (neigh)
+		HAKC_GET_SAFE_PTR(neigh)->output =
+			hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(neigh)->output,
+						     __claque_id, true);
+	if (!IS_ERR(neigh)) {
+		sock_confirm_neigh(skb, neigh);
+		ret = neigh_output(neigh, skb, false);
+		rcu_read_unlock_bh();
+		/* release the ref: refcnt access is instrumented (signed neigh),
+		 * destroy is a core fn (raw ptr); in-table neigh never hits 0 here. */
+		if (refcount_dec_and_test(&HAKC_GET_SAFE_PTR(neigh)->refcnt))
+			neigh_destroy(HAKC_GET_SAFE_PTR(neigh));
+		return ret;
+	}
+	rcu_read_unlock_bh();
+#else
 	neigh = __ipv6_neigh_lookup_noref(dst->dev, nexthop);
 	if (unlikely(!neigh))
 		neigh = __neigh_create(&nd_tbl, nexthop, dst->dev, false);
@@ -126,6 +226,7 @@ static int ip6_finish_output2(struct net *net, struct sock *sk, struct sk_buff *
 		return ret;
 	}
 	rcu_read_unlock_bh();
+#endif
 
 	IP6_INC_STATS(net, ip6_dst_idev(dst), IPSTATS_MIB_OUTNOROUTES);
 	kfree_skb(skb);
@@ -182,7 +283,16 @@ static int __ip6_finish_output(struct net *net, struct sock *sk, struct sk_buff 
 		return ip6_finish_output_gso_slowpath_drop(net, sk, skb, mtu);
 
 	if ((skb->len > mtu && !skb_is_gso(skb)) ||
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	    /* dst_allfrag reads dst metrics (RTAX_FEATURES); for a CORE
+	     * default-metrics dst the instrumented read authenticates the
+	     * read-only default/template metrics array under the ipv6 cert and
+	     * FPACs.  Read-only metrics => features 0 => allfrag 0, so skip. */
+	    (!dst_metrics_read_only(skb_dst(skb)) &&
+	     dst_allfrag(skb_dst(skb))) ||
+#else
 	    dst_allfrag(skb_dst(skb)) ||
+#endif
 	    (IP6CB(skb)->frag_max_size && skb->len > IP6CB(skb)->frag_max_size))
 		return ip6_fragment(net, sk, skb, ip6_finish_output2);
 	else
@@ -1733,7 +1843,7 @@ alloc_new_skb:
 				skb->sk = sk;
 				wmem_alloc_delta += skb->truesize;
 			}
-			__skb_queue_tail(queue, skb);
+			skb_queue_tail(queue, skb);
 			continue;
 		}
 
@@ -1878,12 +1988,22 @@ struct sk_buff *__ip6_make_skb(struct sock *sk,
 	struct net *net = sock_net(sk);
 #endif
 	struct ipv6hdr *hdr;
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* cork is an uncolored stack control block shared raw with the rest of
+	 * the send path (ip6_make_skb writes it raw, udp_v6_send_skb reads
+	 * &cork.base raw); access it canonically here too, else PMCPass's
+	 * inserted checks autia an unsigned pointer and FPAC. Mirrors the
+	 * HAKC_GET_SAFE_PTR treatment of final_dst below. */
+	struct inet_cork_full *cork_s = HAKC_GET_SAFE_PTR(cork);
+#else
+	struct inet_cork_full *cork_s = cork;
+#endif
 	struct ipv6_txoptions *opt = v6_cork->opt;
-	struct rt6_info *rt = (struct rt6_info *)cork->base.dst;
-	struct flowi6 *fl6 = &cork->fl.u.ip6;
+	struct rt6_info *rt = (struct rt6_info *)cork_s->base.dst;
+	struct flowi6 *fl6 = &cork_s->fl.u.ip6;
 	unsigned char proto = fl6->flowi6_proto;
 
-	skb = __skb_dequeue(queue);
+	skb = skb_dequeue(queue);
 	if (!skb)
 		goto out;
 	tail_skb = &(skb_shinfo(skb)->frag_list);
@@ -1891,7 +2011,7 @@ struct sk_buff *__ip6_make_skb(struct sock *sk,
 	/* move skb->data to ip header from ext header */
 	if (skb->data < skb_network_header(skb))
 		__skb_pull(skb, skb_network_offset(skb));
-	while ((tmp_skb = __skb_dequeue(queue)) != NULL) {
+	while ((tmp_skb = skb_dequeue(queue)) != NULL) {
 		__skb_pull(tmp_skb, skb_network_header_len(skb));
 		*tail_skb = tmp_skb;
 		tail_skb = &(tmp_skb->next);
@@ -1905,7 +2025,7 @@ struct sk_buff *__ip6_make_skb(struct sock *sk,
 	/* Allow local fragmentation. */
 	skb->ignore_df = ip6_sk_ignore_df(sk);
 
-	*final_dst = fl6->daddr;
+	*HAKC_GET_SAFE_PTR(final_dst) = fl6->daddr;
 	__skb_pull(skb, skb_network_header_len(skb));
 	if (opt && opt->opt_flen)
 		ipv6_push_frag_opts(skb, opt, &proto);
@@ -1922,15 +2042,42 @@ struct sk_buff *__ip6_make_skb(struct sock *sk,
 	hdr->hop_limit = v6_cork->hop_limit;
 	hdr->nexthdr = proto;
 	hdr->saddr = fl6->saddr;
-	hdr->daddr = *final_dst;
+	hdr->daddr = *HAKC_GET_SAFE_PTR(final_dst);
 
 	skb->priority = sk->sk_priority;
-	skb->mark = cork->base.mark;
+	skb->mark = cork_s->base.mark;
 
-	skb->tstamp = cork->base.transmit_time;
+	skb->tstamp = cork_s->base.transmit_time;
 
 	skb_dst_set(skb, dst_clone(&rt->dst));
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	{
+		/* percpu MIB base is an OFFSET; mask to a clean offset, resolve this
+		 * cpu's slot, then re-sign it for its own 1MB region (same pattern as
+		 * icmp_sk / rt6i_pcpu) so the instrumented counter deref passes.
+		 * this_cpu_ptr needs preemption disabled. */
+		struct inet6_dev *_idev = rt->rt6i_idev;
+		unsigned long _no = (unsigned long)net->mib.ipv6_statistics &
+				    0x0000FFFFFFFFFFFFUL;
+		unsigned long _io = _idev ? ((unsigned long)_idev->stats.ipv6 &
+					     0x0000FFFFFFFFFFFFUL) : 0;
+		struct ipstats_mib *_s;
+		preempt_disable();
+		if (likely(_idev != NULL)) {
+			_s = this_cpu_ptr((struct ipstats_mib __percpu *)_io);
+			_s = hakc_sign_pointer(_s, __claque_id, __color, false);
+			_s->mibs[IPSTATS_MIB_OUTPKTS]++;
+			_s->mibs[IPSTATS_MIB_OUTOCTETS] += skb->len;
+		}
+		_s = this_cpu_ptr((struct ipstats_mib __percpu *)_no);
+		_s = hakc_sign_pointer(_s, __claque_id, __color, false);
+		_s->mibs[IPSTATS_MIB_OUTPKTS]++;
+		_s->mibs[IPSTATS_MIB_OUTOCTETS] += skb->len;
+		preempt_enable();
+	}
+#else
 	IP6_UPD_PO_STATS(net, rt->rt6i_idev, IPSTATS_MIB_OUT, skb->len);
+#endif
 	if (proto == IPPROTO_ICMPV6) {
 		struct inet6_dev *idev = ip6_dst_idev(skb_dst(skb));
 
@@ -1945,7 +2092,12 @@ out:
 
 int ip6_send_skb(struct sk_buff *skb)
 {
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	struct net *net = hakc_sign_pointer_with_color(sock_net(skb->sk),
+						       __claque_id, false);
+#else
 	struct net *net = sock_net(skb->sk);
+#endif
 	struct rt6_info *rt = (struct rt6_info *)skb_dst(skb);
 	int err;
 
@@ -1980,7 +2132,7 @@ static void __ip6_flush_pending_frames(struct sock *sk,
 {
 	struct sk_buff *skb;
 
-	while ((skb = __skb_dequeue_tail(queue)) != NULL) {
+	while ((skb = skb_dequeue_tail(queue)) != NULL) {
 		if (skb_dst(skb))
 			IP6_INC_STATS(sock_net(sk), ip6_dst_idev(skb_dst(skb)),
 				      IPSTATS_MIB_OUTDISCARDS);
@@ -2024,7 +2176,7 @@ struct sk_buff *ip6_make_skb(struct sock *sk,
 #else
 	queue_c = &queue;
 #endif
-	__skb_queue_head_init(queue_c);
+	skb_queue_head_init(queue_c);
 
 	cork->base.flags = 0;
 	cork->base.addr = 0;

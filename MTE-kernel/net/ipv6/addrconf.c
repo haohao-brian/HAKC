@@ -95,6 +95,31 @@
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
 HAKC_EXIT(HAKC_ENTRY_TOKEN(0, HAKC_MASK_COLOR(SILVER_CLIQUE)),
          HAKC_ENTRY_TOKEN(1, HAKC_MASK_COLOR(SILVER_CLIQUE)));
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* Sign a raw core net_device for the ipv6 clique so an instrumented
+ * dev->field deref authenticates instead of FPAC (dump/enumeration path). */
+#define hakc_sign_netdev(d) \
+	((struct net_device *)hakc_sign_pointer_with_color( \
+		HAKC_GET_SAFE_PTR((void *)(d)), __claque_id, false))
+#else
+#define hakc_sign_netdev(d) (d)
+#endif
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* Strip a signed netlink skb to canonical before handing it to CORE rtnl_notify
+ * -> netlink_broadcast -> sk_filter/BPF, which deref skb and skb->data raw (a
+ * signed pointer there is a non-canonical addr -> data abort). Strip data/head
+ * while skb is still signed (instrumented write), then return the canonical skb. */
+static inline struct sk_buff *hakc_skb_to_core(struct sk_buff *skb)
+{
+	skb->data = HAKC_GET_SAFE_PTR(skb->data);
+	skb->head = HAKC_GET_SAFE_PTR(skb->head);
+	return HAKC_GET_SAFE_PTR(skb);
+}
+#else
+static inline struct sk_buff *hakc_skb_to_core(struct sk_buff *skb) { return skb; }
+#endif
 #endif
 
 #define	INFINITY_LIFE_TIME	0xFFFFFFFF
@@ -633,7 +658,7 @@ void inet6_netconf_notify_devconf(struct net *net, int event, int type,
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, 0, RTNLGRP_IPV6_NETCONF, NULL, GFP_KERNEL);
+	rtnl_notify(hakc_skb_to_core(skb), net, 0, RTNLGRP_IPV6_NETCONF, NULL, GFP_KERNEL);
 	return;
 errout:
 	rtnl_set_sk_err(net, RTNLGRP_IPV6_NETCONF, err);
@@ -1820,6 +1845,12 @@ int ipv6_dev_get_saddr(struct net *net, const struct net_device *dst_dev,
 	int hiscore_idx = 0;
 	int ret = 0;
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* dst_dev is a raw core net_device; sign it for the ipv6 clique so the
+	 * dst_dev->ifindex / __in6_dev_get(dst_dev) derefs below authenticate. */
+	if (dst_dev)
+		dst_dev = hakc_sign_netdev(dst_dev);
+#endif
 	dst_type = __ipv6_addr_type(daddr);
 	dst.addr = daddr;
 	dst.ifindex = dst_dev ? dst_dev->ifindex : 0;
@@ -1880,10 +1911,19 @@ int ipv6_dev_get_saddr(struct net *net, const struct net_device *dst_dev,
 				goto out;
 		}
 
-		for_each_netdev_rcu(net, dev) {
-			/* only consider addresses on devices in the
-			 * same L3 domain
-			 */
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+		{
+		/* Walk the CORE net_device list raw: for_each_netdev_rcu's instrumented
+		 * cursor autia's each core net_device and FPACs. Strip every list_head
+		 * cursor (and the derived dev) so PMCPass inserts no check; __in6_dev_get
+		 * still yields the colored idev for the scoring pass. */
+		struct list_head *__h = &HAKC_GET_SAFE_PTR(net)->dev_base_head;
+		struct list_head *__p;
+		for (__p = rcu_dereference(__h->next);
+		     HAKC_GET_SAFE_PTR(__p) != __h;
+		     __p = rcu_dereference(HAKC_GET_SAFE_PTR(__p)->next)) {
+			dev = hakc_sign_netdev(list_entry(HAKC_GET_SAFE_PTR(__p),
+							   struct net_device, dev_list));
 			if (l3mdev_master_ifindex_rcu(dev) != master_idx)
 				continue;
 			idev = __in6_dev_get(dev);
@@ -1891,6 +1931,17 @@ int ipv6_dev_get_saddr(struct net *net, const struct net_device *dst_dev,
 				continue;
 			hiscore_idx = __ipv6_dev_get_saddr(net, &dst, idev, scores, hiscore_idx);
 		}
+		}
+#else
+		for_each_netdev_rcu(net, dev) {
+			if (l3mdev_master_ifindex_rcu(dev) != master_idx)
+				continue;
+			idev = __in6_dev_get(dev);
+			if (!idev)
+				continue;
+			hiscore_idx = __ipv6_dev_get_saddr(net, &dst, idev, scores, hiscore_idx);
+		}
+#endif
 	}
 
 out:
@@ -5197,7 +5248,7 @@ static int inet6_fill_ifaddr(struct sk_buff *skb, struct inet6_ifaddr *ifa,
 		return -EMSGSIZE;
 
 	put_ifaddrmsg(nlh, ifa->prefix_len, ifa->flags, rt_scope(ifa->scope),
-		      ifa->idev->dev->ifindex);
+		      hakc_sign_netdev(ifa->idev->dev)->ifindex);
 
 	if (args->netnsid >= 0 &&
 	    nla_put_s32(skb, IFA_TARGET_NETNSID, args->netnsid))
@@ -5857,6 +5908,16 @@ static void inet6_ifa_notify(int event, struct inet6_ifaddr *ifa)
 		kfree_skb(skb);
 		goto errout;
 	}
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* restore to canonical before handing to CORE netlink/BPF, which
+	 * dereferences skb and skb->data raw (a signed pointer there is a
+	 * non-canonical addr -> data abort, not FPAC). Strip the data/head
+	 * fields while skb is still signed (instrumented access), then pass
+	 * the canonical skb pointer to core. */
+	skb->data = HAKC_GET_SAFE_PTR(skb->data);
+	skb->head = HAKC_GET_SAFE_PTR(skb->head);
+	skb = HAKC_GET_SAFE_PTR(skb);
+#endif
 	rtnl_notify(skb, net, 0, RTNLGRP_IPV6_IFADDR, NULL, GFP_ATOMIC);
 	return;
 errout:
@@ -6319,7 +6380,7 @@ static int inet6_set_link_af(struct net_device *dev, const struct nlattr *nla)
 static int inet6_fill_ifinfo(struct sk_buff *skb, struct inet6_dev *idev,
 			     u32 portid, u32 seq, int event, unsigned int flags)
 {
-	struct net_device *dev = idev->dev;
+	struct net_device *dev = hakc_sign_netdev(idev->dev);
 	struct ifinfomsg *hdr;
 	struct nlmsghdr *nlh;
 	void *protoinfo;
@@ -6544,7 +6605,7 @@ void inet6_ifinfo_notify(int event, struct inet6_dev *idev)
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, 0, RTNLGRP_IPV6_IFINFO, NULL, GFP_ATOMIC);
+	rtnl_notify(hakc_skb_to_core(skb), net, 0, RTNLGRP_IPV6_IFINFO, NULL, GFP_ATOMIC);
 	return;
 errout:
 	if (err < 0)
@@ -6624,7 +6685,7 @@ static void inet6_prefix_notify(int event, struct inet6_dev *idev,
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, 0, RTNLGRP_IPV6_PREFIX, NULL, GFP_ATOMIC);
+	rtnl_notify(hakc_skb_to_core(skb), net, 0, RTNLGRP_IPV6_PREFIX, NULL, GFP_ATOMIC);
 	return;
 errout:
 	if (err < 0)

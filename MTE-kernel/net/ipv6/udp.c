@@ -59,6 +59,61 @@
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
 HAKC_EXIT(HAKC_ENTRY_TOKEN(0, HAKC_MASK_COLOR(SILVER_CLIQUE)),
          HAKC_ENTRY_TOKEN(1, HAKC_MASK_COLOR(SILVER_CLIQUE)));
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+static inline struct net *hakc_dev_net(const struct net_device *dev)
+{
+	return (struct net *)hakc_sign_pointer_with_color(
+		HAKC_GET_SAFE_PTR((void *)dev_net(dev)), __claque_id, false);
+}
+#else
+#define hakc_dev_net(dev) dev_net(dev)
+#endif
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* Same percpu-MIB resign as ip6_input.c, for struct udp_mib.  mte_transfer_percpu
+ * returns a raw percpu base; resolve this cpu's slot from a clean offset and
+ * re-sign it before the instrumented this_cpu counter deref, then route every
+ * UDP/UDP6 stat update through it.  Only ipv6.ko sees these overrides. */
+static inline struct udp_mib *hakc_udp_mib(void *base)
+{
+	unsigned long off = (unsigned long)base & 0x0000FFFFFFFFFFFFUL;
+	struct udp_mib *s = this_cpu_ptr((struct udp_mib __percpu *)off);
+
+	return hakc_sign_pointer(s, __claque_id, __color, false);
+}
+#undef __UDP6_INC_STATS
+#undef UDP6_INC_STATS
+#undef __UDP_INC_STATS
+#undef UDP_INC_STATS
+#define __UDP6_INC_STATS(net, field, is_udplite)			\
+	do {								\
+		preempt_disable();					\
+		if (is_udplite)						\
+			hakc_udp_mib((net)->mib.udplite_stats_in6)->mibs[field]++; \
+		else							\
+			hakc_udp_mib((net)->mib.udp_stats_in6)->mibs[field]++; \
+		preempt_enable();					\
+	} while (0)
+#define UDP6_INC_STATS(net, field, is_udplite) __UDP6_INC_STATS(net, field, is_udplite)
+#define __UDP_INC_STATS(net, field, is_udplite)				\
+	do {								\
+		preempt_disable();					\
+		if (is_udplite)						\
+			hakc_udp_mib((net)->mib.udplite_statistics)->mibs[field]++; \
+		else							\
+			hakc_udp_mib((net)->mib.udp_statistics)->mibs[field]++; \
+		preempt_enable();					\
+	} while (0)
+#define UDP_INC_STATS(net, field, is_udplite) __UDP_INC_STATS(net, field, is_udplite)
+#undef SNMP_INC_STATS
+#define SNMP_INC_STATS(mib, field)					\
+	do {								\
+		preempt_disable();					\
+		hakc_udp_mib(mib)->mibs[field]++;			\
+		preempt_enable();					\
+	} while (0)
+#endif
 #endif
 
 static u32 udp6_ehashfn(const struct net *net,
@@ -288,7 +343,7 @@ static struct sock *__udp6_lib_lookup_skb(struct sk_buff *skb,
 {
 	const struct ipv6hdr *iph = ipv6_hdr(skb);
 
-	return __udp6_lib_lookup(dev_net(skb->dev), &iph->saddr, sport,
+	return __udp6_lib_lookup(hakc_dev_net(skb->dev), &iph->saddr, sport,
 				 &iph->daddr, dport, inet6_iif(skb),
 				 inet6_sdif(skb), udptable, skb);
 }
@@ -298,7 +353,7 @@ struct sock *udp6_lib_lookup_skb(struct sk_buff *skb,
 {
 	const struct ipv6hdr *iph = ipv6_hdr(skb);
 
-	return __udp6_lib_lookup(dev_net(skb->dev), &iph->saddr, sport,
+	return __udp6_lib_lookup(hakc_dev_net(skb->dev), &iph->saddr, sport,
 				 &iph->daddr, dport, inet6_iif(skb),
 				 inet6_sdif(skb), &udp_table, NULL);
 }
@@ -912,7 +967,7 @@ int __udp6_lib_rcv(struct sk_buff *skb, struct udp_table *udptable,
 		   int proto)
 {
 	const struct in6_addr *saddr, *daddr;
-	struct net *net = dev_net(skb->dev);
+	struct net *net = hakc_dev_net(skb->dev);
 	struct udphdr *uh;
 	struct sock *sk;
 	bool refcounted;
@@ -1187,6 +1242,9 @@ static int udp_v6_send_skb(struct sk_buff *skb, struct flowi6 *fl6,
 	int offset = skb_transport_offset(skb);
 	int len = skb->len - offset;
 	int datalen = len - sizeof(*uh);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	fl6 = HAKC_GET_SAFE_PTR(fl6);	/* stack flowi6 from udpv6_sendmsg */
+#endif
 
 	/*
 	 * Create a UDP header
@@ -1615,7 +1673,7 @@ do_confirm:
 	goto out;
 }
 
-void udpv6_destroy_sock(struct sock *sk)
+noinline void udpv6_destroy_sock(struct sock *sk)
 {
 	struct udp_sock *up = udp_sk(sk);
 	lock_sock(sk);
@@ -1714,6 +1772,13 @@ void udp6_proc_exit(struct net *net)
 
 /* ------------------------------------------------------------------------ */
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* .destroy called from core udp_lib_close with a raw sk; sign it in. */
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(udpv6_destroy_sock, void, struct sock *sk) {
+	sk = hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(sk), __claque_id, false);
+	udpv6_destroy_sock(sk);
+}
+#endif
 struct proto udpv6_prot = {
 	.name			= "UDPv6",
 	.owner			= THIS_MODULE,
@@ -1723,7 +1788,11 @@ struct proto udpv6_prot = {
 	.disconnect		= udp_disconnect,
 	.ioctl			= udp_ioctl,
 	.init			= udp_init_sock,
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	.destroy		= HAKC_OUTSIDE_TRANSFER_FUNC(udpv6_destroy_sock),
+#else
 	.destroy		= udpv6_destroy_sock,
+#endif
 	.setsockopt		= udpv6_setsockopt,
 	.getsockopt		= udpv6_getsockopt,
 	.sendmsg		= udpv6_sendmsg,

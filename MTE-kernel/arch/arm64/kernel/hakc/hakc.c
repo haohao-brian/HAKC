@@ -710,7 +710,7 @@ void *mte_transfer_percpu(struct percpu_info *pcpu_info, size_t size,
 			if (cpu == get_boot_cpu_id()) {
 				u64 offset = ((u64)pcpu_ptr - (u64)pcpu_info->percpu_addr);
 				HAKC_INFO("\toffset = %lx\n", offset);
-				result = (void *)((u64)signed_ptr - offset);
+				result = pcpu_info->percpu_addr; (void)offset; (void)signed_ptr;
 			}
 		}
 

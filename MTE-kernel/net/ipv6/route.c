@@ -72,6 +72,63 @@
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
 HAKC_EXIT(HAKC_ENTRY_TOKEN(0, HAKC_MASK_COLOR(SILVER_CLIQUE)),
          HAKC_ENTRY_TOKEN(1, HAKC_MASK_COLOR(SILVER_CLIQUE)));
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+static inline struct net *hakc_dev_net(const struct net_device *dev)
+{
+	/* dev_net(dev) yields a net pointer signed for the wrong clique (or
+	 * raw); re-sign it for the ipv6 clique so instrumented net->X derefs
+	 * authenticate. The check canonicalizes net on use, so &net->... that
+	 * ip6_dst_alloc hands to core dst_alloc stays canonical. */
+	return (struct net *)hakc_sign_pointer_with_color(
+		HAKC_GET_SAFE_PTR(dev_net(dev)), __claque_id, false);
+}
+#else
+#define hakc_dev_net(dev) dev_net(dev)
+#endif
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* Sign a raw core net_device for the ipv6 clique so an instrumented
+ * dev->field deref authenticates instead of FPAC. */
+#define hakc_sign_netdev(d) \
+	((struct net_device *)hakc_sign_pointer_with_color( \
+		HAKC_GET_SAFE_PTR((void *)(d)), __claque_id, false))
+#else
+#define hakc_sign_netdev(d) (d)
+#endif
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+static inline bool hakc_ip6_ignore_linkdown(const struct net_device *dev)
+{
+	const struct inet6_dev *idev;
+
+	/* dev (fib nexthop dev) and the idev it points to are raw core objects;
+	 * re-sign each for the ipv6 clique so ->ip6_ptr / ->cnf derefs auth. */
+	dev = (const struct net_device *)hakc_sign_pointer_with_color(
+		HAKC_GET_SAFE_PTR((void *)dev), __claque_id, false);
+	idev = __in6_dev_get(dev);
+	idev = (const struct inet6_dev *)hakc_sign_pointer_with_color(
+		HAKC_GET_SAFE_PTR((void *)idev), __claque_id, false);
+	return !!idev->cnf.ignore_routes_with_linkdown;
+}
+#else
+#define hakc_ip6_ignore_linkdown(dev) ip6_ignore_linkdown(dev)
+#endif
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* Strip a signed netlink skb to canonical before handing it to CORE rtnl_notify
+ * -> netlink_broadcast -> sk_filter/BPF, which deref skb and skb->data raw (a
+ * signed pointer there is a non-canonical addr -> data abort). Strip data/head
+ * while skb is still signed (instrumented write), then return the canonical skb. */
+static inline struct sk_buff *hakc_skb_to_core(struct sk_buff *skb)
+{
+	skb->data = HAKC_GET_SAFE_PTR(skb->data);
+	skb->head = HAKC_GET_SAFE_PTR(skb->head);
+	return HAKC_GET_SAFE_PTR(skb);
+}
+#else
+static inline struct sk_buff *hakc_skb_to_core(struct sk_buff *skb) { return skb; }
+#endif
 #endif
 
 static int ip6_rt_type_to_error(u8 fib6_type);
@@ -141,6 +198,13 @@ static DEFINE_PER_CPU_ALIGNED(struct uncached_list, rt6_uncached_list);
 void rt6_uncached_list_add(struct rt6_info *rt)
 {
 	struct uncached_list *ul = raw_cpu_ptr(&rt6_uncached_list);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* rt6_uncached_list is a module percpu the LOADER already colored RED
+	 * (kernel/module.c). PMCPass inserts the access check but never the
+	 * signature for percpu, so sign-only (NOT _with_color, which recolors
+	 * read-only memory) the loader-colored per-cpu VA. */
+	ul = hakc_sign_pointer(ul, __claque_id, __color, false);
+#endif
 
 	rt->rt6i_uncached_list = ul;
 
@@ -172,6 +236,13 @@ static void rt6_uncached_list_flush_dev(struct net *net, struct net_device *dev)
 
 	for_each_possible_cpu(cpu) {
 		struct uncached_list *ul = per_cpu_ptr(&rt6_uncached_list, cpu);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+		/* rt6_uncached_list is a module percpu the LOADER already colored RED
+		 * (kernel/module.c). PMCPass inserts the access check but never the
+		 * signature for percpu, so sign-only (NOT _with_color, which recolors
+		 * read-only memory) the loader-colored per-cpu VA. */
+		ul = hakc_sign_pointer(ul, __claque_id, __color, false);
+#endif
 		struct rt6_info *rt;
 
 		spin_lock_bh(&ul->lock);
@@ -382,7 +453,15 @@ static void ip6_dst_destroy(struct dst_entry *dst)
 	struct fib6_info *from;
 	struct inet6_dev *idev;
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* ip_dst_metrics_put dereferences DST_METRICS_PTR(dst); for a read-only
+	 * (shared static) metrics array the instrumented access FPACs, and such
+	 * metrics are never refcounted/freed, so skip. */
+	if (!dst_metrics_read_only(dst))
+		ip_dst_metrics_put(dst);
+#else
 	ip_dst_metrics_put(dst);
+#endif
 	rt6_uncached_list_del(rt);
 
 	idev = rt->rt6i_idev;
@@ -776,7 +855,7 @@ static bool find_match(struct fib6_nh *nh, u32 fib6_flags,
 	if (nh->fib_nh_flags & RTNH_F_DEAD)
 		goto out;
 
-	if (ip6_ignore_linkdown(nh->fib_nh_dev) &&
+	if (hakc_ip6_ignore_linkdown(nh->fib_nh_dev) &&
 	    nh->fib_nh_flags & RTNH_F_LINKDOWN &&
 	    !(strict & RT6_LOOKUP_F_IGNORE_LINKSTATE))
 		goto out;
@@ -793,9 +872,9 @@ static bool find_match(struct fib6_nh *nh, u32 fib6_flags,
 		rt6_probe(nh);
 
 	/* note that m can be RT6_NUD_FAIL_PROBE at this point */
-	if (m > *mpri) {
-		*do_rr = match_do_rr;
-		*mpri = m;
+	if (m > *HAKC_GET_SAFE_PTR(mpri)) {
+		*HAKC_GET_SAFE_PTR(do_rr) = match_do_rr;
+		*HAKC_GET_SAFE_PTR(mpri) = m;
 		rc = true;
 	}
 out:
@@ -1044,7 +1123,7 @@ int rt6_route_rcv(struct net_device *dev, u8 *opt, int len,
 /* called with rcu_lock held */
 static struct net_device *ip6_rt_get_dev_rcu(const struct fib6_result *res)
 {
-	struct net_device *dev = res->nh->fib_nh_dev;
+	struct net_device *dev = hakc_sign_netdev(res->nh->fib_nh_dev);
 
 	if (res->fib6_flags & (RTF_LOCAL | RTF_ANYCAST)) {
 		/* for copies of local routes, dst->dev needs to be the
@@ -1055,7 +1134,15 @@ static struct net_device *ip6_rt_get_dev_rcu(const struct fib6_result *res)
 		    !rt6_need_strict(&res->f6i->fib6_dst.addr))
 			dev = l3mdev_master_dev_rcu(dev);
 		else if (!netif_is_l3_master(dev))
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+			/* dev_net(dev) is signed for the wrong clique; re-sign for the
+			 * ipv6 clique so ->loopback_dev authenticates (local/::1 route). */
+			dev = hakc_sign_netdev(((struct net *)hakc_sign_pointer_with_color(
+				HAKC_GET_SAFE_PTR(dev_net(dev)), __claque_id,
+				false))->loopback_dev);
+#else
 			dev = dev_net(dev)->loopback_dev;
+#endif
 		/* last case is netif_is_l3_master(dev) is true in which
 		 * case we want dev returned to be dev
 		 */
@@ -1158,7 +1245,7 @@ static void rt6_set_from(struct rt6_info *rt, struct fib6_info *from)
 static void ip6_rt_copy_init(struct rt6_info *rt, const struct fib6_result *res)
 {
 	const struct fib6_nh *nh = res->nh;
-	const struct net_device *dev = nh->fib_nh_dev;
+	const struct net_device *dev = hakc_sign_netdev(nh->fib_nh_dev);
 	struct fib6_info *f6i = res->f6i;
 
 	ip6_rt_init_dst(rt, res);
@@ -1222,7 +1309,7 @@ static struct rt6_info *ip6_create_rt_rcu(const struct fib6_result *res)
 		goto fallback;
 
 	flags = fib6_info_dst_flags(f6i);
-	nrt = ip6_dst_alloc(dev_net(dev), dev, flags);
+	nrt = ip6_dst_alloc(hakc_dev_net(dev), dev, flags);
 	if (!nrt) {
 		fib6_info_release(f6i);
 		goto fallback;
@@ -1369,7 +1456,7 @@ static struct rt6_info *ip6_rt_cache_alloc(const struct fib6_result *res,
 		return NULL;
 
 	dev = ip6_rt_get_dev_rcu(res);
-	rt = ip6_dst_alloc(dev_net(dev), dev, 0);
+	rt = ip6_dst_alloc(hakc_dev_net(dev), dev, 0);
 	if (!rt) {
 		fib6_info_release(f6i);
 		return NULL;
@@ -1407,7 +1494,7 @@ static struct rt6_info *ip6_rt_pcpu_alloc(const struct fib6_result *res)
 
 	rcu_read_lock();
 	dev = ip6_rt_get_dev_rcu(res);
-	pcpu_rt = ip6_dst_alloc(dev_net(dev), dev, flags | DST_NOCOUNT);
+	pcpu_rt = ip6_dst_alloc(hakc_dev_net(dev), dev, flags | DST_NOCOUNT);
 	rcu_read_unlock();
 	if (!pcpu_rt) {
 		fib6_info_release(f6i);
@@ -1417,7 +1504,7 @@ static struct rt6_info *ip6_rt_pcpu_alloc(const struct fib6_result *res)
 	pcpu_rt->rt6i_flags |= RTF_PCPU;
 
 	if (f6i->nh)
-		pcpu_rt->sernum = rt_genid_ipv6(dev_net(dev));
+		pcpu_rt->sernum = rt_genid_ipv6(hakc_dev_net(dev));
 
 	return pcpu_rt;
 }
@@ -1432,12 +1519,25 @@ static struct rt6_info *rt6_get_pcpu_route(const struct fib6_result *res)
 {
 	struct rt6_info *pcpu_rt;
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	{
+		/* rt6i_pcpu sign: raw percpu base now, sign the resolved this-cpu
+		 * slot for its own 1MB region before dereferencing it. */
+		struct rt6_info **__p6 = this_cpu_ptr(res->nh->rt6i_pcpu);
+		__p6 = hakc_sign_pointer(__p6, __claque_id, __color, false);
+		pcpu_rt = *__p6;
+	}
+#else
 	pcpu_rt = this_cpu_read(*res->nh->rt6i_pcpu);
+#endif
 
 	if (pcpu_rt && pcpu_rt->sernum && !rt6_is_valid(pcpu_rt)) {
 		struct rt6_info *prev, **p;
 
 		p = this_cpu_ptr(res->nh->rt6i_pcpu);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+		p = hakc_sign_pointer(p, __claque_id, __color, false);
+#endif
 		prev = xchg(p, NULL);
 		if (prev) {
 			dst_dev_put(&prev->dst);
@@ -1460,6 +1560,9 @@ static struct rt6_info *rt6_make_pcpu_route(struct net *net,
 		return NULL;
 
 	p = this_cpu_ptr(res->nh->rt6i_pcpu);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	p = hakc_sign_pointer(p, __claque_id, __color, false);
+#endif
 	prev = cmpxchg(p, NULL, pcpu_rt);
 	BUG_ON(prev);
 
@@ -3131,7 +3234,17 @@ static unsigned int ip6_mtu(const struct dst_entry *dst)
 	struct inet6_dev *idev;
 	unsigned int mtu;
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* For a read-only-metrics dst, _metrics points at the CORE global
+	 * dst_default_metrics (not colored into the ipv6 clique); the
+	 * PMCPass-instrumented read authenticates it under the ipv6 cert and
+	 * FPACs.  The default RTAX_MTU is 0, so skipping the read is
+	 * behavior-identical (falls through to idev->cnf.mtu6).  Writable
+	 * (in-clique) metrics are still read normally. */
+	mtu = dst_metrics_read_only(dst) ? 0 : dst_metric_raw(dst, RTAX_MTU);
+#else
 	mtu = dst_metric_raw(dst, RTAX_MTU);
+#endif
 	if (mtu)
 		goto out;
 
@@ -3214,7 +3327,12 @@ struct dst_entry *icmp6_dst_alloc(struct net_device *dev,
 	rt->rt6i_dst.addr = fl6->daddr;
 	rt->rt6i_dst.plen = 128;
 	rt->rt6i_idev     = idev;
+#if !IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Under HAKC this triggers dst->ops->cow_metrics (a CORE fn) via an indirect
+	 * call check_hakc_code_access cannot authenticate -> FPAC; a fresh dst already
+	 * has RTAX_HOPLIMIT=0 (default read-only metrics) so skipping is safe. */
 	dst_metric_set(&rt->dst, RTAX_HOPLIMIT, 0);
+#endif
 
 	/* Add this dst into uncached_list so that rt6_disable_ip() can
 	 * do proper release of the net_device
@@ -3506,12 +3624,12 @@ int fib6_nh_init(struct net *net, struct fib6_nh *fib6_nh,
 	addr_type = ipv6_addr_type(&cfg->fc_dst);
 	if (fib6_is_reject(cfg->fc_flags, dev, addr_type)) {
 		/* hold loopback dev/idev if we haven't done so. */
-		if (dev != net->loopback_dev) {
+		if (HAKC_GET_SAFE_PTR(dev) != HAKC_GET_SAFE_PTR(net->loopback_dev)) {
 			if (dev) {
 				dev_put(dev);
 				in6_dev_put(idev);
 			}
-			dev = net->loopback_dev;
+			dev = hakc_sign_netdev(net->loopback_dev);
 			dev_hold(dev);
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
 			/* Faithful (a): sign the loopback dev like the normal
@@ -3919,7 +4037,7 @@ out_put:
 	fib6_info_release(rt);
 
 	if (skb) {
-		rtnl_notify(skb, net, info->portid, RTNLGRP_IPV6_ROUTE,
+		rtnl_notify(hakc_skb_to_core(skb), net, info->portid, RTNLGRP_IPV6_ROUTE,
 			    info->nlh, gfp_any());
 	}
 	return err;
@@ -6103,7 +6221,7 @@ void inet6_rt_notify(int event, struct fib6_info *rt, struct nl_info *info,
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, info->portid, RTNLGRP_IPV6_ROUTE,
+	rtnl_notify(hakc_skb_to_core(skb), net, info->portid, RTNLGRP_IPV6_ROUTE,
 		    info->nlh, gfp_any());
 	return;
 errout:
@@ -6143,7 +6261,7 @@ void fib6_rt_update(struct net *net, struct fib6_info *rt,
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, info->portid, RTNLGRP_IPV6_ROUTE,
+	rtnl_notify(hakc_skb_to_core(skb), net, info->portid, RTNLGRP_IPV6_ROUTE,
 		    info->nlh, gfp_any());
 	return;
 errout:
@@ -6774,6 +6892,13 @@ int __init ip6_route_init(void)
 //		#else
 		struct uncached_list *ul = per_cpu_ptr(&rt6_uncached_list, cpu);
 //		#endif
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+		/* rt6_uncached_list is a module percpu the LOADER already colored RED
+		 * (kernel/module.c). PMCPass inserts the access check but never the
+		 * signature for percpu, so sign-only (NOT _with_color, which recolors
+		 * read-only memory) the loader-colored per-cpu VA. */
+		ul = hakc_sign_pointer(ul, __claque_id, __color, false);
+#endif
 
 
 		INIT_LIST_HEAD(&ul->head);

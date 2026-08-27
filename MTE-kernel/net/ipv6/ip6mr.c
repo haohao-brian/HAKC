@@ -55,6 +55,21 @@
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
 HAKC_EXIT(HAKC_ENTRY_TOKEN(0, HAKC_MASK_COLOR(SILVER_CLIQUE)),
 	 HAKC_ENTRY_TOKEN(1, HAKC_MASK_COLOR(SILVER_CLIQUE)));
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* Strip a signed netlink skb to canonical before handing it to CORE rtnl_notify
+ * -> netlink_broadcast -> sk_filter/BPF, which deref skb and skb->data raw (a
+ * signed pointer there is a non-canonical addr -> data abort). Strip data/head
+ * while skb is still signed (instrumented write), then return the canonical skb. */
+static inline struct sk_buff *hakc_skb_to_core(struct sk_buff *skb)
+{
+	skb->data = HAKC_GET_SAFE_PTR(skb->data);
+	skb->head = HAKC_GET_SAFE_PTR(skb->head);
+	return HAKC_GET_SAFE_PTR(skb);
+}
+#else
+static inline struct sk_buff *hakc_skb_to_core(struct sk_buff *skb) { return skb; }
+#endif
 #endif
 
 struct ip6mr_rule {
@@ -2500,7 +2515,7 @@ static void mr6_netlink_event(struct mr_table *mrt, struct mfc6_cache *mfc,
 	if (err < 0)
 		goto errout;
 
-	rtnl_notify(skb, net, 0, RTNLGRP_IPV6_MROUTE, NULL, GFP_ATOMIC);
+	rtnl_notify(hakc_skb_to_core(skb), net, 0, RTNLGRP_IPV6_MROUTE, NULL, GFP_ATOMIC);
 	return;
 
 errout:
@@ -2572,7 +2587,7 @@ static void mrt6msg_netlink_event(struct mr_table *mrt, struct sk_buff *pkt)
 
 	nlmsg_end(skb, nlh);
 
-	rtnl_notify(skb, net, 0, RTNLGRP_IPV6_MROUTE_R, NULL, GFP_ATOMIC);
+	rtnl_notify(hakc_skb_to_core(skb), net, 0, RTNLGRP_IPV6_MROUTE_R, NULL, GFP_ATOMIC);
 	return;
 
 nla_put_failure:
