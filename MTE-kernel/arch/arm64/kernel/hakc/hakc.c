@@ -5,6 +5,7 @@
 #include <linux/skbuff.h>
 #include <linux/percpu.h>
 #include <uapi/linux/netlink.h>
+#include <linux/mm.h>
 
 #define HAKC_DEBUG IS_ENABLED(CONFIG_PAC_MTE_COMPART_DEBUG_PRINT)
 #define HAKC_ALLOW IS_ENABLED(CONFIG_PAC_MTE_COMPART_ALLOW_FAILED)
@@ -62,7 +63,28 @@ static inline bool addr_is_signed(const void *ptr)
 static inline bool get_percpu_info(struct percpu_info *info)
 {
 	if (addr_is_signed(info->signed_addr)) {
-		info->percpu_addr = HAKC_GET_SAFE_PTR(info->signed_addr);
+		/* Discriminator fix: a signed pointer may be a kernel VA OR a
+		 * percpu offset. HAKC_GET_SAFE_PTR unconditionally forces the top
+		 * to 0xffff (kernel-VA assumption), which corrupts a percpu offset.
+		 * Decide by PROBING: interpret as percpu offset (off, top=0) and ask
+		 * the percpu subsystem; interpret as kernel VA (kva, top=0xffff) and
+		 * test if that is a real kernel address. Commit to percpu only when
+		 * the scan says percpu AND the kernel interpretation is NOT legit
+		 * (a real percpu cookie kva form is unmapped; a real kernel VA kva
+		 * form is itself). Lets is_dynamic recognize the offset and diverts
+		 * callers away from the naked-sign/ldg crash. */
+		unsigned long long _v = (unsigned long long)info->signed_addr;
+		unsigned long _off = (unsigned long)(_v & 0x0000FFFFFFFFFFFFULL);
+		unsigned long _kva = (unsigned long)(0xFFFF000000000000ULL | _v);
+		bool _is_pcpu = is_dynamic_percpu_address(_off) ||
+				is_kernel_percpu_address(_off) ||
+				is_module_percpu_address(_off);
+		bool _kva_legit = virt_addr_valid((void *)_kva) ||
+				  is_vmalloc_addr((void *)_kva);
+		if (_is_pcpu && !_kva_legit)
+			info->percpu_addr = (void *)_off;   /* percpu: keep clean offset */
+		else
+			info->percpu_addr = HAKC_GET_SAFE_PTR(info->signed_addr);
 	} else {
 		info->percpu_addr = info->signed_addr;
 	}
@@ -654,40 +676,43 @@ void *mte_transfer_percpu(struct percpu_info *pcpu_info, size_t size,
 		  pcpu_info->signed_addr, size, claque_id,
 		  get_hakc_color_name(color));
 
-	//	if(!pcpu_info->is_dynamic) {
-	//		return color_and_sign(raw_cpu_ptr(pcpu_info->signed_addr),
-	//				      size * num_online_cpus(),
-	//				      claque_id, color, false);
-	//	}
+		if(!pcpu_info->is_dynamic) {
+			return color_and_sign(raw_cpu_ptr(pcpu_info->signed_addr),
+					      size * num_online_cpus(),
+					      claque_id, color, false);
+		}
 
-	pcpu_ptr = pcpu_ptr_to_addr(pcpu_info->percpu_addr);
-	signed_ptr = color_and_sign(pcpu_ptr, size * nr_cpu_ids, claque_id,
-				    color, is_code);
-	result = addr_to_pcpu_ptr(signed_ptr);
+        /* Return the original alloc_percpu base pointer unchanged.
+         * color_and_sign above has already applied MTE tags (and PAC if
+         * HAKC_SIGN_PTR=1) to each per-CPU slot.  The base pointer itself
+         * must remain a raw percpu offset so that per_cpu_ptr() arithmetic
+         * works correctly in callers. */
+	int cpu;
+        result = pcpu_info->percpu_addr;
 
-	//	for_each_possible_cpu (cpu) {
-	//		pcpu_ptr = per_cpu_ptr(pcpu_info->percpu_addr, cpu);
-	//		HAKC_INFO("\tpcpu_ptr = %lx\n", pcpu_ptr);
-	//		pr_info("mte_transfer_percpu pcpu_info->percpu_addr = "
-	//			"%lx\nvirt_addr_valid = %d\n"
-	//			"is_kernel_percpu_address %d\n"
-	//			"is_module_percpu_address %d\n"
-	//			"is_dynamic_percpu_address %d\n",
-	//			pcpu_info->percpu_addr,
-	//			virt_addr_valid(pcpu_info->percpu_addr),
-	//			is_kernel_percpu_address(pcpu_info->percpu_addr),
-	//			is_module_percpu_address(pcpu_info->percpu_addr),
-	//			is_dynamic_percpu_address(pcpu_info->percpu_addr)
-	//		);
-	//		signed_ptr = color_and_sign(pcpu_ptr, size, claque_id, color,
-	//					    is_code);
-	//		HAKC_INFO("\tsigned_ptr = %lx\n", signed_ptr);
-	//		if (cpu == get_boot_cpu_id()) {
-	//			u64 offset = ((u64)pcpu_ptr - (u64)pcpu_info->percpu_addr);
-	//			HAKC_INFO("\toffset = %lx\n", offset);
-	//			result = (void *)((u64)signed_ptr - offset);
-	//		}
-	//	}
+		for_each_possible_cpu (cpu) {
+			pcpu_ptr = per_cpu_ptr(pcpu_info->percpu_addr, cpu);
+			HAKC_INFO("\tpcpu_ptr = %lx\n", pcpu_ptr);
+			pr_info("mte_transfer_percpu pcpu_info->percpu_addr = "
+				"%lx\nvirt_addr_valid = %d\n"
+				"is_kernel_percpu_address %d\n"
+				"is_module_percpu_address %d\n"
+				"is_dynamic_percpu_address %d\n",
+				pcpu_info->percpu_addr,
+				virt_addr_valid(pcpu_info->percpu_addr),
+				is_kernel_percpu_address(pcpu_info->percpu_addr),
+				is_module_percpu_address(pcpu_info->percpu_addr),
+				is_dynamic_percpu_address(pcpu_info->percpu_addr)
+			);
+			signed_ptr = color_and_sign(pcpu_ptr, size, claque_id, color,
+						    is_code);
+			HAKC_INFO("\tsigned_ptr = %lx\n", signed_ptr);
+			if (cpu == get_boot_cpu_id()) {
+				u64 offset = ((u64)pcpu_ptr - (u64)pcpu_info->percpu_addr);
+				HAKC_INFO("\toffset = %lx\n", offset);
+				result = pcpu_info->percpu_addr; (void)offset; (void)signed_ptr;
+			}
+		}
 
 	HAKC_INFO(
 		"Transferred percpu variable %lx: %lx (%lx %lx)\n",

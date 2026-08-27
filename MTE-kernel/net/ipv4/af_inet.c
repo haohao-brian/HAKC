@@ -1668,7 +1668,8 @@ EXPORT_SYMBOL_GPL(inet_ctl_sock_create);
 u64 snmp_get_cpu_field(void __percpu *mib, int cpu, int offt)
 {
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
-	mib = hakc_safe_ptr2(mib);
+	/* strip claque/PAC (bits[63:48]) -> raw percpu offset so per_cpu_ptr does not overflow */
+	mib = (void __percpu *)((u64)mib & 0x0000FFFFFFFFFFFF);
 #endif
 	return  *(((unsigned long *)per_cpu_ptr(mib, cpu)) + offt);
 }

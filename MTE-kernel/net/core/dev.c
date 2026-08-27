@@ -10263,6 +10263,22 @@ int netdev_refcnt_read(const struct net_device *dev)
 }
 EXPORT_SYMBOL(netdev_refcnt_read);
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* Out-of-line dev_hold/dev_put: defined in this uncolored core TU so PMCPass
+ * does not instrument the per-cpu refcount access. See netdevice.h. */
+void dev_hold(struct net_device *dev)
+{
+	this_cpu_inc(*dev->pcpu_refcnt);
+}
+EXPORT_SYMBOL(dev_hold);
+void dev_put(struct net_device *dev)
+{
+	this_cpu_dec(*dev->pcpu_refcnt);
+}
+EXPORT_SYMBOL(dev_put);
+#endif
+
+
 #define WAIT_REFS_MIN_MSECS 1
 #define WAIT_REFS_MAX_MSECS 250
 /**

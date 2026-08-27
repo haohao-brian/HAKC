@@ -3959,10 +3959,14 @@ void netdev_run_todo(void);
  *
  * Release reference to device to allow it to be freed.
  */
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+void dev_put(struct net_device *dev);
+#else
 static inline void dev_put(struct net_device *dev)
 {
 	this_cpu_dec(*dev->pcpu_refcnt);
 }
+#endif
 
 /**
  *	dev_hold - get reference to device
@@ -3970,10 +3974,17 @@ static inline void dev_put(struct net_device *dev)
  *
  * Hold reference to device to keep it from being freed.
  */
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* out-of-line in net/core/dev.c (uncolored core TU) so PMCPass does not
+ * instrument the percpu access (which FPACs on non-boot cpus across 1MB
+ * PAC granules). refcount access fail-open. */
+void dev_hold(struct net_device *dev);
+#else
 static inline void dev_hold(struct net_device *dev)
 {
 	this_cpu_inc(*dev->pcpu_refcnt);
 }
+#endif
 
 /* Carrier loss detection, dial on demand. The functions netif_carrier_on
  * and _off may be called from IRQ context, but it is caller

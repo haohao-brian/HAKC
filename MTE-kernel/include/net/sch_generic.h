@@ -758,7 +758,13 @@ static inline bool qdisc_tx_is_noop(const struct net_device *dev)
 
 	for (i = 0; i < dev->num_tx_queues; i++) {
 		struct netdev_queue *txq = netdev_get_tx_queue(dev, i);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+		/* compare-only: read qdisc as scalar so PMCPass does not autia a core
+		 * pointer (== &noop_qdisc, a shared global) we never dereference */
+		if (*(unsigned long volatile *)&txq->qdisc != (unsigned long)&noop_qdisc)
+#else
 		if (rcu_access_pointer(txq->qdisc) != &noop_qdisc)
+#endif
 			return false;
 	}
 	return true;

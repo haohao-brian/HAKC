@@ -1053,7 +1053,18 @@ static int noinline __net_init icmpv6_sk_init(struct net *net)
 //		sk = hakc_transfer_to_clique(sk, sizeof(*sk), __claque_id, __color,
 //                              false);
 //#endif
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+		{
+			/* base is now a raw percpu offset; sign the resolved per-cpu
+			 * slot for its own 1MB region (sign-only, memory already
+			 * colored) so the instrumented store authenticates. */
+			struct sock **__slot = per_cpu_ptr(net->ipv6.icmp_sk, i);
+			__slot = hakc_sign_pointer(__slot, __claque_id, __color, false);
+			*__slot = sk;
+		}
+#else
 		*per_cpu_ptr(net->ipv6.icmp_sk, i) = sk;
+#endif
 
 		/* Enough space for 2 64K ICMP packets, including
 		 * sk_buff struct overhead.

@@ -75,15 +75,155 @@
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
 HAKC_EXIT(HAKC_ENTRY_TOKEN(0, HAKC_MASK_COLOR(SILVER_CLIQUE)),
          HAKC_ENTRY_TOKEN(1, HAKC_MASK_COLOR(SILVER_CLIQUE)));
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* Strip a signed netlink skb to canonical before handing it to CORE rtnl_notify
+ * -> netlink_broadcast -> sk_filter/BPF, which deref skb and skb->data raw (a
+ * signed pointer there is a non-canonical addr -> data abort). Strip data/head
+ * while skb is still signed (instrumented write), then return the canonical skb. */
+static inline struct sk_buff *hakc_skb_to_core(struct sk_buff *skb)
+{
+	skb->data = HAKC_GET_SAFE_PTR(skb->data);
+	skb->head = HAKC_GET_SAFE_PTR(skb->head);
+	return HAKC_GET_SAFE_PTR(skb);
+}
+#else
+static inline struct sk_buff *hakc_skb_to_core(struct sk_buff *skb) { return skb; }
+#endif
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* mte_transfer_percpu returns a raw percpu base; the instrumented this_cpu deref
+ * of a MIB counter would autia the raw resolved slot and FPAC. Resolve this cpu's
+ * slot from a clean offset and re-sign it for its own 1MB region before the
+ * counter deref, then route every IPv6/ICMPv6 MIB update through it (same pattern
+ * as ip6_input.c). SNMP counters stay protected; only ipv6.ko sees these. */
+static inline struct ipstats_mib *hakc_ip6_mib(void *base)
+{
+	unsigned long off = (unsigned long)base & 0x0000FFFFFFFFFFFFUL;
+	struct ipstats_mib *s = this_cpu_ptr((struct ipstats_mib __percpu *)off);
+
+	return hakc_sign_pointer(s, __claque_id, __color, false);
+}
+static inline struct icmpv6_mib *hakc_icmpv6_mib(void *base)
+{
+	unsigned long off = (unsigned long)base & 0x0000FFFFFFFFFFFFUL;
+	struct icmpv6_mib *s = this_cpu_ptr((struct icmpv6_mib __percpu *)off);
+
+	return hakc_sign_pointer(s, __claque_id, __color, false);
+}
+#undef IP6_INC_STATS
+#undef __IP6_INC_STATS
+#undef IP6_ADD_STATS
+#undef __IP6_ADD_STATS
+#undef IP6_UPD_PO_STATS
+#undef __IP6_UPD_PO_STATS
+#define IP6_INC_STATS(net, idev, field)					\
+	do {								\
+		struct inet6_dev *__d = (idev);				\
+		preempt_disable();					\
+		if (likely(__d))					\
+			hakc_ip6_mib((__d)->stats.ipv6)->mibs[field]++;	\
+		hakc_ip6_mib((net)->mib.ipv6_statistics)->mibs[field]++; \
+		preempt_enable();					\
+	} while (0)
+#define __IP6_INC_STATS(net, idev, field) IP6_INC_STATS(net, idev, field)
+#define IP6_ADD_STATS(net, idev, field, val)				\
+	do {								\
+		struct inet6_dev *__d = (idev);				\
+		unsigned long __v = (val);				\
+		preempt_disable();					\
+		if (likely(__d))					\
+			hakc_ip6_mib((__d)->stats.ipv6)->mibs[field] += __v; \
+		hakc_ip6_mib((net)->mib.ipv6_statistics)->mibs[field] += __v; \
+		preempt_enable();					\
+	} while (0)
+#define __IP6_ADD_STATS(net, idev, field, val) IP6_ADD_STATS(net, idev, field, val)
+#define IP6_UPD_PO_STATS(net, idev, field, val)				\
+	do {								\
+		IP6_INC_STATS(net, idev, field##PKTS);			\
+		IP6_ADD_STATS(net, idev, field##OCTETS, val);		\
+	} while (0)
+#define __IP6_UPD_PO_STATS(net, idev, field, val) IP6_UPD_PO_STATS(net, idev, field, val)
+#undef ICMP6_INC_STATS
+#undef __ICMP6_INC_STATS
+#define ICMP6_INC_STATS(net, idev, field)				\
+	do {								\
+		struct inet6_dev *__d = (idev);				\
+		preempt_disable();					\
+		if (likely(__d))					\
+			SNMP_INC_STATS_ATOMIC_LONG((__d)->stats.icmpv6dev, field); \
+		hakc_icmpv6_mib((net)->mib.icmpv6_statistics)->mibs[field]++; \
+		preempt_enable();					\
+	} while (0)
+#define __ICMP6_INC_STATS(net, idev, field) ICMP6_INC_STATS(net, idev, field)
+#endif
 #endif
 
 static u32 ndisc_hash(const void *pkey,
 		      const struct net_device *dev,
 		      __u32 *hash_rnd);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* ndisc_hash is tbl->hash, called from core ___neigh_create with raw args
+ * (pkey=&neigh->primary_key, dev, hash_rnd=&nht->hash_rnd); the instrumented
+ * ndisc_hash autia's them. Sign the arg pointers into the compartment for the
+ * call (read-only hashing, local copies, no restore needed). */
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(ndisc_hash, static u32,
+				  const void *pkey,
+				  const struct net_device *dev,
+				  __u32 *hash_rnd)
+{
+	pkey = hakc_sign_pointer_with_color((void *)HAKC_GET_SAFE_PTR(pkey),
+					    __claque_id, false);
+	dev = hakc_sign_pointer_with_color((void *)HAKC_GET_SAFE_PTR(dev),
+					   __claque_id, false);
+	hash_rnd = hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(hash_rnd),
+						__claque_id, false);
+	return ndisc_hash(pkey, dev, hash_rnd);
+}
+#endif
 static bool ndisc_key_eq(const struct neighbour *neigh, const void *pkey);
 static bool ndisc_allow_add(const struct net_device *dev,
 			    struct netlink_ext_ack *extack);
-static int ndisc_constructor(struct neighbour *neigh);
+static noinline int ndisc_constructor(struct neighbour *neigh);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* OUTSIDE_TRANSFER wrapper: core ___neigh_create calls the neigh constructor
+ * with a raw (unsigned) neigh; the instrumented ndisc_constructor autia's it
+ * -> FPAC. Transfer the neigh into the ipv6 compartment for the duration of
+ * the call, then restore its original color/claque on the way out so core
+ * keeps its raw view (transient transfer/restore, not persistent signing). */
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(ndisc_constructor, static int,
+				  struct neighbour *neigh)
+{
+	int result;
+	clique_color_t nc;
+	claque_id_t nq;
+	struct net_device *odev;
+	struct neigh_parms *oparms;
+	void *oip6;
+
+	nc = get_hakc_address_color(neigh);
+	nq = get_hakc_address_claque(neigh);
+	neigh = hakc_transfer_to_clique(neigh, sizeof(*neigh),
+				       __claque_id, __color, false);
+	/* neigh->dev (net_device) is a shared core object: sign-only into the
+	 * compartment for the call (keep its memory color), restore the raw
+	 * pointer afterwards so core keeps its raw view. */
+	odev = HAKC_GET_SAFE_PTR(neigh)->dev;
+	HAKC_GET_SAFE_PTR(neigh)->dev =
+		hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(odev), __claque_id, false);
+	oparms = HAKC_GET_SAFE_PTR(neigh)->parms;
+	HAKC_GET_SAFE_PTR(neigh)->parms =
+		hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(oparms), __claque_id, false);
+	oip6 = (void *)HAKC_GET_SAFE_PTR(odev)->header_ops;
+	HAKC_GET_SAFE_PTR(odev)->header_ops =
+		hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(oip6), __claque_id, false);
+	result = ndisc_constructor(neigh);
+	HAKC_GET_SAFE_PTR(neigh)->dev = odev;
+	HAKC_GET_SAFE_PTR(odev)->header_ops = oip6;
+	neigh = hakc_transfer_to_clique(neigh, sizeof(*neigh), nq, nc, false);
+	return result;
+}
+#endif
 static void ndisc_solicit(struct neighbour *neigh, struct sk_buff *skb);
 static void ndisc_error_report(struct neighbour *neigh, struct sk_buff *skb);
 static int pndisc_constructor(struct pneigh_entry *n);
@@ -118,9 +258,17 @@ struct neigh_table nd_tbl = {
 	.family =	AF_INET6,
 	.key_len =	sizeof(struct in6_addr),
 	.protocol =	cpu_to_be16(ETH_P_IPV6),
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	.hash =		HAKC_OUTSIDE_TRANSFER_FUNC(ndisc_hash),
+#else
 	.hash =		ndisc_hash,
+#endif
 	.key_eq =	ndisc_key_eq,
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	.constructor =	HAKC_OUTSIDE_TRANSFER_FUNC(ndisc_constructor),
+#else
 	.constructor =	ndisc_constructor,
+#endif
 	.pconstructor =	pndisc_constructor,
 	.pdestructor =	pndisc_destructor,
 	.proxy_redo =	pndisc_redo,
@@ -175,9 +323,9 @@ EXPORT_SYMBOL_GPL(__ndisc_fill_addr_option);
 static inline void ndisc_fill_addr_option(struct sk_buff *skb, int type,
 					  void *data, u8 icmp6_type)
 {
-	__ndisc_fill_addr_option(skb, type, data, skb->dev->addr_len,
-				 ndisc_addr_option_pad(skb->dev->type));
-	ndisc_ops_fill_addr_option(skb->dev, skb, icmp6_type);
+	__ndisc_fill_addr_option(skb, type, data, ((struct net_device *)hakc_sign_pointer_with_color(skb->dev, __claque_id, false))->addr_len,
+				 ndisc_addr_option_pad(((struct net_device *)hakc_sign_pointer_with_color(skb->dev, __claque_id, false))->type));
+	ndisc_ops_fill_addr_option(hakc_sign_pointer_with_color(skb->dev, __claque_id, false), skb, icmp6_type);
 }
 
 static inline void ndisc_fill_redirect_addr_option(struct sk_buff *skb,
@@ -318,7 +466,7 @@ int ndisc_mc_map(const struct in6_addr *addr, char *buf, struct net_device *dev,
 }
 EXPORT_SYMBOL(ndisc_mc_map);
 
-static u32 ndisc_hash(const void *pkey,
+static noinline u32 ndisc_hash(const void *pkey,
 		      const struct net_device *dev,
 		      __u32 *hash_rnd)
 {
@@ -327,13 +475,32 @@ static u32 ndisc_hash(const void *pkey,
 
 static bool ndisc_key_eq(const struct neighbour *n, const void *pkey)
 {
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* key_eq is called by core neigh_lookup during the (uninstrumented) hash
+	 * walk with a RAW neigh and a raw/interior pkey; this instrumented body
+	 * autias them -> FPAC.  Sign both for their existing memory color + ipv6
+	 * claque (sign-only, no transfer -- this is a hot read-only compare). */
+	n = (const struct neighbour *)hakc_sign_pointer_with_color(
+		HAKC_GET_SAFE_PTR((void *)n), __claque_id, false);
+	pkey = (const void *)hakc_sign_pointer_with_color(
+		HAKC_GET_SAFE_PTR((void *)pkey), __claque_id, false);
+#endif
 	return neigh_key_eq128(n, pkey);
 }
 
-static int ndisc_constructor(struct neighbour *neigh)
+static noinline int ndisc_constructor(struct neighbour *neigh)
 {
 	struct in6_addr *addr = (struct in6_addr *)&neigh->primary_key;
 	struct net_device *dev = neigh->dev;
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* addr is an interior pointer of the (transferred) neigh; taking the
+	 * field address invalidates its PAC for that address, so ndisc_mc_map()
+	 * autias it and FPACs. Re-sign it for the neigh memorys existing
+	 * color (as this constructor's OUTSIDE_TRANSFER wrapper does for
+	 * dev/parms/header_ops) so the instrumented reads authenticate. */
+	addr = hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(addr),
+					    __claque_id, false);
+#endif
 	struct inet6_dev *in6_dev;
 	struct neigh_parms *parms;
 	bool is_multicast = ipv6_addr_is_multicast(addr);
@@ -432,6 +599,13 @@ static struct sk_buff *ndisc_alloc_skb(struct net_device *dev,
 		return NULL;
 	}
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* ndisc_alloc_skb: transfer the freshly-allocated (raw core) skb into
+	 * the ipv6 compartment so the instrumented skb field accesses below
+	 * (protocol/dev/head via skb_reserve/skb_set_owner_w) authenticate
+	 * instead of FPAC -- same pattern as mld_newpack. */
+	skb = hakc_transfer_skb(skb, __claque_id, __color);
+#endif
 	skb->protocol = htons(ETH_P_IPV6);
 	skb->dev = dev;
 
@@ -456,7 +630,15 @@ static void ip6_nd_hdr(struct sk_buff *skb,
 	unsigned tclass;
 
 	rcu_read_lock();
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* skb->dev is a raw core net_device; sign it (and the resulting idev)
+	 * for the ipv6 claque so the instrumented ip6_ptr / cnf derefs auth. */
+	idev = __in6_dev_get(hakc_sign_pointer_with_color(skb->dev, __claque_id, false));
+	if (idev)
+		idev = hakc_sign_pointer_with_color(idev, __claque_id, false);
+#else
 	idev = __in6_dev_get(skb->dev);
+#endif
 	tclass = idev ? idev->cnf.ndisc_tclass : 0;
 	rcu_read_unlock();
 
@@ -479,8 +661,18 @@ static void ndisc_send_skb(struct sk_buff *skb,
 			   const struct in6_addr *saddr)
 {
 	struct dst_entry *dst = skb_dst(skb);
-	struct net *net = dev_net(skb->dev);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* sign dev/net/sk for ndisc_send_skb: skb->dev, dev_net(dev) and
+	 * net->ipv6.ndisc_sk are raw core objects; sign each for its memory
+	 * color + ipv6 claque so the instrumented derefs below authenticate. */
+	struct net_device *dev = hakc_sign_pointer_with_color(skb->dev, __claque_id, false);
+	struct net *net = hakc_sign_pointer_with_color(dev_net(dev), __claque_id, false);
+	struct sock *sk = hakc_sign_pointer_with_color(net->ipv6.ndisc_sk, __claque_id, false);
+#else
+	struct net_device *dev = skb->dev;
+	struct net *net = dev_net(dev);
 	struct sock *sk = net->ipv6.ndisc_sk;
+#endif
 	struct inet6_dev *idev;
 	int err;
 	struct icmp6hdr *icmp6h = icmp6_hdr(skb);
@@ -490,10 +682,10 @@ static void ndisc_send_skb(struct sk_buff *skb,
 
 	if (!dst) {
 		struct flowi6 fl6;
-		int oif = skb->dev->ifindex;
+		int oif = dev->ifindex;
 
 		icmpv6_flow_init(sk, &fl6, type, saddr, daddr, oif);
-		dst = icmp6_dst_alloc(skb->dev, &fl6);
+		dst = icmp6_dst_alloc(dev, &fl6);
 		if (IS_ERR(dst)) {
 			kfree_skb(skb);
 			return;
@@ -502,19 +694,29 @@ static void ndisc_send_skb(struct sk_buff *skb,
 		skb_dst_set(skb, dst);
 	}
 
-	icmp6h->icmp6_cksum = csum_ipv6_magic(saddr, daddr, skb->len,
+	/* csum_partial/csum_ipv6_magic are CORE (uninstrumented) and deref their
+	 * pointer args directly; icmp6h/saddr/daddr are signed here, so strip to
+	 * canonical first or core faults on the non-canonical addr (same as
+	 * mld_sendpack). */
+	icmp6h->icmp6_cksum = csum_ipv6_magic(HAKC_GET_SAFE_PTR(saddr),
+					      HAKC_GET_SAFE_PTR(daddr), skb->len,
 					      IPPROTO_ICMPV6,
-					      csum_partial(icmp6h,
+					      csum_partial(HAKC_GET_SAFE_PTR(icmp6h),
 							   skb->len, 0));
 
 	ip6_nd_hdr(skb, saddr, daddr, inet6_sk(sk)->hop_limit, skb->len);
 
 	rcu_read_lock();
-	idev = __in6_dev_get(dst->dev);
+	/* dst->dev == dev (dst was icmp6_dst_alloc(dev)); reuse the signed dev,
+	 * and sign idev via signed dev so the stats derefs authenticate. */
+	idev = __in6_dev_get(dev);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	idev = hakc_sign_pointer_with_color(idev, __claque_id, false);
+#endif
 	IP6_UPD_PO_STATS(net, idev, IPSTATS_MIB_OUT, skb->len);
 
 	err = NF_HOOK(NFPROTO_IPV6, NF_INET_LOCAL_OUT,
-		      net, sk, skb, NULL, dst->dev,
+		      net, sk, skb, NULL, dev,
 		      dst_output);
 	if (!err) {
 		ICMP6MSGOUT_INC_STATS(net, idev, type);
@@ -1173,7 +1375,7 @@ static void ndisc_ra_useropt(struct sk_buff *ra, struct nd_opt_hdr *opt)
 		goto nla_put_failure;
 	nlmsg_end(skb, nlh);
 
-	rtnl_notify(skb, net, 0, RTNLGRP_ND_USEROPT, NULL, GFP_ATOMIC);
+	rtnl_notify(hakc_skb_to_core(skb), net, 0, RTNLGRP_ND_USEROPT, NULL, GFP_ATOMIC);
 	return;
 
 nla_put_failure:
@@ -2005,6 +2207,22 @@ int __init ndisc_init(void)
 	 * Initialize the neighbour table
 	 */
 	neigh_table_init(NEIGH_ND_TABLE, &nd_tbl);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Sign nd_tbl's initial hash_buckets into the ipv6 compartment so the
+	 * instrumented neigh-lookup autia verifies. Reaching hash_buckets means
+	 * dereferencing nd_tbl.nht, an access the compartment checks (autia);
+	 * nd_tbl.nht is itself an unsigned core pointer, so we sign a LOCAL copy
+	 * of it purely to pass that deref check, and do NOT store the signed nht
+	 * back -- nd_tbl.nht stays unsigned so core neighbour.c readers are
+	 * unaffected. sign-only: reads the existing mte tag, no size, no coloring. */
+	{
+		struct neigh_hash_table *nht =
+			rcu_dereference_protected(nd_tbl.nht, 1);
+		nht = hakc_sign_pointer_with_color(nht, __claque_id, false);
+		nht->hash_buckets = hakc_sign_pointer_with_color(
+			nht->hash_buckets, __claque_id, false);
+	}
+#endif
 
 #ifdef CONFIG_SYSCTL
 	err = neigh_sysctl_register(NULL, &nd_tbl.parms,

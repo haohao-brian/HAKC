@@ -2179,6 +2179,18 @@ static int __net_init tcpv6_net_init(struct net *net)
 				    SOCK_RAW, IPPROTO_TCP, net);
 }
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(tcpv6_net_init, int, struct net* net) {
+	int result;
+
+	net = hakc_transfer_to_clique(net, sizeof(*net), __claque_id,
+				      __color, false);
+	result = tcpv6_net_init(net);
+
+	return result;
+}
+#endif
+
 static void __net_exit tcpv6_net_exit(struct net *net)
 {
 	inet_ctl_sock_destroy(net->ipv6.tcp_sk);
@@ -2190,7 +2202,11 @@ static void __net_exit tcpv6_net_exit_batch(struct list_head *net_exit_list)
 }
 
 static struct pernet_operations tcpv6_net_ops = {
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	.init	    = HAKC_OUTSIDE_TRANSFER_FUNC(tcpv6_net_init),
+#else
 	.init	    = tcpv6_net_init,
+#endif
 	.exit	    = tcpv6_net_exit,
 	.exit_batch = tcpv6_net_exit_batch,
 };
