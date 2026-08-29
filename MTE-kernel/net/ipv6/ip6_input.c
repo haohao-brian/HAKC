@@ -49,6 +49,54 @@
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
 HAKC_EXIT(HAKC_ENTRY_TOKEN(0, HAKC_MASK_COLOR(SILVER_CLIQUE)),
 	 HAKC_ENTRY_TOKEN(1, HAKC_MASK_COLOR(SILVER_CLIQUE)));
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* mte_transfer_percpu returns a raw percpu base; the instrumented this_cpu deref
+ * of a MIB counter would autia the raw resolved slot and FPAC.  Resolve this cpu's
+ * slot from a clean offset and re-sign it for its own region (same pattern as
+ * icmp_sk / rt6i_pcpu) before the counter deref, then route every IPv6 MIB update
+ * through it.  SNMP counters stay protected; only ipv6.ko sees these overrides. */
+static inline struct ipstats_mib *hakc_ip6_mib(void *base)
+{
+	unsigned long off = (unsigned long)base & 0x0000FFFFFFFFFFFFUL;
+	struct ipstats_mib *s = this_cpu_ptr((struct ipstats_mib __percpu *)off);
+
+	return hakc_sign_pointer(s, __claque_id, __color, false);
+}
+#undef IP6_INC_STATS
+#undef __IP6_INC_STATS
+#undef IP6_ADD_STATS
+#undef __IP6_ADD_STATS
+#undef IP6_UPD_PO_STATS
+#undef __IP6_UPD_PO_STATS
+#define IP6_INC_STATS(net, idev, field)					\
+	do {								\
+		struct inet6_dev *__d = (idev);				\
+		preempt_disable();					\
+		if (likely(__d))					\
+			hakc_ip6_mib((__d)->stats.ipv6)->mibs[field]++;	\
+		hakc_ip6_mib((net)->mib.ipv6_statistics)->mibs[field]++; \
+		preempt_enable();					\
+	} while (0)
+#define __IP6_INC_STATS(net, idev, field) IP6_INC_STATS(net, idev, field)
+#define IP6_ADD_STATS(net, idev, field, val)				\
+	do {								\
+		struct inet6_dev *__d = (idev);				\
+		unsigned long __v = (val);				\
+		preempt_disable();					\
+		if (likely(__d))					\
+			hakc_ip6_mib((__d)->stats.ipv6)->mibs[field] += __v; \
+		hakc_ip6_mib((net)->mib.ipv6_statistics)->mibs[field] += __v; \
+		preempt_enable();					\
+	} while (0)
+#define __IP6_ADD_STATS(net, idev, field, val) IP6_ADD_STATS(net, idev, field, val)
+#define IP6_UPD_PO_STATS(net, idev, field, val)				\
+	do {								\
+		IP6_INC_STATS(net, idev, field##PKTS);			\
+		IP6_ADD_STATS(net, idev, field##OCTETS, val);		\
+	} while (0)
+#define __IP6_UPD_PO_STATS(net, idev, field, val) IP6_UPD_PO_STATS(net, idev, field, val)
+#endif
 #endif
 
 INDIRECT_CALLABLE_DECLARE(void udp_v6_early_demux(struct sk_buff *));
