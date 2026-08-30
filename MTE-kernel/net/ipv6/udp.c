@@ -141,10 +141,20 @@ static u32 udp6_ehashfn(const struct net *net,
 
 int udp_v6_get_port(struct sock *sk, unsigned short snum)
 {
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Faithful (a): sign net so ipv6_portaddr_hash check(net) passes, instead
+	 * of the single-namespace init_net direct-global shortcut. */
+	struct net *net = hakc_transfer_to_clique(sock_net(sk), sizeof(struct net),
+						 __claque_id, __color, false);
+	unsigned int hash2_nulladdr = ipv6_portaddr_hash(net, &in6addr_any, snum);
+	unsigned int hash2_partial =
+		ipv6_portaddr_hash(net, &sk->sk_v6_rcv_saddr, 0);
+#else
 	unsigned int hash2_nulladdr =
 		ipv6_portaddr_hash(sock_net(sk), &in6addr_any, snum);
 	unsigned int hash2_partial =
 		ipv6_portaddr_hash(sock_net(sk), &sk->sk_v6_rcv_saddr, 0);
+#endif
 
 	/* precompute partial secondary hash */
 	udp_sk(sk)->udp_portaddr_hash = hash2_partial;
@@ -333,7 +343,7 @@ static struct sock *__udp6_lib_lookup_skb(struct sk_buff *skb,
 {
 	const struct ipv6hdr *iph = ipv6_hdr(skb);
 
-	return __udp6_lib_lookup(dev_net(skb->dev), &iph->saddr, sport,
+	return __udp6_lib_lookup(hakc_dev_net(skb->dev), &iph->saddr, sport,
 				 &iph->daddr, dport, inet6_iif(skb),
 				 inet6_sdif(skb), udptable, skb);
 }
@@ -343,7 +353,7 @@ struct sock *udp6_lib_lookup_skb(struct sk_buff *skb,
 {
 	const struct ipv6hdr *iph = ipv6_hdr(skb);
 
-	return __udp6_lib_lookup(dev_net(skb->dev), &iph->saddr, sport,
+	return __udp6_lib_lookup(hakc_dev_net(skb->dev), &iph->saddr, sport,
 				 &iph->daddr, dport, inet6_iif(skb),
 				 inet6_sdif(skb), &udp_table, NULL);
 }
@@ -957,7 +967,7 @@ int __udp6_lib_rcv(struct sk_buff *skb, struct udp_table *udptable,
 		   int proto)
 {
 	const struct in6_addr *saddr, *daddr;
-	struct net *net = dev_net(skb->dev);
+	struct net *net = hakc_dev_net(skb->dev);
 	struct udphdr *uh;
 	struct sock *sk;
 	bool refcounted;

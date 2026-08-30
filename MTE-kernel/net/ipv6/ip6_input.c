@@ -362,9 +362,25 @@ drop:
 	return NULL;
 }
 
-int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, struct net_device *orig_dev)
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* RX entry: core __netif_receive_skb_core calls ipv6_rcv (packet_type .func)
+ * with a raw skb; the instrumented ipv6_rcv autia's it. Transfer skb (and
+ * sign dev) into the ipv6 compartment for the call. */
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(ipv6_rcv, int,
+				  struct sk_buff *skb, struct net_device *dev,
+				  struct packet_type *pt, struct net_device *orig_dev)
 {
-	struct net *net = dev_net(skb->dev);
+	skb = hakc_transfer_skb(skb, __claque_id, __color);
+	if (dev)
+		dev = hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(dev),
+						   __claque_id, false);
+	return ipv6_rcv(skb, dev, pt, orig_dev);
+}
+#endif
+
+noinline int ipv6_rcv(struct sk_buff *skb, struct net_device *dev, struct packet_type *pt, struct net_device *orig_dev)
+{
+	struct net *net = hakc_dev_net(skb->dev);
 
 	skb = ip6_rcv_core(skb, dev, net);
 	if (skb == NULL)
@@ -546,7 +562,7 @@ static int ip6_input_finish(struct net *net, struct sock *sk, struct sk_buff *sk
 int ip6_input(struct sk_buff *skb)
 {
 	return NF_HOOK(NFPROTO_IPV6, NF_INET_LOCAL_IN,
-		       dev_net(skb->dev), NULL, skb, skb->dev, NULL,
+		       hakc_dev_net(skb->dev), NULL, skb, skb->dev, NULL,
 		       ip6_input_finish);
 }
 EXPORT_SYMBOL_GPL(ip6_input);

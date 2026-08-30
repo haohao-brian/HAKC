@@ -1309,7 +1309,7 @@ static struct rt6_info *ip6_create_rt_rcu(const struct fib6_result *res)
 		goto fallback;
 
 	flags = fib6_info_dst_flags(f6i);
-	nrt = ip6_dst_alloc(dev_net(dev), dev, flags);
+	nrt = ip6_dst_alloc(hakc_dev_net(dev), dev, flags);
 	if (!nrt) {
 		fib6_info_release(f6i);
 		goto fallback;
@@ -1456,7 +1456,7 @@ static struct rt6_info *ip6_rt_cache_alloc(const struct fib6_result *res,
 		return NULL;
 
 	dev = ip6_rt_get_dev_rcu(res);
-	rt = ip6_dst_alloc(dev_net(dev), dev, 0);
+	rt = ip6_dst_alloc(hakc_dev_net(dev), dev, 0);
 	if (!rt) {
 		fib6_info_release(f6i);
 		return NULL;
@@ -1494,7 +1494,7 @@ static struct rt6_info *ip6_rt_pcpu_alloc(const struct fib6_result *res)
 
 	rcu_read_lock();
 	dev = ip6_rt_get_dev_rcu(res);
-	pcpu_rt = ip6_dst_alloc(dev_net(dev), dev, flags | DST_NOCOUNT);
+	pcpu_rt = ip6_dst_alloc(hakc_dev_net(dev), dev, flags | DST_NOCOUNT);
 	rcu_read_unlock();
 	if (!pcpu_rt) {
 		fib6_info_release(f6i);
@@ -1504,7 +1504,7 @@ static struct rt6_info *ip6_rt_pcpu_alloc(const struct fib6_result *res)
 	pcpu_rt->rt6i_flags |= RTF_PCPU;
 
 	if (f6i->nh)
-		pcpu_rt->sernum = rt_genid_ipv6(dev_net(dev));
+		pcpu_rt->sernum = rt_genid_ipv6(hakc_dev_net(dev));
 
 	return pcpu_rt;
 }
