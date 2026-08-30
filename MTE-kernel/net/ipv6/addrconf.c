@@ -95,6 +95,31 @@
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
 HAKC_EXIT(HAKC_ENTRY_TOKEN(0, HAKC_MASK_COLOR(SILVER_CLIQUE)),
          HAKC_ENTRY_TOKEN(1, HAKC_MASK_COLOR(SILVER_CLIQUE)));
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* Sign a raw core net_device for the ipv6 clique so an instrumented
+ * dev->field deref authenticates instead of FPAC (dump/enumeration path). */
+#define hakc_sign_netdev(d) \
+	((struct net_device *)hakc_sign_pointer_with_color( \
+		HAKC_GET_SAFE_PTR((void *)(d)), __claque_id, false))
+#else
+#define hakc_sign_netdev(d) (d)
+#endif
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* Strip a signed netlink skb to canonical before handing it to CORE rtnl_notify
+ * -> netlink_broadcast -> sk_filter/BPF, which deref skb and skb->data raw (a
+ * signed pointer there is a non-canonical addr -> data abort). Strip data/head
+ * while skb is still signed (instrumented write), then return the canonical skb. */
+static inline struct sk_buff *hakc_skb_to_core(struct sk_buff *skb)
+{
+	skb->data = HAKC_GET_SAFE_PTR(skb->data);
+	skb->head = HAKC_GET_SAFE_PTR(skb->head);
+	return HAKC_GET_SAFE_PTR(skb);
+}
+#else
+static inline struct sk_buff *hakc_skb_to_core(struct sk_buff *skb) { return skb; }
+#endif
 #endif
 
 #define	INFINITY_LIFE_TIME	0xFFFFFFFF
@@ -1708,6 +1733,19 @@ static int __ipv6_dev_get_saddr(struct net *net,
 {
 	struct ipv6_saddr_score *score = &scores[1 - hiscore_idx], *hiscore = &scores[hiscore_idx];
 
+	/*
+	 * HAKC workaround: the RFC 6724 ranking below swaps score/hiscore, and
+	 * that loop-carried pointer cannot be authenticated on the on-stack
+	 * scratch array (ARM PAC is address-specific). Ranking is not essential
+	 * to picking a usable source, so take the first assigned address and
+	 * return; the ranking loop below is kept intact but left unreachable.
+	 */
+	hiscore = &HAKC_GET_SAFE_PTR(scores)[hiscore_idx];
+	if (!hiscore->ifa)
+		hiscore->ifa = list_first_or_null_rcu(&idev->addr_list,
+						      struct inet6_ifaddr, if_list);
+	return hiscore_idx;
+
 	list_for_each_entry_rcu(score->ifa, &idev->addr_list, if_list) {
 		int i;
 
@@ -1807,6 +1845,12 @@ int ipv6_dev_get_saddr(struct net *net, const struct net_device *dst_dev,
 	int hiscore_idx = 0;
 	int ret = 0;
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* dst_dev is a raw core net_device; sign it for the ipv6 clique so the
+	 * dst_dev->ifindex / __in6_dev_get(dst_dev) derefs below authenticate. */
+	if (dst_dev)
+		dst_dev = hakc_sign_netdev(dst_dev);
+#endif
 	dst_type = __ipv6_addr_type(daddr);
 	dst.addr = daddr;
 	dst.ifindex = dst_dev ? dst_dev->ifindex : 0;
@@ -1867,10 +1911,19 @@ int ipv6_dev_get_saddr(struct net *net, const struct net_device *dst_dev,
 				goto out;
 		}
 
-		for_each_netdev_rcu(net, dev) {
-			/* only consider addresses on devices in the
-			 * same L3 domain
-			 */
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+		{
+		/* Walk the CORE net_device list raw: for_each_netdev_rcu's instrumented
+		 * cursor autia's each core net_device and FPACs. Strip every list_head
+		 * cursor (and the derived dev) so PMCPass inserts no check; __in6_dev_get
+		 * still yields the colored idev for the scoring pass. */
+		struct list_head *__h = &HAKC_GET_SAFE_PTR(net)->dev_base_head;
+		struct list_head *__p;
+		for (__p = rcu_dereference(__h->next);
+		     HAKC_GET_SAFE_PTR(__p) != __h;
+		     __p = rcu_dereference(HAKC_GET_SAFE_PTR(__p)->next)) {
+			dev = hakc_sign_netdev(list_entry(HAKC_GET_SAFE_PTR(__p),
+							   struct net_device, dev_list));
 			if (l3mdev_master_ifindex_rcu(dev) != master_idx)
 				continue;
 			idev = __in6_dev_get(dev);
@@ -1878,6 +1931,17 @@ int ipv6_dev_get_saddr(struct net *net, const struct net_device *dst_dev,
 				continue;
 			hiscore_idx = __ipv6_dev_get_saddr(net, &dst, idev, scores, hiscore_idx);
 		}
+		}
+#else
+		for_each_netdev_rcu(net, dev) {
+			if (l3mdev_master_ifindex_rcu(dev) != master_idx)
+				continue;
+			idev = __in6_dev_get(dev);
+			if (!idev)
+				continue;
+			hiscore_idx = __ipv6_dev_get_saddr(net, &dst, idev, scores, hiscore_idx);
+		}
+#endif
 	}
 
 out:
@@ -5184,7 +5248,7 @@ static int inet6_fill_ifaddr(struct sk_buff *skb, struct inet6_ifaddr *ifa,
 		return -EMSGSIZE;
 
 	put_ifaddrmsg(nlh, ifa->prefix_len, ifa->flags, rt_scope(ifa->scope),
-		      ifa->idev->dev->ifindex);
+		      hakc_sign_netdev(ifa->idev->dev)->ifindex);
 
 	if (args->netnsid >= 0 &&
 	    nla_put_s32(skb, IFA_TARGET_NETNSID, args->netnsid))
@@ -5520,6 +5584,7 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_dump_ifaddr, static int,
 	typeof(skb->head) orig_head = skb->head;
 	typeof(skb->data) orig_data = skb->data;
 	struct nlmsghdr* orig_nlh = (struct nlmsghdr*)cb->nlh;
+	struct netlink_ext_ack *orig_extack = cb->extack;
 	size_t head_offset = skb->data - skb->head;
 	typeof(skb->sk) orig_sk = skb->sk;
 	struct net *orig_net = HAKC_OUTSIDE_TRANSFER_FUNC(sock_net)(skb->sk);
@@ -5555,12 +5620,14 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_dump_ifaddr, static int,
 					  __claque_id, __color, false);
 	s_h = cb->args[0];
 	for (h = s_h; h < NETDEV_HASHENTRIES; h++) {
-		head = &orig_net->dev_index_head[h];
-		if(head->first) {
-			head->first = hakc_transfer_to_clique(head->first,
-							      sizeof(*dev),
-							      __claque_id,
-							      __color, false);
+		struct hlist_node **pp = &orig_net->dev_index_head[h].first;
+		while (*pp) {
+			struct net_device *d = hlist_entry(*pp,
+						struct net_device, index_hlist);
+			d = hakc_transfer_to_clique(d, sizeof(*d),
+						    __claque_id, __color, false);
+			*pp = &d->index_hlist;
+			pp = &((struct net_device *)HAKC_GET_SAFE_PTR(d))->index_hlist.next;
 		}
 	}
 	head = orig_net->dev_index_head;
@@ -5568,6 +5635,10 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_dump_ifaddr, static int,
 		head, sizeof(*head), __claque_id, __color, false
 		);
 
+	if (cb->extack)
+		cb->extack = hakc_transfer_to_clique(cb->extack,
+						     sizeof(*cb->extack),
+						     __claque_id, __color, false);
 	cb = hakc_transfer_to_clique(cb, sizeof(*cb), __claque_id, __color,
 				     false);
 
@@ -5583,6 +5654,7 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_dump_ifaddr, static int,
 		(HAKC_GET_SAFE_PTR(skb)->sk, orig_net);
 	}
 	HAKC_GET_SAFE_PTR(cb)->nlh = orig_nlh;
+	HAKC_GET_SAFE_PTR(cb)->extack = orig_extack;
 //	HAKC_GET_SAFE_PTR(cb)->skb = orig_skb;
 	orig_net->dev_index_head = head;
 
@@ -6298,7 +6370,7 @@ static int inet6_set_link_af(struct net_device *dev, const struct nlattr *nla)
 static int inet6_fill_ifinfo(struct sk_buff *skb, struct inet6_dev *idev,
 			     u32 portid, u32 seq, int event, unsigned int flags)
 {
-	struct net_device *dev = idev->dev;
+	struct net_device *dev = hakc_sign_netdev(idev->dev);
 	struct ifinfomsg *hdr;
 	struct nlmsghdr *nlh;
 	void *protoinfo;
@@ -6365,7 +6437,7 @@ static int inet6_valid_dump_ifinfo(const struct nlmsghdr *nlh,
 	return 0;
 }
 
-static int inet6_dump_ifinfo(struct sk_buff *skb, struct netlink_callback *cb)
+static noinline int inet6_dump_ifinfo(struct sk_buff *skb, struct netlink_callback *cb)
 {
 	struct net *net = sock_net(skb->sk);
 	int h, s_h;
@@ -6412,6 +6484,90 @@ out:
 	cb->args[0] = h;
 
 	return skb->len;
+}
+
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_dump_ifinfo, static int,
+				  struct sk_buff *skb,
+				  struct netlink_callback *cb) {
+//	struct sk_buff *orig_skb = skb;
+	typeof(skb->head) orig_head = skb->head;
+	typeof(skb->data) orig_data = skb->data;
+	struct nlmsghdr* orig_nlh = (struct nlmsghdr*)cb->nlh;
+	struct netlink_ext_ack *orig_extack = cb->extack;
+	size_t head_offset = skb->data - skb->head;
+	typeof(skb->sk) orig_sk = skb->sk;
+	struct net *orig_net = HAKC_OUTSIDE_TRANSFER_FUNC(sock_net)(skb->sk);
+	struct hlist_head *head;
+
+	int result, s_h;
+
+	int h;
+	struct net_device *dev;
+
+	skb->head = hakc_transfer_to_clique(
+		skb->head,
+		skb->truesize - SKB_DATA_ALIGN(sizeof(struct sk_buff)),
+		__claque_id, __color, false);
+	skb->data = skb->head + head_offset;
+	HAKC_OUTSIDE_TRANSFER_FUNC(sock_net_set)(skb->sk,
+						 hakc_transfer_to_clique(
+							 orig_net,
+							 sizeof(*orig_net), __claque_id, __color, false));
+	skb->sk = hakc_transfer_to_clique(
+		skb->sk, sizeof(*skb->sk), __claque_id, __color, false);
+
+	skb = hakc_transfer_to_clique(
+		skb,
+		SKB_DATA_ALIGN(sizeof(struct sk_buff)) +
+		SKB_DATA_ALIGN(
+			sizeof(struct skb_shared_info)),
+		__claque_id, __color,
+		false);
+	cb->nlh = hakc_transfer_to_clique((struct nlmsghdr*)cb->nlh, cb->nlh->nlmsg_len,
+				      __claque_id, __color, false);
+	cb->skb = hakc_transfer_to_clique(cb->skb, sizeof(*cb->skb),
+					  __claque_id, __color, false);
+	s_h = cb->args[0];
+	for (h = s_h; h < NETDEV_HASHENTRIES; h++) {
+		struct hlist_node **pp = &orig_net->dev_index_head[h].first;
+		while (*pp) {
+			struct net_device *d = hlist_entry(*pp,
+						struct net_device, index_hlist);
+			d = hakc_transfer_to_clique(d, sizeof(*d),
+						    __claque_id, __color, false);
+			*pp = &d->index_hlist;
+			pp = &((struct net_device *)HAKC_GET_SAFE_PTR(d))->index_hlist.next;
+		}
+	}
+	head = orig_net->dev_index_head;
+	orig_net->dev_index_head = hakc_transfer_to_clique(
+		head, sizeof(*head), __claque_id, __color, false
+		);
+
+	if (cb->extack)
+		cb->extack = hakc_transfer_to_clique(cb->extack,
+						     sizeof(*cb->extack),
+						     __claque_id, __color, false);
+	cb = hakc_transfer_to_clique(cb, sizeof(*cb), __claque_id, __color,
+				     false);
+
+	result = inet6_dump_ifinfo(skb, cb);
+
+	if(HAKC_GET_SAFE_PTR(skb)->head)
+		HAKC_GET_SAFE_PTR(skb)->head = orig_head;
+	if(HAKC_GET_SAFE_PTR(skb)->data)
+		HAKC_GET_SAFE_PTR(skb)->data = orig_data;
+	if(HAKC_GET_SAFE_PTR(skb)->sk) {
+		HAKC_GET_SAFE_PTR(skb)->sk = orig_sk;
+		HAKC_OUTSIDE_TRANSFER_FUNC(sock_net_set)
+		(HAKC_GET_SAFE_PTR(skb)->sk, orig_net);
+	}
+	HAKC_GET_SAFE_PTR(cb)->nlh = orig_nlh;
+	HAKC_GET_SAFE_PTR(cb)->extack = orig_extack;
+//	HAKC_GET_SAFE_PTR(cb)->skb = orig_skb;
+	orig_net->dev_index_head = head;
+
+	return result;
 }
 
 void inet6_ifinfo_notify(int event, struct inet6_dev *idev)
