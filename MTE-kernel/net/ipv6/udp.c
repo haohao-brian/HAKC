@@ -1242,6 +1242,9 @@ static int udp_v6_send_skb(struct sk_buff *skb, struct flowi6 *fl6,
 	int offset = skb_transport_offset(skb);
 	int len = skb->len - offset;
 	int datalen = len - sizeof(*uh);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	fl6 = HAKC_GET_SAFE_PTR(fl6);	/* stack flowi6 from udpv6_sendmsg */
+#endif
 
 	/*
 	 * Create a UDP header
@@ -1427,6 +1430,12 @@ do_udp_sendmsg:
 		return -EMSGSIZE;
 
 	getfrag  =  is_udplite ?  udplite_getfrag : ip_generic_getfrag;
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Sign the getfrag callback as a code target so the instrumented indirect
+	 * call in __ip6_append_data (check_hakc_code_access) can authenticate it. */
+	getfrag = (typeof(getfrag))hakc_sign_pointer_with_color((void *)getfrag,
+							__claque_id, true);
+#endif
 	if (up->pending) {
 		/*
 		 * There are pending frames.

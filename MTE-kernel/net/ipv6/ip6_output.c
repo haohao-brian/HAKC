@@ -1315,7 +1315,18 @@ struct dst_entry *ip6_sk_dst_lookup_flow(struct sock *sk, struct flowi6 *fl6,
 	if (dst)
 		return dst;
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Transfer net ONCE here: signed net threads down through the whole
+	 * ipv6-instrumented route subtree (ip6_dst_lookup_tail -> route_output ->
+	 * fib6_rule_lookup -> fib6_table_lookup ...) so their check(net) all pass. */
+	{
+		struct net *__n = hakc_transfer_to_clique(sock_net(sk),
+					sizeof(struct net), __claque_id, __color, false);
+		dst = ip6_dst_lookup_flow(__n, sk, fl6, final_dst);
+	}
+#else
 	dst = ip6_dst_lookup_flow(sock_net(sk), sk, fl6, final_dst);
+#endif
 	if (connected && !IS_ERR(dst))
 		ip6_sk_dst_store_flow(sk, dst_clone(dst), fl6);
 
@@ -1734,6 +1745,11 @@ alloc_new_skb:
 			}
 			if (!skb)
 				goto error;
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+			/* Transfer the freshly-allocated skb (struct + head buffer) into
+			 * this clique so the compartment can authenticate it. */
+			skb = hakc_transfer_skb(skb, __claque_id, __color);
+#endif
 			/*
 			 *	Fill in the control structures
 			 */
@@ -1793,7 +1809,7 @@ alloc_new_skb:
 				skb->sk = sk;
 				wmem_alloc_delta += skb->truesize;
 			}
-			__skb_queue_tail(queue, skb);
+			skb_queue_tail(queue, skb);
 			continue;
 		}
 
@@ -1931,14 +1947,29 @@ struct sk_buff *__ip6_make_skb(struct sock *sk,
 	struct sk_buff **tail_skb;
 	struct in6_addr final_dst_buf, *final_dst = &final_dst_buf;
 	struct ipv6_pinfo *np = inet6_sk(sk);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	struct net *net = hakc_sign_pointer_with_color(sock_net(sk), __claque_id,
+						       false);
+#else
 	struct net *net = sock_net(sk);
+#endif
 	struct ipv6hdr *hdr;
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* cork is an uncolored stack control block shared raw with the rest of
+	 * the send path (ip6_make_skb writes it raw, udp_v6_send_skb reads
+	 * &cork.base raw); access it canonically here too, else PMCPass's
+	 * inserted checks autia an unsigned pointer and FPAC. Mirrors the
+	 * HAKC_GET_SAFE_PTR treatment of final_dst below. */
+	struct inet_cork_full *cork_s = HAKC_GET_SAFE_PTR(cork);
+#else
+	struct inet_cork_full *cork_s = cork;
+#endif
 	struct ipv6_txoptions *opt = v6_cork->opt;
-	struct rt6_info *rt = (struct rt6_info *)cork->base.dst;
-	struct flowi6 *fl6 = &cork->fl.u.ip6;
+	struct rt6_info *rt = (struct rt6_info *)cork_s->base.dst;
+	struct flowi6 *fl6 = &cork_s->fl.u.ip6;
 	unsigned char proto = fl6->flowi6_proto;
 
-	skb = __skb_dequeue(queue);
+	skb = skb_dequeue(queue);
 	if (!skb)
 		goto out;
 	tail_skb = &(skb_shinfo(skb)->frag_list);
@@ -1946,7 +1977,7 @@ struct sk_buff *__ip6_make_skb(struct sock *sk,
 	/* move skb->data to ip header from ext header */
 	if (skb->data < skb_network_header(skb))
 		__skb_pull(skb, skb_network_offset(skb));
-	while ((tmp_skb = __skb_dequeue(queue)) != NULL) {
+	while ((tmp_skb = skb_dequeue(queue)) != NULL) {
 		__skb_pull(tmp_skb, skb_network_header_len(skb));
 		*tail_skb = tmp_skb;
 		tail_skb = &(tmp_skb->next);
@@ -1960,7 +1991,7 @@ struct sk_buff *__ip6_make_skb(struct sock *sk,
 	/* Allow local fragmentation. */
 	skb->ignore_df = ip6_sk_ignore_df(sk);
 
-	*final_dst = fl6->daddr;
+	*HAKC_GET_SAFE_PTR(final_dst) = fl6->daddr;
 	__skb_pull(skb, skb_network_header_len(skb));
 	if (opt && opt->opt_flen)
 		ipv6_push_frag_opts(skb, opt, &proto);
@@ -2027,7 +2058,12 @@ out:
 
 int ip6_send_skb(struct sk_buff *skb)
 {
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	struct net *net = hakc_sign_pointer_with_color(sock_net(skb->sk),
+						       __claque_id, false);
+#else
 	struct net *net = sock_net(skb->sk);
+#endif
 	struct rt6_info *rt = (struct rt6_info *)skb_dst(skb);
 	int err;
 
@@ -2062,7 +2098,7 @@ static void __ip6_flush_pending_frames(struct sock *sk,
 {
 	struct sk_buff *skb;
 
-	while ((skb = __skb_dequeue_tail(queue)) != NULL) {
+	while ((skb = skb_dequeue_tail(queue)) != NULL) {
 		if (skb_dst(skb))
 			IP6_INC_STATS(sock_net(sk), ip6_dst_idev(skb_dst(skb)),
 				      IPSTATS_MIB_OUTDISCARDS);
@@ -2088,6 +2124,8 @@ struct sk_buff *ip6_make_skb(struct sock *sk,
 			     struct inet_cork_full *cork)
 {
 	struct inet6_cork v6_cork;
+	struct inet6_cork *v6_cork_c;
+	struct sk_buff_head *queue_c;
 	struct sk_buff_head queue;
 	int exthdrlen = (ipc6->opt ? ipc6->opt->opt_flen : 0);
 	int err;
@@ -2095,29 +2133,47 @@ struct sk_buff *ip6_make_skb(struct sock *sk,
 	if (flags & MSG_PROBE)
 		return NULL;
 
-	__skb_queue_head_init(&queue);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* queue is on this stack too; transfer BEFORE init so the sk_buff_head
+	 * self-pointers (next/prev) hold the signed pointer, then let
+	 * __ip6_append_data and friends authenticate it. */
+	queue_c = hakc_transfer_to_clique(&queue, sizeof(queue),
+					  __claque_id, __color, false);
+#else
+	queue_c = &queue;
+#endif
+	skb_queue_head_init(queue_c);
 
 	cork->base.flags = 0;
 	cork->base.addr = 0;
 	cork->base.opt = NULL;
 	cork->base.dst = NULL;
 	v6_cork.opt = NULL;
-	err = ip6_setup_cork(sk, cork, &v6_cork, ipc6, rt, fl6);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* v6_cork lives on this stack; transfer it into the clique once here so
+	 * every callee below (ip6_setup_cork, __ip6_append_data, ...) can
+	 * authenticate it instead of faulting on an unsigned stack pointer. */
+	v6_cork_c = hakc_transfer_to_clique(&v6_cork, sizeof(v6_cork),
+					    __claque_id, __color, false);
+#else
+	v6_cork_c = &v6_cork;
+#endif
+	err = ip6_setup_cork(sk, cork, v6_cork_c, ipc6, rt, fl6);
 	if (err) {
-		ip6_cork_release(cork, &v6_cork);
+		ip6_cork_release(cork, v6_cork_c);
 		return ERR_PTR(err);
 	}
 	if (ipc6->dontfrag < 0)
 		ipc6->dontfrag = inet6_sk(sk)->dontfrag;
 
-	err = __ip6_append_data(sk, fl6, &queue, &cork->base, &v6_cork,
+	err = __ip6_append_data(sk, fl6, queue_c, &cork->base, v6_cork_c,
 				&current->task_frag, getfrag, from,
 				length + exthdrlen, transhdrlen + exthdrlen,
 				flags, ipc6);
 	if (err) {
-		__ip6_flush_pending_frames(sk, &queue, cork, &v6_cork);
+		__ip6_flush_pending_frames(sk, queue_c, cork, v6_cork_c);
 		return ERR_PTR(err);
 	}
 
-	return __ip6_make_skb(sk, &queue, cork, &v6_cork);
+	return __ip6_make_skb(sk, queue_c, cork, v6_cork_c);
 }
