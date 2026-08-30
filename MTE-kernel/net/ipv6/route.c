@@ -6363,7 +6363,13 @@ struct ctl_table * __net_init ipv6_route_sysctl_init(struct net *net)
 		table[10].data = &net->ipv6.sysctl.skip_notify_on_dev_down;
 
 		/* Don't export sysctls to unprivileged users */
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+		/* compare-only: read user_ns as scalar so PMCPass does not autia a
+		 * core pointer (net->user_ns -> &init_user_ns) we never dereference */
+		if (*(unsigned long *)&net->user_ns != (unsigned long)&init_user_ns)
+#else
 		if (net->user_ns != &init_user_ns)
+#endif
 			table[0].procname = NULL;
 	}
 
@@ -6377,6 +6383,14 @@ static int __net_init noinline ip6_route_net_init(struct net *net)
 
 	memcpy(&net->ipv6.ip6_dst_ops, &ip6_dst_ops_template,
 	       sizeof(net->ipv6.ip6_dst_ops));
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* PoC: sign the dst_ops->mtu code target so the instrumented indirect
+	 * call in dst_mtu() (check_hakc_code_access) can authenticate it. The
+	 * wrapper reads the code page color internally (is_code = true). */
+	net->ipv6.ip6_dst_ops.mtu =
+		(typeof(net->ipv6.ip6_dst_ops.mtu))hakc_sign_pointer_with_color(
+			(void *)net->ipv6.ip6_dst_ops.mtu, __claque_id, true);
+#endif
 
 	if (dst_entries_init(&net->ipv6.ip6_dst_ops) < 0)
 		goto out_ip6_dst_ops;

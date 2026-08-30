@@ -56,6 +56,9 @@ int __net_init fib6_notifier_init(struct net *net)
 	struct fib_notifier_ops *ops;
 
 	ops = fib_notifier_ops_register(&fib6_notifier_ops_template, net);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	ops = hakc_transfer_to_clique(ops, sizeof(*ops), __claque_id, __color, false);
+#endif
 	if (IS_ERR(ops))
 		return PTR_ERR(ops);
 	net->ipv6.notifier_ops = ops;

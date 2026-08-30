@@ -1599,7 +1599,7 @@ do_confirm:
 	goto out;
 }
 
-void udpv6_destroy_sock(struct sock *sk)
+noinline void udpv6_destroy_sock(struct sock *sk)
 {
 	struct udp_sock *up = udp_sk(sk);
 	lock_sock(sk);
@@ -1698,6 +1698,13 @@ void udp6_proc_exit(struct net *net)
 
 /* ------------------------------------------------------------------------ */
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* .destroy called from core udp_lib_close with a raw sk; sign it in. */
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(udpv6_destroy_sock, void, struct sock *sk) {
+	sk = hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(sk), __claque_id, false);
+	udpv6_destroy_sock(sk);
+}
+#endif
 struct proto udpv6_prot = {
 	.name			= "UDPv6",
 	.owner			= THIS_MODULE,
@@ -1707,7 +1714,11 @@ struct proto udpv6_prot = {
 	.disconnect		= udp_disconnect,
 	.ioctl			= udp_ioctl,
 	.init			= udp_init_sock,
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	.destroy		= HAKC_OUTSIDE_TRANSFER_FUNC(udpv6_destroy_sock),
+#else
 	.destroy		= udpv6_destroy_sock,
+#endif
 	.setsockopt		= udpv6_setsockopt,
 	.getsockopt		= udpv6_getsockopt,
 	.sendmsg		= udpv6_sendmsg,

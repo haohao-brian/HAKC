@@ -3763,9 +3763,7 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(addrconf_notify, static int,
 						 (HAKC_GET_SAFE_PTR
 						  (info->dev)->dev_addr,
 		 sizeof(u64), __claque_id, __color, false);
-	info->dev = hakc_transfer_to_clique(info->dev, sizeof(struct
-							     net_device),
-					   __claque_id, __color, false);
+	info->dev = hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(info->dev), __claque_id, false); /* PROTO Q4: sign-only, keep net_device SILVER */
 	prot_v = hakc_transfer_to_clique(info, sizeof(struct netdev_notifier_info),
 					__claque_id, __color, false);
 
@@ -7654,6 +7652,10 @@ DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(addrconf_init, void, void) {
 	init_net.loopback_dev->pcpu_refcnt = hakc_transfer_percpu_to_clique(
 		init_net.loopback_dev->pcpu_refcnt, sizeof(int),
 		__claque_id, __color);
+	init_net.loopback_dev->_tx = hakc_transfer_to_clique(
+		init_net.loopback_dev->_tx,
+		init_net.loopback_dev->num_tx_queues * sizeof(struct netdev_queue),
+		__claque_id, __color, false);
 	init_net.loopback_dev = hakc_sign_pointer_with_color(
 		init_net.loopback_dev, __claque_id, false);
 }
@@ -7731,7 +7733,7 @@ int __init addrconf_init(void)
 	rtnl_af_register(&inet6_ops);
 
 	err = rtnl_register_module(THIS_MODULE, PF_INET6, RTM_GETLINK,
-				   NULL, inet6_dump_ifinfo, 0);
+				   NULL, HAKC_OUTSIDE_TRANSFER_FUNC(inet6_dump_ifinfo), 0);
 	if (err < 0)
 		goto errout;
 

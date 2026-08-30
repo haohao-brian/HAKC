@@ -458,7 +458,7 @@ out_unlock:
 }
 
 /* bind for INET6 API */
-int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
+noinline int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 {
 	struct sock *sk = sock->sk;
 	int err = 0;
@@ -481,7 +481,7 @@ int inet6_bind(struct socket *sock, struct sockaddr *uaddr, int addr_len)
 }
 EXPORT_SYMBOL(inet6_bind);
 
-int inet6_release(struct socket *sock)
+noinline int inet6_release(struct socket *sock)
 {
 	struct sock *sk = sock->sk;
 
@@ -494,6 +494,13 @@ int inet6_release(struct socket *sock)
 	/* Free ac lists */
 	ipv6_sock_ac_close(sk);
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* restore sk to canonical before the core free path: __sk_free/__sk_destruct/
+	 * mem_cgroup_sk_free are uninstrumented core and deref a raw pointer, so a
+	 * signed sk would fault there. */
+	sock->sk = HAKC_GET_SAFE_PTR(sk);
+#endif
+
 	return inet_release(sock);
 }
 EXPORT_SYMBOL(inet6_release);
@@ -501,9 +508,13 @@ EXPORT_SYMBOL(inet6_release);
 #if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
 DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_release, int, struct socket *sock) {
 	int ret;
-
+	struct sock *sk;
 	sock = hakc_transfer_to_clique(sock, sizeof(*sock), __claque_id,
 				       __color, false);
+	sk = HAKC_GET_SAFE_PTR(sock)->sk;
+	if (sk)
+		HAKC_GET_SAFE_PTR(sock)->sk =
+			hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(sk), __claque_id, false);
 	ret = inet6_release(sock);
 
 	return ret;
@@ -663,20 +674,116 @@ EXPORT_SYMBOL_GPL(inet6_compat_ioctl);
 
 INDIRECT_CALLABLE_DECLARE(int udpv6_sendmsg(struct sock *, struct msghdr *,
 					    size_t));
-int inet6_sendmsg(struct socket *sock, struct msghdr *msg, size_t size)
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+int udpv6_sendmsg(struct sock *sk, struct msghdr *msg, size_t len);
+int udp_v6_get_port(struct sock *sk, unsigned short snum);
+#endif
+noinline int inet6_sendmsg(struct socket *sock, struct msghdr *msg, size_t size)
 {
 	struct sock *sk = sock->sk;
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Do inet_send_prepare's autobind inline with the SIGNED sk so the ipv6
+	 * get_port callee's entry check passes; do NOT call core inet_send_prepare,
+	 * whose autobind would re-enter ipv6 with a canonical sk and FPAC. */
+	if (!inet_sk(sk)->inet_num) {
+		/* UDP-only for now: assign a local port with the SIGNED sk. (proper
+		 * tcp/udp dispatch deferred until get_port internals pass.) */
+		if (udp_v6_get_port(sk, 0))
+			return -EAGAIN;
+		inet_sk(sk)->inet_sport = htons(inet_sk(sk)->inet_num);
+	}
+#else
 	if (unlikely(inet_send_prepare(sk)))
 		return -EAGAIN;
+#endif
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* Do NOT dereference sk->sk_prot: it is a shared global proto, never
+	 * HAKC-signed, so a check would FPAC. Compare the proto pointer VALUE
+	 * (scalar, no deref -> no check) and call the target DIRECTLY by name
+	 * (direct call -> no code check, no proto deref). */
+	/* sk->sk_prot is a SIGNED pointer (PAC/claque in the top 16 bits); the
+	 * &udpv6_prot global symbol is canonical. Compare only the low 48 address
+	 * bits so the same proto matches regardless of signing. */
+	if ((*(unsigned long *)&sk->sk_prot & 0x0000FFFFFFFFFFFFUL) ==
+	    ((unsigned long)&udpv6_prot & 0x0000FFFFFFFFFFFFUL)) {
+		/* msg is a canonical core (stack) object; sign it for the ipv6 callee. */
+		msg = hakc_transfer_to_clique(msg, sizeof(*msg), __claque_id,
+					      __color, false);
+		/* nested pointer: msg->msg_name (dest sockaddr) is a canonical
+		 * kernel buffer; sign it too so the ipv6 callee check passes. */
+		if (msg->msg_name && msg->msg_namelen)
+			msg->msg_name = hakc_transfer_to_clique(msg->msg_name,
+						msg->msg_namelen, __claque_id,
+						__color, false);
+		return udpv6_sendmsg(sk, msg, size);
+	}
+	return tcp_sendmsg(sk, msg, size);
+#else
 	return INDIRECT_CALL_2(sk->sk_prot->sendmsg, tcp_sendmsg, udpv6_sendmsg,
 			       sk, msg, size);
+#endif
 }
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_sendmsg, int, struct socket *sock,
+				  struct msghdr *msg, size_t size) {
+	int ret;
+	struct sock *sk;
+	sock = hakc_transfer_to_clique(sock, sizeof(*sock), __claque_id,
+				       __color, false);
+	sk = HAKC_GET_SAFE_PTR(sock)->sk;
+	if (sk) {
+		struct net *n = HAKC_GET_SAFE_PTR(sk)->__sk_common.skc_net.net;
+		HAKC_GET_SAFE_PTR(sk)->__sk_common.skc_net.net =
+			hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(n), __claque_id, false);
+	}
+	ret = inet6_sendmsg(sock, msg, size);
+
+	return ret;
+}
+EXPORT_SYMBOL(HAKC_OUTSIDE_TRANSFER_FUNC(inet6_sendmsg));
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* bind entry: __sys_bind calls inet6_bind with a raw socket; transfer sock
+ * into the compartment (same pattern as inet6_sendmsg). */
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_bind, int, struct socket *sock,
+				  struct sockaddr *uaddr, int addr_len) {
+	int ret;
+	struct sock *sk;
+	sock = hakc_transfer_to_clique(sock, sizeof(*sock), __claque_id,
+				       __color, false);
+	sk = HAKC_GET_SAFE_PTR(sock)->sk;
+	if (sk) {
+		struct net *n = HAKC_GET_SAFE_PTR(sk)->__sk_common.skc_net.net;
+		HAKC_GET_SAFE_PTR(sk)->__sk_common.skc_net.net =
+			hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(n), __claque_id, false);
+	}
+	uaddr = hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(uaddr),
+					     __claque_id, false);
+	ret = inet6_bind(sock, uaddr, addr_len);
+	return ret;
+}
+EXPORT_SYMBOL(HAKC_OUTSIDE_TRANSFER_FUNC(inet6_bind));
+#endif
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+DEFINE_HAKC_OUTSIDE_TRANSFER_FUNC(inet6_recvmsg, int, struct socket *sock,
+				  struct msghdr *msg, size_t size, int flags) {
+	int ret;
+	sock = hakc_transfer_to_clique(sock, sizeof(*sock), __claque_id,
+				       __color, false);
+	msg = hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(msg),
+					   __claque_id, false);
+	ret = inet6_recvmsg(sock, msg, size, flags);
+	return ret;
+}
+EXPORT_SYMBOL(HAKC_OUTSIDE_TRANSFER_FUNC(inet6_recvmsg));
+#endif
+#endif
 
 INDIRECT_CALLABLE_DECLARE(int udpv6_recvmsg(struct sock *, struct msghdr *,
 					    size_t, int, int, int *));
-int inet6_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
+noinline int inet6_recvmsg(struct socket *sock, struct msghdr *msg, size_t size,
 		  int flags)
 {
 
@@ -704,7 +811,11 @@ const struct proto_ops inet6_stream_ops = {
 #else
 	.release	   = inet6_release,
 #endif
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	.bind		   = HAKC_OUTSIDE_TRANSFER_FUNC(inet6_bind),
+#else
 	.bind		   = inet6_bind,
+#endif
 	.connect	   = inet_stream_connect,	/* ok		*/
 	.socketpair	   = sock_no_socketpair,	/* a do nothing	*/
 	.accept		   = inet_accept,		/* ok		*/
@@ -716,8 +827,12 @@ const struct proto_ops inet6_stream_ops = {
 	.shutdown	   = inet_shutdown,		/* ok		*/
 	.setsockopt	   = sock_common_setsockopt,	/* ok		*/
 	.getsockopt	   = sock_common_getsockopt,	/* ok		*/
-	.sendmsg	   = inet6_sendmsg,		/* retpoline's sake */
+	.sendmsg	   = HAKC_OUTSIDE_TRANSFER_FUNC(inet6_sendmsg),		/* retpoline's sake */
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	.recvmsg	   = HAKC_OUTSIDE_TRANSFER_FUNC(inet6_recvmsg),		/* retpoline's sake */
+#else
 	.recvmsg	   = inet6_recvmsg,		/* retpoline's sake */
+#endif
 #ifdef CONFIG_MMU
 	.mmap		   = tcp_mmap,
 #endif
@@ -741,7 +856,11 @@ const struct proto_ops inet6_dgram_ops = {
 #else
 	.release	   = inet6_release,
 #endif
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	.bind		   = HAKC_OUTSIDE_TRANSFER_FUNC(inet6_bind),
+#else
 	.bind		   = inet6_bind,
+#endif
 	.connect	   = inet_dgram_connect,	/* ok		*/
 	.socketpair	   = sock_no_socketpair,	/* a do nothing	*/
 	.accept		   = sock_no_accept,		/* a do nothing	*/
@@ -753,8 +872,12 @@ const struct proto_ops inet6_dgram_ops = {
 	.shutdown	   = inet_shutdown,		/* ok		*/
 	.setsockopt	   = sock_common_setsockopt,	/* ok		*/
 	.getsockopt	   = sock_common_getsockopt,	/* ok		*/
-	.sendmsg	   = inet6_sendmsg,		/* retpoline's sake */
+	.sendmsg	   = HAKC_OUTSIDE_TRANSFER_FUNC(inet6_sendmsg),		/* retpoline's sake */
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	.recvmsg	   = HAKC_OUTSIDE_TRANSFER_FUNC(inet6_recvmsg),		/* retpoline's sake */
+#else
 	.recvmsg	   = inet6_recvmsg,		/* retpoline's sake */
+#endif
 	.mmap		   = sock_no_mmap,
 	.sendpage	   = sock_no_sendpage,
 	.set_peek_off	   = sk_set_peek_off,
@@ -910,9 +1033,17 @@ bool ipv6_opt_accepted(const struct sock *sk, const struct sk_buff *skb,
 }
 EXPORT_SYMBOL_GPL(ipv6_opt_accepted);
 
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+int HAKC_OUTSIDE_TRANSFER_FUNC(ipv6_rcv)(struct sk_buff *, struct net_device *,
+					 struct packet_type *, struct net_device *);
+#endif
 static struct packet_type ipv6_packet_type __read_mostly = {
 	.type = cpu_to_be16(ETH_P_IPV6),
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	.func = HAKC_OUTSIDE_TRANSFER_FUNC(ipv6_rcv),
+#else
 	.func = ipv6_rcv,
+#endif
 	.list_func = ipv6_list_rcv,
 };
 
