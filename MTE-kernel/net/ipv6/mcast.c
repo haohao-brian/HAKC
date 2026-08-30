@@ -1675,6 +1675,13 @@ static struct sk_buff *mld_newpack(struct inet6_dev *idev, unsigned int mtu)
 {
 	struct net_device *dev = idev->dev;
 	struct net *net = dev_net(dev);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* dev_net(dev) yields init_net signed for dev's clique, not ipv6's RED;
+	 * re-sign it for the ipv6 clique so the instrumented net->ipv6.igmp_sk
+	 * access authenticates instead of FPAC (mld change-report timer path). */
+	net = (struct net *)hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(net),
+							 __claque_id, false);
+#endif
 	struct sock *sk = net->ipv6.igmp_sk;
 	struct sk_buff *skb;
 	struct mld2_report *pmr;
@@ -1695,6 +1702,13 @@ static struct sk_buff *mld_newpack(struct inet6_dev *idev, unsigned int mtu)
 
 	if (!skb)
 		return NULL;
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART)
+	/* Transfer the freshly-allocated skb (struct + head data buffer) into the
+	 * ipv6 compartment -- same proven pattern as __ip6_append_data. This colors
+	 * skb->head so every skb-data access below (skb->head-derived) autia-verifies
+	 * instead of FPAC-faulting (MLD bug 3). */
+	skb = hakc_transfer_skb(skb, __claque_id, __color);
+#endif
 
 	skb->priority = TC_PRIO_CONTROL;
 	skb_reserve(skb, hlen);
@@ -1745,9 +1759,9 @@ static void mld_sendpack(struct sk_buff *skb)
 	mldlen = skb_tail_pointer(skb) - skb_transport_header(skb);
 	pip6->payload_len = htons(payload_len);
 
-	pmr->mld2r_cksum = csum_ipv6_magic(&pip6->saddr, &pip6->daddr, mldlen,
+	pmr->mld2r_cksum = csum_ipv6_magic(HAKC_GET_SAFE_PTR(&pip6->saddr), HAKC_GET_SAFE_PTR(&pip6->daddr), mldlen,
 					   IPPROTO_ICMPV6,
-					   csum_partial(skb_transport_header(skb),
+					   csum_partial(HAKC_GET_SAFE_PTR(skb_transport_header(skb)),
 							mldlen, 0));
 
 	icmpv6_flow_init(net->ipv6.igmp_sk, &fl6, ICMPV6_MLD2_REPORT,
@@ -2066,6 +2080,13 @@ static void mld_send_cr(struct inet6_dev *idev)
 static void igmp6_send(struct in6_addr *addr, struct net_device *dev, int type)
 {
 	struct net *net = dev_net(dev);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* dev_net(dev) yields init_net signed for dev's clique, not ipv6's RED;
+	 * re-sign it for the ipv6 clique so the instrumented net->ipv6.igmp_sk
+	 * access authenticates instead of FPAC (mld change-report timer path). */
+	net = (struct net *)hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(net),
+							 __claque_id, false);
+#endif
 	struct sock *sk = net->ipv6.igmp_sk;
 	struct inet6_dev *idev;
 	struct sk_buff *skb;
@@ -2104,6 +2125,13 @@ static void igmp6_send(struct in6_addr *addr, struct net_device *dev, int type)
 		rcu_read_unlock();
 		return;
 	}
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART)
+	/* Transfer the freshly-allocated skb (struct + head data buffer) into the
+	 * ipv6 compartment -- same proven pattern as __ip6_append_data. This colors
+	 * skb->head so every skb-data access below (skb->head-derived) autia-verifies
+	 * instead of FPAC-faulting (MLD bug 3). */
+	skb = hakc_transfer_skb(skb, __claque_id, __color);
+#endif
 	skb->priority = TC_PRIO_CONTROL;
 	skb_reserve(skb, hlen);
 
