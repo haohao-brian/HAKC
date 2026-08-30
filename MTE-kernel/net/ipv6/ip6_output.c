@@ -249,7 +249,16 @@ static int __ip6_finish_output(struct net *net, struct sock *sk, struct sk_buff 
 		return ip6_finish_output_gso_slowpath_drop(net, sk, skb, mtu);
 
 	if ((skb->len > mtu && !skb_is_gso(skb)) ||
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	    /* dst_allfrag reads dst metrics (RTAX_FEATURES); for a CORE
+	     * default-metrics dst the instrumented read authenticates the
+	     * read-only default/template metrics array under the ipv6 cert and
+	     * FPACs.  Read-only metrics => features 0 => allfrag 0, so skip. */
+	    (!dst_metrics_read_only(skb_dst(skb)) &&
+	     dst_allfrag(skb_dst(skb))) ||
+#else
 	    dst_allfrag(skb_dst(skb)) ||
+#endif
 	    (IP6CB(skb)->frag_max_size && skb->len > IP6CB(skb)->frag_max_size))
 		return ip6_fragment(net, sk, skb, ip6_finish_output2);
 	else
