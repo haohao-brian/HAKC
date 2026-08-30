@@ -4037,7 +4037,7 @@ out_put:
 	fib6_info_release(rt);
 
 	if (skb) {
-		rtnl_notify(skb, net, info->portid, RTNLGRP_IPV6_ROUTE,
+		rtnl_notify(hakc_skb_to_core(skb), net, info->portid, RTNLGRP_IPV6_ROUTE,
 			    info->nlh, gfp_any());
 	}
 	return err;
@@ -6221,7 +6221,7 @@ void inet6_rt_notify(int event, struct fib6_info *rt, struct nl_info *info,
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, info->portid, RTNLGRP_IPV6_ROUTE,
+	rtnl_notify(hakc_skb_to_core(skb), net, info->portid, RTNLGRP_IPV6_ROUTE,
 		    info->nlh, gfp_any());
 	return;
 errout:
@@ -6261,7 +6261,7 @@ void fib6_rt_update(struct net *net, struct fib6_info *rt,
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, info->portid, RTNLGRP_IPV6_ROUTE,
+	rtnl_notify(hakc_skb_to_core(skb), net, info->portid, RTNLGRP_IPV6_ROUTE,
 		    info->nlh, gfp_any());
 	return;
 errout:

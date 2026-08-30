@@ -658,7 +658,7 @@ void inet6_netconf_notify_devconf(struct net *net, int event, int type,
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, 0, RTNLGRP_IPV6_NETCONF, NULL, GFP_KERNEL);
+	rtnl_notify(hakc_skb_to_core(skb), net, 0, RTNLGRP_IPV6_NETCONF, NULL, GFP_KERNEL);
 	return;
 errout:
 	rtnl_set_sk_err(net, RTNLGRP_IPV6_NETCONF, err);
@@ -5908,6 +5908,16 @@ static void inet6_ifa_notify(int event, struct inet6_ifaddr *ifa)
 		kfree_skb(skb);
 		goto errout;
 	}
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* restore to canonical before handing to CORE netlink/BPF, which
+	 * dereferences skb and skb->data raw (a signed pointer there is a
+	 * non-canonical addr -> data abort, not FPAC). Strip the data/head
+	 * fields while skb is still signed (instrumented access), then pass
+	 * the canonical skb pointer to core. */
+	skb->data = HAKC_GET_SAFE_PTR(skb->data);
+	skb->head = HAKC_GET_SAFE_PTR(skb->head);
+	skb = HAKC_GET_SAFE_PTR(skb);
+#endif
 	rtnl_notify(skb, net, 0, RTNLGRP_IPV6_IFADDR, NULL, GFP_ATOMIC);
 	return;
 errout:
@@ -6595,7 +6605,7 @@ void inet6_ifinfo_notify(int event, struct inet6_dev *idev)
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, 0, RTNLGRP_IPV6_IFINFO, NULL, GFP_ATOMIC);
+	rtnl_notify(hakc_skb_to_core(skb), net, 0, RTNLGRP_IPV6_IFINFO, NULL, GFP_ATOMIC);
 	return;
 errout:
 	if (err < 0)
@@ -6675,7 +6685,7 @@ static void inet6_prefix_notify(int event, struct inet6_dev *idev,
 		kfree_skb(skb);
 		goto errout;
 	}
-	rtnl_notify(skb, net, 0, RTNLGRP_IPV6_PREFIX, NULL, GFP_ATOMIC);
+	rtnl_notify(hakc_skb_to_core(skb), net, 0, RTNLGRP_IPV6_PREFIX, NULL, GFP_ATOMIC);
 	return;
 errout:
 	if (err < 0)
