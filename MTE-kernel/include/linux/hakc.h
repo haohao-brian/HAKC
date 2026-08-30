@@ -176,13 +176,13 @@ static inline void *hakc_safe_ptr2(unsigned long addr)
 {
 	unsigned long tmp = addr;
 	if (!(tmp & BIT(VA_BITS - 1))) {
-		return (void*)(tmp & 0x0000FFFFFFFFFFFF);
+		return (void*)(tmp & 0x00007FFFFFFFFFFF);
 	} else {
 		return (void*)HAKC_KADDR(tmp);
 	}
 }
 
-static inline void *hakc_safe_ptr(unsigned long addr)
+static noinline void *hakc_safe_ptr(unsigned long addr)
 {
 	if (!addr) {
 		return (void *)addr;

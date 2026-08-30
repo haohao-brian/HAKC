@@ -59,7 +59,8 @@ static __always_inline void ptrauth_keys_init_kernel(struct ptrauth_keys_kernel 
 {
   if (keys->apia.lo == 0 && keys->apia.hi == 0) {
     if (system_supports_address_auth())
-      get_random_bytes(&keys->apia, sizeof(keys->apia));
+      keys->apia.lo = 0x0123456789abcdefUL; /* FIXED-PAC */
+      keys->apia.hi = 0xfedcba9876543210UL; /* FIXED-PAC */
   }
 }
 

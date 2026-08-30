@@ -3167,6 +3167,7 @@ void kmem_cache_free(struct kmem_cache *s, void *x)
 	if(!ZERO_OR_NULL_PTR(x)) {
 		x = HAKC_GET_SAFE_PTR(x);
 	}
+	s = HAKC_GET_SAFE_PTR(s);
 #endif
 	s = cache_from_obj(s, x);
 	if (!s)
@@ -3272,6 +3273,18 @@ void kmem_cache_free_bulk(struct kmem_cache *s, size_t size, void **p)
 {
 	if (WARN_ON(!size))
 		return;
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART)
+	/* Bulk-freed objects may still carry a HAKC signature (e.g. an skb/data
+	 * object recolored by the IPv6 compartment and later freed). Strip each
+	 * entry first, matching the single-object free paths (ported from elice). */
+	{
+		size_t _i;
+		for (_i = 0; _i < size; _i++)
+			if (!ZERO_OR_NULL_PTR(p[_i]))
+				p[_i] = HAKC_GET_SAFE_PTR(p[_i]);
+	}
+#endif
 
 	memcg_slab_free_hook(s, p, size);
 	do {
