@@ -183,6 +183,39 @@ static int ip6_finish_output2(struct net *net, struct sock *sk, struct sk_buff *
 
 	rcu_read_lock_bh();
 	nexthop = rt6_nexthop((struct rt6_info *)dst, &ipv6_hdr(skb)->daddr);
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	/* The inlined __ipv6_neigh_lookup_noref walks the neighbour hash table;
+	 * its instrumented copy autias each RAW (core-colored) neighbour in the
+	 * bucket and FPACs.  Run the walk in CORE (uninstrumented) via the real
+	 * neigh_lookup(), which returns a *referenced* neigh; sign the result so
+	 * the instrumented neigh_output()/sock_confirm_neigh() authenticate, then
+	 * drop the reference after output.  (Refcounted path replaces the noref
+	 * fast path only under instrumentation.) */
+	neigh = neigh_lookup(&nd_tbl, nexthop, dst->dev);
+	if (!neigh)
+		neigh = __neigh_create(&nd_tbl, nexthop, dst->dev, true);
+	/* Sign the raw neigh (from core neigh_lookup/__neigh_create) for its
+	 * existing memory color + ipv6 claque BEFORE any ordinary use: PMCPass
+	 * auto-authenticates a pointer at its first use (e.g. IS_ERR), which
+	 * would autia the raw core neigh and FPAC; the sign intrinsic itself is
+	 * exempt, so signing first is the working order (as upstream did). */
+	neigh = hakc_sign_pointer_with_color(neigh, __claque_id, false);
+	if (neigh)
+		HAKC_GET_SAFE_PTR(neigh)->output =
+			hakc_sign_pointer_with_color(HAKC_GET_SAFE_PTR(neigh)->output,
+						     __claque_id, true);
+	if (!IS_ERR(neigh)) {
+		sock_confirm_neigh(skb, neigh);
+		ret = neigh_output(neigh, skb, false);
+		rcu_read_unlock_bh();
+		/* release the ref: refcnt access is instrumented (signed neigh),
+		 * destroy is a core fn (raw ptr); in-table neigh never hits 0 here. */
+		if (refcount_dec_and_test(&HAKC_GET_SAFE_PTR(neigh)->refcnt))
+			neigh_destroy(HAKC_GET_SAFE_PTR(neigh));
+		return ret;
+	}
+	rcu_read_unlock_bh();
+#else
 	neigh = __ipv6_neigh_lookup_noref(dst->dev, nexthop);
 	if (unlikely(!neigh))
 		neigh = __neigh_create(&nd_tbl, nexthop, dst->dev, false);
@@ -193,6 +226,7 @@ static int ip6_finish_output2(struct net *net, struct sock *sk, struct sk_buff *
 		return ret;
 	}
 	rcu_read_unlock_bh();
+#endif
 
 	IP6_INC_STATS(net, ip6_dst_idev(dst), IPSTATS_MIB_OUTNOROUTES);
 	kfree_skb(skb);
