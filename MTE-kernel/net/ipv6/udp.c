@@ -59,6 +59,61 @@
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
 HAKC_EXIT(HAKC_ENTRY_TOKEN(0, HAKC_MASK_COLOR(SILVER_CLIQUE)),
          HAKC_ENTRY_TOKEN(1, HAKC_MASK_COLOR(SILVER_CLIQUE)));
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+static inline struct net *hakc_dev_net(const struct net_device *dev)
+{
+	return (struct net *)hakc_sign_pointer_with_color(
+		HAKC_GET_SAFE_PTR((void *)dev_net(dev)), __claque_id, false);
+}
+#else
+#define hakc_dev_net(dev) dev_net(dev)
+#endif
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* Same percpu-MIB resign as ip6_input.c, for struct udp_mib.  mte_transfer_percpu
+ * returns a raw percpu base; resolve this cpu's slot from a clean offset and
+ * re-sign it before the instrumented this_cpu counter deref, then route every
+ * UDP/UDP6 stat update through it.  Only ipv6.ko sees these overrides. */
+static inline struct udp_mib *hakc_udp_mib(void *base)
+{
+	unsigned long off = (unsigned long)base & 0x0000FFFFFFFFFFFFUL;
+	struct udp_mib *s = this_cpu_ptr((struct udp_mib __percpu *)off);
+
+	return hakc_sign_pointer(s, __claque_id, __color, false);
+}
+#undef __UDP6_INC_STATS
+#undef UDP6_INC_STATS
+#undef __UDP_INC_STATS
+#undef UDP_INC_STATS
+#define __UDP6_INC_STATS(net, field, is_udplite)			\
+	do {								\
+		preempt_disable();					\
+		if (is_udplite)						\
+			hakc_udp_mib((net)->mib.udplite_stats_in6)->mibs[field]++; \
+		else							\
+			hakc_udp_mib((net)->mib.udp_stats_in6)->mibs[field]++; \
+		preempt_enable();					\
+	} while (0)
+#define UDP6_INC_STATS(net, field, is_udplite) __UDP6_INC_STATS(net, field, is_udplite)
+#define __UDP_INC_STATS(net, field, is_udplite)				\
+	do {								\
+		preempt_disable();					\
+		if (is_udplite)						\
+			hakc_udp_mib((net)->mib.udplite_statistics)->mibs[field]++; \
+		else							\
+			hakc_udp_mib((net)->mib.udp_statistics)->mibs[field]++; \
+		preempt_enable();					\
+	} while (0)
+#define UDP_INC_STATS(net, field, is_udplite) __UDP_INC_STATS(net, field, is_udplite)
+#undef SNMP_INC_STATS
+#define SNMP_INC_STATS(mib, field)					\
+	do {								\
+		preempt_disable();					\
+		hakc_udp_mib(mib)->mibs[field]++;			\
+		preempt_enable();					\
+	} while (0)
+#endif
 #endif
 
 static u32 udp6_ehashfn(const struct net *net,

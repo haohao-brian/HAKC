@@ -61,6 +61,73 @@
 HAKC_MODULE_CLAQUE(2, RED_CLIQUE, HAKC_MASK_COLOR(SILVER_CLIQUE) | HAKC_MASK_COLOR(GREEN_CLIQUE));
 HAKC_EXIT(HAKC_ENTRY_TOKEN(0, HAKC_MASK_COLOR(SILVER_CLIQUE)),
          HAKC_ENTRY_TOKEN(1, HAKC_MASK_COLOR(SILVER_CLIQUE)));
+
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+/* mte_transfer_percpu returns a raw percpu base; the instrumented this_cpu deref
+ * of a MIB counter would autia the raw resolved slot and FPAC. Resolve this cpu's
+ * slot from a clean offset and re-sign it for its own 1MB region before the
+ * counter deref, then route every IPv6/ICMPv6 MIB update through it (same pattern
+ * as ip6_input.c). SNMP counters stay protected; only ipv6.ko sees these. */
+static inline struct ipstats_mib *hakc_ip6_mib(void *base)
+{
+	unsigned long off = (unsigned long)base & 0x0000FFFFFFFFFFFFUL;
+	struct ipstats_mib *s = this_cpu_ptr((struct ipstats_mib __percpu *)off);
+
+	return hakc_sign_pointer(s, __claque_id, __color, false);
+}
+static inline struct icmpv6_mib *hakc_icmpv6_mib(void *base)
+{
+	unsigned long off = (unsigned long)base & 0x0000FFFFFFFFFFFFUL;
+	struct icmpv6_mib *s = this_cpu_ptr((struct icmpv6_mib __percpu *)off);
+
+	return hakc_sign_pointer(s, __claque_id, __color, false);
+}
+#undef IP6_INC_STATS
+#undef __IP6_INC_STATS
+#undef IP6_ADD_STATS
+#undef __IP6_ADD_STATS
+#undef IP6_UPD_PO_STATS
+#undef __IP6_UPD_PO_STATS
+#define IP6_INC_STATS(net, idev, field)					\
+	do {								\
+		struct inet6_dev *__d = (idev);				\
+		preempt_disable();					\
+		if (likely(__d))					\
+			hakc_ip6_mib((__d)->stats.ipv6)->mibs[field]++;	\
+		hakc_ip6_mib((net)->mib.ipv6_statistics)->mibs[field]++; \
+		preempt_enable();					\
+	} while (0)
+#define __IP6_INC_STATS(net, idev, field) IP6_INC_STATS(net, idev, field)
+#define IP6_ADD_STATS(net, idev, field, val)				\
+	do {								\
+		struct inet6_dev *__d = (idev);				\
+		unsigned long __v = (val);				\
+		preempt_disable();					\
+		if (likely(__d))					\
+			hakc_ip6_mib((__d)->stats.ipv6)->mibs[field] += __v; \
+		hakc_ip6_mib((net)->mib.ipv6_statistics)->mibs[field] += __v; \
+		preempt_enable();					\
+	} while (0)
+#define __IP6_ADD_STATS(net, idev, field, val) IP6_ADD_STATS(net, idev, field, val)
+#define IP6_UPD_PO_STATS(net, idev, field, val)				\
+	do {								\
+		IP6_INC_STATS(net, idev, field##PKTS);			\
+		IP6_ADD_STATS(net, idev, field##OCTETS, val);		\
+	} while (0)
+#define __IP6_UPD_PO_STATS(net, idev, field, val) IP6_UPD_PO_STATS(net, idev, field, val)
+#undef ICMP6_INC_STATS
+#undef __ICMP6_INC_STATS
+#define ICMP6_INC_STATS(net, idev, field)				\
+	do {								\
+		struct inet6_dev *__d = (idev);				\
+		preempt_disable();					\
+		if (likely(__d))					\
+			SNMP_INC_STATS_ATOMIC_LONG((__d)->stats.icmpv6dev, field); \
+		hakc_icmpv6_mib((net)->mib.icmpv6_statistics)->mibs[field]++; \
+		preempt_enable();					\
+	} while (0)
+#define __ICMP6_INC_STATS(net, idev, field) ICMP6_INC_STATS(net, idev, field)
+#endif
 #endif
 
 static int ip6_finish_output2(struct net *net, struct sock *sk, struct sk_buff *skb)
@@ -1901,15 +1968,42 @@ struct sk_buff *__ip6_make_skb(struct sock *sk,
 	hdr->hop_limit = v6_cork->hop_limit;
 	hdr->nexthdr = proto;
 	hdr->saddr = fl6->saddr;
-	hdr->daddr = *final_dst;
+	hdr->daddr = *HAKC_GET_SAFE_PTR(final_dst);
 
 	skb->priority = sk->sk_priority;
-	skb->mark = cork->base.mark;
+	skb->mark = cork_s->base.mark;
 
-	skb->tstamp = cork->base.transmit_time;
+	skb->tstamp = cork_s->base.transmit_time;
 
 	skb_dst_set(skb, dst_clone(&rt->dst));
+#if IS_ENABLED(CONFIG_PAC_MTE_COMPART_IPV6)
+	{
+		/* percpu MIB base is an OFFSET; mask to a clean offset, resolve this
+		 * cpu's slot, then re-sign it for its own 1MB region (same pattern as
+		 * icmp_sk / rt6i_pcpu) so the instrumented counter deref passes.
+		 * this_cpu_ptr needs preemption disabled. */
+		struct inet6_dev *_idev = rt->rt6i_idev;
+		unsigned long _no = (unsigned long)net->mib.ipv6_statistics &
+				    0x0000FFFFFFFFFFFFUL;
+		unsigned long _io = _idev ? ((unsigned long)_idev->stats.ipv6 &
+					     0x0000FFFFFFFFFFFFUL) : 0;
+		struct ipstats_mib *_s;
+		preempt_disable();
+		if (likely(_idev != NULL)) {
+			_s = this_cpu_ptr((struct ipstats_mib __percpu *)_io);
+			_s = hakc_sign_pointer(_s, __claque_id, __color, false);
+			_s->mibs[IPSTATS_MIB_OUTPKTS]++;
+			_s->mibs[IPSTATS_MIB_OUTOCTETS] += skb->len;
+		}
+		_s = this_cpu_ptr((struct ipstats_mib __percpu *)_no);
+		_s = hakc_sign_pointer(_s, __claque_id, __color, false);
+		_s->mibs[IPSTATS_MIB_OUTPKTS]++;
+		_s->mibs[IPSTATS_MIB_OUTOCTETS] += skb->len;
+		preempt_enable();
+	}
+#else
 	IP6_UPD_PO_STATS(net, rt->rt6i_idev, IPSTATS_MIB_OUT, skb->len);
+#endif
 	if (proto == IPPROTO_ICMPV6) {
 		struct inet6_dev *idev = ip6_dst_idev(skb_dst(skb));
 
